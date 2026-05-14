@@ -7,6 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=IBM+Plex+Sans:wght@300;400;500&family=IBM+Plex+Sans+Arabic:wght@300;400;500&display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="style.css"/>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/devicons/devicon@v2.15.1/devicon.min.css"/>
 </head>
 <body>
 
@@ -64,8 +65,16 @@ function renderStatic(){
     const cat = document.createElement('p');
     cat.className = 'skill-cat'; cat.textContent = s.category;
     const tags = document.createElement('div'); tags.className = 'tags';
-    s.items.forEach(i=>{
-      const sp = document.createElement('span'); sp.className = 'tag'; sp.textContent = i;
+    s.items.forEach(item=>{
+      const sp = document.createElement('span'); sp.className = 'tag';
+      const di = (typeof DEVICON_MAP !== 'undefined') && DEVICON_MAP[item];
+      if(di){
+        const ico = document.createElement('i');
+        ico.className = `devicon-${di} colored tag-icon`;
+        ico.setAttribute('aria-hidden','true');
+        sp.appendChild(ico);
+      }
+      sp.appendChild(document.createTextNode(item));
       tags.appendChild(sp);
     });
     div.appendChild(cat); div.appendChild(tags);

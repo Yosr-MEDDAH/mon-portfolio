@@ -4,13 +4,11 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>Projets — Yosr Meddah</title>
+<meta name="description" content="Tous les projets de Yosr Meddah : web, mobile, IoT, IA, jeux et plus."/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=IBM+Plex+Sans:wght@300;400;500&family=IBM+Plex+Sans+Arabic:wght@300;400;500&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/devicons/devicon@v2.15.1/devicon.min.css"/>
 <link rel="stylesheet" href="style.css"/>
-<style>
-/* Projects page — slightly wider grid */
-.projects-grid{grid-template-columns:repeat(auto-fill,minmax(280px,1fr))}
-</style>
 </head>
 <body>
 
@@ -23,9 +21,9 @@
       <li><a href="skills.html"         data-page="skills.html"         data-i18n="nav.skills">Compétences</a></li>
       <li><a href="experiences.html"    data-page="experiences.html"    data-i18n="nav.experience">Expérience</a></li>
       <li><a href="projects.html"       data-page="projects.html"       data-i18n="nav.projects">Projets</a></li>
-      <li><a href="presentations.html" data-page="presentations.html" data-i18n="nav.presentations">Présentations</a></li>
+      <li><a href="presentations.html"  data-page="presentations.html"  data-i18n="nav.presentations">Présentations</a></li>
       <li><a href="artworks.html"       data-page="artworks.html"       data-i18n="nav.artworks">Artworks</a></li>
-      <li><a href="index.html#contact" data-i18n="nav.contact">Contact</a></li>
+      <li><a href="index.html#contact"  data-i18n="nav.contact">Contact</a></li>
     </ul>
     <div role="group" aria-label="Langue">
       <button class="icon-btn" onclick="setLang('fr')" aria-label="Français">FR</button>
@@ -44,7 +42,7 @@
     <p class="page-count" id="page-count"></p>
   </div>
 
-  <section aria-labelledby="page-title" style="padding-top:0;background:var(--surface);border-top:1px solid var(--border)">
+  <section aria-labelledby="page-title" style="padding-top:0">
     <div class="container">
       <div class="projects-grid" id="projects-grid" role="list"></div>
     </div>
@@ -65,7 +63,7 @@ function renderDynamic(){
   const pc = $('page-count');
   if(pc){
     const n = DATA.projects.length;
-    pc.textContent = lang==='ar' ? `${n} مشاريع`
+    pc.textContent = lang==='ar' ? `${n} مشروع`
       : lang==='en' ? `${n} projects`
       : `${n} projets`;
   }
@@ -73,25 +71,8 @@ function renderDynamic(){
   const pg = $('projects-grid');
   if(!pg) return;
   pg.innerHTML = '';
-  DATA.projects.forEach(p=>{
-    const card = document.createElement('article');
-    card.className = 'proj-card reveal'; card.setAttribute('role','listitem');
-    const desc  = p.description[lang] || p.description['fr'] || p.description;
-    const title = p.title[lang]       || p.title['fr']       || p.title;
-    card.innerHTML = `
-      <p class="proj-title">${title}</p>
-      <p class="proj-desc">${desc}</p>
-      <div class="tags proj-tag-wrap"></div>
-      <div class="proj-links"></div>`;
-    (p.tags||[]).forEach(tag=>{
-      const sp = document.createElement('span'); sp.className = 'tag'; sp.textContent = tag;
-      card.querySelector('.proj-tag-wrap').appendChild(sp);
-    });
-    const pl = card.querySelector('.proj-links');
-    if(p.github){ const a=document.createElement('a'); a.href=p.github; a.target='_blank'; a.rel='noopener'; a.textContent='GitHub ↗'; pl.appendChild(a); }
-    if(p.demo){   const a=document.createElement('a'); a.href=p.demo;   a.target='_blank'; a.rel='noopener'; a.textContent='Demo ↗';   pl.appendChild(a); }
-    pg.appendChild(card);
-  });
+  DATA.projects.forEach(p => pg.appendChild(buildProjectCard(p)));
+  observe();
 }
 </script>
 </body>

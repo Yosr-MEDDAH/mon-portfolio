@@ -149,6 +149,141 @@ function buildArtworkItem(aw){
   return item;
 }
 
+/* ── Tech visual maps ────────────────────────────────── */
+const DEVICON_MAP = {
+  'React':'react-original','React 18':'react-original',
+  'Angular':'angularjs-plain','TypeScript':'typescript-plain',
+  'JavaScript':'javascript-plain','Python':'python-plain',
+  'Java':'java-plain','PHP':'php-plain','Node.js':'nodejs-plain',
+  'Express.js':'express-original','MongoDB':'mongodb-plain',
+  'PostgreSQL':'postgresql-plain','MySQL':'mysql-plain',
+  'Docker':'docker-plain','Git':'git-plain','Flutter':'flutter-plain',
+  'Firebase':'firebase-plain','Figma':'figma-plain',
+  'HTML/CSS':'html5-plain','Tailwind CSS':'tailwindcss-plain',
+  'FastAPI':'fastapi-plain','Laravel':'laravel-plain',
+  'Unity':'unity-original','Three.js':'threejs-original',
+  'Arduino':'arduino-plain','C++':'cplusplus-plain','C#':'csharp-plain',
+  'Azure':'azure-plain','Spring Boot':'spring-plain',
+  'Flask':'flask-original','Symfony':'symfony-original',
+  'Android Studio':'android-plain','NumPy':'numpy-plain',
+  'Pandas':'pandas-original','SQL':'mysql-plain',
+  'Playwright':'playwright-plain','Cypress':'cypressio-plain',
+  'AWS':'amazonwebservices-original','Material UI':'materialdesign-plain',
+};
+
+const TECH_GRAD = {
+  'React':'#61DAFB,#1a9cc4','React 18':'#61DAFB,#1a9cc4',
+  'Angular':'#DD0031,#7b001a','TypeScript':'#3178C6,#1a4a8a',
+  'JavaScript':'#F7DF1E,#c4a800','Python':'#3776AB,#FFD43B',
+  'Java':'#ED8B00,#5382A1','Flutter':'#54C5F8,#0175C2',
+  'Unity':'#464646,#1a1a1a','Arduino':'#00979D,#005f63',
+  'C++':'#00599C,#003a6b','CUDA':'#76B900,#3d6100',
+  'MongoDB':'#47A248,#1a5c1a','FastAPI':'#009688,#004d40',
+  'Laravel':'#FF2D20,#8b1b14','Three.js':'#222,#444',
+  'Node.js':'#339933,#1a5c1a','Docker':'#2496ED,#0d5faa',
+  'Flask':'#555,#222','Spring Boot':'#6DB33F,#2e5c10',
+  'Firebase':'#FFCA28,#e09400','Flutter':'#54C5F8,#0175C2',
+};
+
+const TECH_EMOJI = {
+  'React':'⚛️','Angular':'🔺','Python':'🐍','Java':'☕',
+  'Flutter':'🦋','Unity':'🎮','Arduino':'🤖','Three.js':'🌐',
+  'Docker':'🐳','Node.js':'🟢','MongoDB':'🍃','CUDA':'⚡',
+  'C++':'⚙️','Laravel':'🎨','FastAPI':'⚡','Firebase':'🔥',
+  'Spring Boot':'🍃','IoT':'🌱','NLP':'💬','ML':'🧠',
+};
+
+function _projGrad(tags){ for(const t of tags||[]){ if(TECH_GRAD[t]) return TECH_GRAD[t]; } return '#3d5229,#6a7f55'; }
+function _projEmoji(tags){ for(const t of tags||[]){ if(TECH_EMOJI[t]) return TECH_EMOJI[t]; } return '💻'; }
+
+/* ── Shared project card builder ─────────────────────── */
+function buildProjectCard(p){
+  const card = document.createElement('article');
+  card.className = 'proj-card reveal';
+  card.setAttribute('role','listitem');
+  const desc  = p.description[lang] || p.description['fr'] || p.description;
+  const title = p.title[lang]       || p.title['fr']       || p.title;
+
+  /* — media area — */
+  const media = document.createElement('div');
+  media.className = 'proj-media';
+  const hasReal = p.image && p.image !== 'placeholder.png';
+  if(hasReal){
+    const img = document.createElement('img');
+    img.src = p.image; img.alt = title; img.loading = 'lazy';
+    media.appendChild(img);
+  } else {
+    const bg = document.createElement('div');
+    bg.className = 'proj-media-bg';
+    bg.style.background = `linear-gradient(135deg,${_projGrad(p.tags)})`;
+    const em = document.createElement('span');
+    em.className = 'proj-media-emoji';
+    em.textContent = _projEmoji(p.tags);
+    em.setAttribute('aria-hidden','true');
+    bg.appendChild(em);
+    media.appendChild(bg);
+  }
+  card.appendChild(media);
+
+  /* — body — */
+  const body = document.createElement('div');
+  body.className = 'proj-body';
+
+  const titleEl = document.createElement('p');
+  titleEl.className = 'proj-title'; titleEl.textContent = title;
+  body.appendChild(titleEl);
+
+  if(p.context){
+    const ctx = document.createElement('p');
+    ctx.className = 'proj-context'; ctx.textContent = p.context;
+    body.appendChild(ctx);
+  }
+
+  const descEl = document.createElement('p');
+  descEl.className = 'proj-desc'; descEl.textContent = desc;
+  body.appendChild(descEl);
+
+  /* — tags with devicon — */
+  const tagWrap = document.createElement('div');
+  tagWrap.className = 'tags';
+  (p.tags||[]).forEach(tag => {
+    const sp = document.createElement('span');
+    sp.className = 'tag';
+    const di = DEVICON_MAP[tag];
+    if(di){
+      const ico = document.createElement('i');
+      ico.className = `devicon-${di} colored tag-icon`;
+      ico.setAttribute('aria-hidden','true');
+      sp.appendChild(ico);
+    }
+    sp.appendChild(document.createTextNode(tag));
+    tagWrap.appendChild(sp);
+  });
+  body.appendChild(tagWrap);
+
+  /* — action buttons (only if link exists) — */
+  const actions = document.createElement('div');
+  actions.className = 'proj-actions';
+  if(p.github){
+    const a = document.createElement('a');
+    a.href=p.github; a.target='_blank'; a.rel='noopener';
+    a.className='proj-btn'; a.textContent='⌥ GitHub';
+    a.setAttribute('aria-label',`${title} — GitHub`);
+    actions.appendChild(a);
+  }
+  if(p.demo){
+    const a = document.createElement('a');
+    a.href=p.demo; a.target='_blank'; a.rel='noopener';
+    a.className='proj-btn'; a.textContent='↗ Demo';
+    a.setAttribute('aria-label',`${title} — Demo`);
+    actions.appendChild(a);
+  }
+  if(actions.children.length) body.appendChild(actions);
+
+  card.appendChild(body);
+  return card;
+}
+
 /* ── Intersection observer ───────────────────────────── */
 function observe(){
   const io = new IntersectionObserver(entries=>{

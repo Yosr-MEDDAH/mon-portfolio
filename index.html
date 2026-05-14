@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="fr" dir="ltr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Portfolio — Yosr Meddah</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=IBM+Plex+Sans:wght@300;400;500&family=IBM+Plex+Sans+Arabic:wght@300;400;500&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+
+<a class="skip-link" href="#main" id="skip-link">Aller au contenu principal</a>
+
+<nav aria-label="Navigation principale">
+  <a class="nav-logo" href="index.html" id="nav-logo" aria-label="Accueil">—</a>
+  <div class="nav-right">
+    <ul class="nav-links" role="list">
+      <li><a href="skills.html"         data-page="skills.html"         data-i18n="nav.skills">Compétences</a></li>
+      <li><a href="experiences.html"    data-page="experiences.html"    data-i18n="nav.experience">Expérience</a></li>
+      <li><a href="projects.html"       data-page="projects.html"       data-i18n="nav.projects">Projets</a></li>
+      <li><a href="presentations.html" data-page="presentations.html" data-i18n="nav.presentations">Présentations</a></li>
+      <li><a href="artworks.html"       data-page="artworks.html"       data-i18n="nav.artworks">Artworks</a></li>
+      <li><a href="#contact"             data-i18n="nav.contact">Contact</a></li>
+    </ul>
+    <div role="group" aria-label="Langue">
+      <button class="icon-btn" onclick="setLang('fr')" aria-label="Français">FR</button>
+      <button class="icon-btn" onclick="setLang('en')" aria-label="English">EN</button>
+      <button class="icon-btn" onclick="setLang('ar')" aria-label="العربية">ع</button>
+    </div>
+    <button class="icon-btn" id="theme-btn" aria-label="Basculer le thème" onclick="toggleTheme()">◑</button>
+  </div>
+</nav>
+
+<main id="main">
+
+<!-- HERO -->
+<section id="hero" aria-labelledby="hero-heading">
+  <div class="container">
+    <div class="hero-inner">
+      <div>
+        <p class="section-label" id="hero-label" data-i18n="hero.label">Portfolio · Disponible pour un stage</p>
+        <h1 class="hero-name" id="hero-name"></h1>
+        <p class="hero-title" id="hero-title-el"></p>
+        <p class="hero-about" id="hero-about"></p>
+        <div class="hero-ctas" id="hero-ctas"></div>
+      </div>
+      <div class="avatar-wrap" aria-hidden="true" id="avatar-wrap"></div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider"/>
+
+<!-- SKILLS HIGHLIGHT -->
+<section id="skills" aria-labelledby="skills-heading" style="background:var(--surface);border-top:1px solid var(--border);border-bottom:1px solid var(--border)">
+  <div class="container">
+    <p class="section-label" data-i18n="section.skills">Compétences</p>
+    <h2 id="skills-heading" data-i18n="heading.skills">Ce que je maîtrise</h2>
+    <div class="skills-grid reveal" id="skills-grid" role="list"></div>
+    <div class="section-footer">
+      <a href="skills.html" class="see-all" data-i18n="see.skills">Voir toutes les compétences</a>
+    </div>
+  </div>
+</section>
+
+<hr class="divider"/>
+
+<!-- EXPERIENCE HIGHLIGHT -->
+<section id="experience" aria-labelledby="exp-heading">
+  <div class="container">
+    <p class="section-label" data-i18n="section.experience">Expérience</p>
+    <h2 id="exp-heading" data-i18n="heading.experience">Expérience professionnelle</h2>
+    <div class="timeline" id="timeline" role="list"></div>
+    <div class="section-footer">
+      <a href="experiences.html" class="see-all" data-i18n="see.experience">Voir toute l'expérience</a>
+    </div>
+  </div>
+</section>
+
+<hr class="divider"/>
+
+<!-- PROJECTS HIGHLIGHT -->
+<section id="projects" aria-labelledby="proj-heading" style="background:var(--surface);border-top:1px solid var(--border);border-bottom:1px solid var(--border)">
+  <div class="container">
+    <p class="section-label" data-i18n="section.projects">Projets</p>
+    <h2 id="proj-heading" data-i18n="heading.projects">Projets</h2>
+    <div class="projects-grid" id="projects-grid" role="list"></div>
+    <div class="section-footer">
+      <a href="projects.html" class="see-all" data-i18n="see.projects">Voir tous les projets</a>
+    </div>
+  </div>
+</section>
+
+<hr class="divider"/>
+
+<!-- PRESENTATIONS HIGHLIGHT -->
+<section id="presentations" aria-labelledby="pres-heading">
+  <div class="container">
+    <p class="section-label" data-i18n="section.presentations">Présentations</p>
+    <h2 id="pres-heading" data-i18n="heading.presentations">Présentations &amp; Talks</h2>
+    <div class="pres-list" id="pres-list" role="list"></div>
+    <div class="section-footer">
+      <a href="presentations.html" class="see-all" data-i18n="see.presentations">Voir toutes les présentations</a>
+    </div>
+  </div>
+</section>
+
+<hr class="divider"/>
+
+<!-- ARTWORKS HIGHLIGHT -->
+<section id="artworks" aria-labelledby="art-heading">
+  <div class="container">
+    <p class="section-label" data-i18n="section.artworks">Artworks</p>
+    <h2 id="art-heading" data-i18n="heading.artworks">Créations</h2>
+    <div class="artworks-grid reveal" id="artworks-grid" role="list"></div>
+    <div class="section-footer">
+      <a href="artworks.html" class="see-all" data-i18n="see.artworks">Voir toutes les créations</a>
+    </div>
+  </div>
+</section>
+
+<hr class="divider"/>
+
+<!-- EDUCATION (full — short list) -->
+<section id="education" aria-labelledby="edu-heading">
+  <div class="container">
+    <p class="section-label" data-i18n="section.education">Formation</p>
+    <h2 id="edu-heading" data-i18n="heading.education">Parcours académique</h2>
+    <div class="edu-list reveal" id="edu-list" role="list"></div>
+  </div>
+</section>
+
+<hr class="divider"/>
+
+<!-- CONTACT -->
+<section id="contact" aria-labelledby="contact-heading">
+  <div class="container">
+    <div class="contact-inner">
+      <p class="section-label" data-i18n="section.contact">Contact</p>
+      <h2 id="contact-heading" data-i18n="heading.contact">Travaillons ensemble</h2>
+      <p id="contact-sub" style="color:var(--text-2);font-size:.95rem" data-i18n="contact.sub">
+        Disponible pour un stage. N'hésitez pas à me contacter.
+      </p>
+      <div class="contact-grid" id="contact-grid"></div>
+      <div class="lang-row" id="lang-row" aria-label="Langues"></div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <span id="footer-name"></span>
+  <span id="footer-year"></span>
+</footer>
+
+<script src="data.js"></script>
+<script src="app.js"></script>
+<script>
+/* ── Index-specific renders ──────────────────────────── */
+const HIGHLIGHTS = { skills: 3, experience: 2, projects: 2, presentations: 3, artworks: 3 };
+
+function renderStatic(){
+  /* Avatar */
+  const aw = $('avatar-wrap');
+  if(aw){
+    if(DATA.avatar){
+      const img = document.createElement('img');
+      img.src = DATA.avatar; img.alt = DATA.name;
+      img.onerror = () => { aw.textContent = initials(DATA.name); };
+      aw.appendChild(img);
+    } else { aw.textContent = initials(DATA.name); }
+  }
+
+  /* Skills — first 3 categories */
+  const sg = $('skills-grid');
+  if(sg){
+    DATA.skills.slice(0, HIGHLIGHTS.skills).forEach(s=>{
+      const div = document.createElement('div');
+      div.setAttribute('role','listitem');
+      const cat = document.createElement('p');
+      cat.className = 'skill-cat'; cat.textContent = s.category;
+      const tags = document.createElement('div'); tags.className = 'tags';
+      s.items.forEach(i=>{
+        const sp = document.createElement('span'); sp.className = 'tag'; sp.textContent = i;
+        tags.appendChild(sp);
+      });
+      div.appendChild(cat); div.appendChild(tags);
+      sg.appendChild(div);
+    });
+  }
+
+  /* Artworks — first 3 */
+  const ag = $('artworks-grid');
+  if(ag){
+    const items = DATA.artworks || [];
+    if(items.length === 0){
+      const p = document.createElement('p');
+      p.style.cssText = 'color:var(--text-3);font-size:.9rem';
+      p.textContent = 'Artworks à venir — ajoute tes créations dans data.js';
+      ag.appendChild(p);
+    } else {
+      items.slice(0, HIGHLIGHTS.artworks).forEach(aw2 => ag.appendChild(buildArtworkItem(aw2)));
+    }
+  }
+
+  /* Education (full) */
+  const el = $('edu-list');
+  if(el){
+    DATA.education.forEach(e=>{
+      const d = document.createElement('div');
+      d.className = 'edu-item reveal'; d.setAttribute('role','listitem');
+      d.innerHTML = `
+        <div>
+          <div class="edu-degree">${e.degree[lang]||e.degree['fr']||e.degree}</div>
+          <div class="edu-school">${e.school}</div>
+        </div>
+        <div class="edu-period">${e.period} · ${e.location}</div>`;
+      el.appendChild(d);
+    });
+  }
+
+  /* Languages */
+  const lr = $('lang-row');
+  if(lr){
+    DATA.languages.forEach(l=>{
+      const sp = document.createElement('span'); sp.className = 'lang-pill';
+      sp.innerHTML = l.lang + '<em>' + l.level + '</em>';
+      lr.appendChild(sp);
+    });
+  }
+}
+
+function renderDynamic(){
+  /* Nav logo */
+  const nl = $('nav-logo'); if(nl) nl.textContent = DATA.name.split(' ')[0];
+
+  /* Hero */
+  const hn = $('hero-name'); if(hn) hn.textContent = DATA.name;
+  const ht = $('hero-title-el');
+  if(ht) ht.textContent = DATA.title[lang] || DATA.title['fr'] || DATA.title;
+  const ha = $('hero-about');
+  if(ha) ha.textContent = DATA.about[lang] || DATA.about['fr'] || DATA.about;
+
+  /* CTAs */
+  const ctas = $('hero-ctas');
+  if(ctas){
+    ctas.innerHTML = '';
+    if(DATA.cv_url){
+      const a = document.createElement('a');
+      a.href = DATA.cv_url; a.className = 'btn btn-primary'; a.download = '';
+      a.textContent = t('btn.cv'); ctas.appendChild(a);
+    }
+    if(DATA.email){
+      const a = document.createElement('a');
+      a.href = 'mailto:' + DATA.email; a.className = 'btn btn-outline';
+      a.textContent = t('btn.contact'); ctas.appendChild(a);
+    }
+  }
+
+  /* Experience — first 2 */
+  const tl = $('timeline');
+  if(tl){
+    tl.innerHTML = '';
+    DATA.experiences.slice(0, HIGHLIGHTS.experience).forEach(e=>{
+      const desc = e.description[lang] || e.description['fr'] || e.description;
+      const d = document.createElement('article');
+      d.className = 'exp-card reveal'; d.setAttribute('role','listitem');
+      d.innerHTML = `
+        <div>
+          <div class="exp-role">${e.role[lang]||e.role['fr']||e.role}</div>
+          <div class="exp-co">${e.company} · ${e.location}</div>
+        </div>
+        <div class="exp-period">${e.period}</div>
+        <p class="exp-desc">${desc}</p>
+        <div class="exp-tags tags"></div>`;
+      (e.tags||[]).forEach(tag=>{
+        const sp = document.createElement('span'); sp.className = 'tag'; sp.textContent = tag;
+        d.querySelector('.exp-tags').appendChild(sp);
+      });
+      tl.appendChild(d);
+    });
+  }
+
+  /* Projects — first 2 */
+  const pg = $('projects-grid');
+  if(pg){
+    pg.innerHTML = '';
+    DATA.projects.slice(0, HIGHLIGHTS.projects).forEach(p=>{
+      const card = document.createElement('article');
+      card.className = 'proj-card reveal'; card.setAttribute('role','listitem');
+      const desc  = p.description[lang] || p.description['fr'] || p.description;
+      const title = p.title[lang]       || p.title['fr']       || p.title;
+      card.innerHTML = `
+        <p class="proj-title">${title}</p>
+        <p class="proj-desc">${desc}</p>
+        <div class="tags proj-tag-wrap"></div>
+        <div class="proj-links"></div>`;
+      (p.tags||[]).forEach(tag=>{
+        const sp = document.createElement('span'); sp.className = 'tag'; sp.textContent = tag;
+        card.querySelector('.proj-tag-wrap').appendChild(sp);
+      });
+      const pl = card.querySelector('.proj-links');
+      if(p.github){ const a=document.createElement('a'); a.href=p.github; a.target='_blank'; a.rel='noopener'; a.textContent='GitHub ↗'; pl.appendChild(a); }
+      if(p.demo){   const a=document.createElement('a'); a.href=p.demo;   a.target='_blank'; a.rel='noopener'; a.textContent='Demo ↗';   pl.appendChild(a); }
+      pg.appendChild(card);
+    });
+  }
+
+  /* Presentations — first 3 */
+  const presList = $('pres-list');
+  if(presList){
+    presList.innerHTML = '';
+    (DATA.presentations||[]).slice(0, HIGHLIGHTS.presentations).forEach(p => {
+      const card = document.createElement('article');
+      card.className = 'pres-card reveal';
+      card.setAttribute('role','listitem');
+      const title   = p.title[lang]       || p.title['fr']       || p.title;
+      const desc    = p.description[lang] || p.description['fr'] || p.description;
+      const context = typeof p.context === 'object'
+        ? (p.context[lang] || p.context['fr'])
+        : p.context;
+      card.innerHTML = `
+        <div class="pres-header">
+          <span class="pres-title">${title}</span>
+          <span class="pres-period">${p.period||''}</span>
+        </div>
+        ${context ? `<p class="pres-context">${context}</p>` : ''}
+        <p class="pres-desc">${desc}</p>
+        <div class="pres-footer">
+          <div class="tags pres-tag-wrap"></div>
+          ${p.youtube ? `<a class="pres-yt" href="${p.youtube}" target="_blank" rel="noopener" aria-label="${title} — YouTube">${lang==='ar'?'مشاهدة':lang==='en'?'Watch':'Voir'}</a>` : ''}
+        </div>`;
+      (p.tags||[]).forEach(tag => {
+        const sp = document.createElement('span');
+        sp.className = 'tag'; sp.textContent = tag;
+        card.querySelector('.pres-tag-wrap').appendChild(sp);
+      });
+      presList.appendChild(card);
+    });
+  }
+
+  /* Education degrees (lang-sensitive) */
+  const el = $('edu-list');
+  if(el){
+    el.querySelectorAll('.edu-degree').forEach((el2, i)=>{
+      const e = DATA.education[i];
+      if(e) el2.textContent = e.degree[lang] || e.degree['fr'] || e.degree;
+    });
+  }
+
+  /* Contact */
+  const cs = $('contact-sub'); if(cs) cs.textContent = t('contact.sub');
+  const cg = $('contact-grid');
+  if(cg){
+    cg.innerHTML = '';
+    [
+      DATA.email    && {href:'mailto:'+DATA.email,    label:DATA.email},
+      DATA.phone    && {href:'tel:'+DATA.phone,        label:DATA.phone},
+      DATA.github   && {href:DATA.github,              label:t('link.github'),   target:'_blank'},
+      DATA.linkedin && {href:DATA.linkedin,            label:t('link.linkedin'), target:'_blank'},
+    ].filter(Boolean).forEach(l=>{
+      const a = document.createElement('a');
+      a.href = l.href; a.className = 'contact-link'; a.textContent = l.label;
+      if(l.target) a.target = l.target; a.rel = 'noopener';
+      cg.appendChild(a);
+    });
+  }
+}
+</script>
+</body>
+</html>

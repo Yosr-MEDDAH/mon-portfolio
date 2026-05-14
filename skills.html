@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="fr" dir="ltr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Compétences — Yosr Meddah</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=IBM+Plex+Sans:wght@300;400;500&family=IBM+Plex+Sans+Arabic:wght@300;400;500&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+
+<a class="skip-link" href="#main" id="skip-link">Aller au contenu principal</a>
+
+<nav aria-label="Navigation principale">
+  <a class="nav-logo" href="index.html" id="nav-logo" aria-label="Accueil">—</a>
+  <div class="nav-right">
+    <ul class="nav-links" role="list">
+      <li><a href="skills.html"         data-page="skills.html"         data-i18n="nav.skills">Compétences</a></li>
+      <li><a href="experiences.html"    data-page="experiences.html"    data-i18n="nav.experience">Expérience</a></li>
+      <li><a href="projects.html"       data-page="projects.html"       data-i18n="nav.projects">Projets</a></li>
+      <li><a href="presentations.html" data-page="presentations.html" data-i18n="nav.presentations">Présentations</a></li>
+      <li><a href="artworks.html"       data-page="artworks.html"       data-i18n="nav.artworks">Artworks</a></li>
+      <li><a href="index.html#contact" data-i18n="nav.contact">Contact</a></li>
+    </ul>
+    <div role="group" aria-label="Langue">
+      <button class="icon-btn" onclick="setLang('fr')" aria-label="Français">FR</button>
+      <button class="icon-btn" onclick="setLang('en')" aria-label="English">EN</button>
+      <button class="icon-btn" onclick="setLang('ar')" aria-label="العربية">ع</button>
+    </div>
+    <button class="icon-btn" id="theme-btn" aria-label="Basculer le thème" onclick="toggleTheme()">◑</button>
+  </div>
+</nav>
+
+<main id="main">
+  <div class="container page-header">
+    <a href="index.html" class="back-link" data-i18n="back">Retour</a>
+    <p class="section-label" data-i18n="section.skills">Compétences</p>
+    <h1 class="page-title" id="page-title" data-i18n="page.skills">Compétences techniques</h1>
+    <p class="page-count" id="page-count"></p>
+  </div>
+
+  <section aria-labelledby="page-title" style="padding-top:0">
+    <div class="container">
+      <div class="skills-grid reveal" id="skills-grid" role="list"></div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <span id="footer-name"></span>
+  <span id="footer-year"></span>
+</footer>
+
+<script src="data.js"></script>
+<script src="app.js"></script>
+<script>
+function renderStatic(){
+  const sg = $('skills-grid');
+  if(!sg) return;
+  DATA.skills.forEach(s=>{
+    const div = document.createElement('div');
+    div.setAttribute('role','listitem');
+    const cat = document.createElement('p');
+    cat.className = 'skill-cat'; cat.textContent = s.category;
+    const tags = document.createElement('div'); tags.className = 'tags';
+    s.items.forEach(i=>{
+      const sp = document.createElement('span'); sp.className = 'tag'; sp.textContent = i;
+      tags.appendChild(sp);
+    });
+    div.appendChild(cat); div.appendChild(tags);
+    sg.appendChild(div);
+  });
+}
+
+function renderDynamic(){
+  const nl = $('nav-logo'); if(nl) nl.textContent = DATA.name.split(' ')[0];
+  const pc = $('page-count');
+  if(pc){
+    const total = DATA.skills.reduce((sum, s) => sum + s.items.length, 0);
+    pc.textContent = lang==='ar'
+      ? `${total} مهارة · ${DATA.skills.length} فئة`
+      : lang==='en'
+      ? `${total} skills across ${DATA.skills.length} categories`
+      : `${total} compétences · ${DATA.skills.length} catégories`;
+  }
+}
+</script>
+</body>
+</html>

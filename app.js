@@ -116,6 +116,17 @@ function toggleTheme(){
 const $ = id => document.getElementById(id);
 const initials = n => n.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
 
+function createOptimizedImg(src, alt, parent, customClass = '') {
+  const img = document.createElement('img');
+  img.src = src; img.alt = alt;
+  if(customClass) img.className = customClass;
+  img.onload = () => {
+    img.classList.add('loaded');
+    if(parent) parent.classList.add('loaded');
+  };
+  return img;
+}
+
 /* ── Artwork renderer (shared) ───────────────────────── */
 function buildArtworkItem(aw){
   const item = document.createElement('figure');
@@ -128,9 +139,7 @@ function buildArtworkItem(aw){
       vid.style.width = '100%'; vid.style.height = '100%'; vid.style.objectFit = 'cover';
       item.appendChild(vid);
     } else {
-      const img = document.createElement('img');
-      img.src = aw.image; img.alt = aw.title||'Artwork'; img.loading = 'lazy';
-      item.appendChild(img);
+      item.appendChild(createOptimizedImg(aw.image, aw.title||'Artwork', item));
     }
   } else {
     const ph = document.createElement('div');
@@ -245,9 +254,7 @@ function buildProjectCard(p){
       card.addEventListener('mouseenter', () => vid.style.transform = 'scale(1.05)');
       card.addEventListener('mouseleave', () => vid.style.transform = 'scale(1)');
     } else {
-      const img = document.createElement('img');
-      img.src = p.image; img.alt = title; img.loading = 'lazy';
-      media.appendChild(img);
+      media.appendChild(createOptimizedImg(p.image, title, media));
     }
   } else {
     const bg = document.createElement('div');

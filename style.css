@@ -331,9 +331,34 @@ h2{
 }
 .proj-card:hover{border-color:var(--mg);box-shadow:0 4px 24px rgba(61,82,41,.08)}
 /* media zone */
-.proj-media{width:100%;height:128px;overflow:hidden;position:relative;background:var(--mg-pale);flex-shrink:0}
-.proj-media img{width:100%;height:100%;object-fit:cover;transition:transform .4s ease;display:block}
+.proj-media{
+  width:100%;height:128px;overflow:hidden;position:relative;
+  background:var(--mg-pale);flex-shrink:0;
+}
+.proj-media::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  transform: translateX(-100%);
+  animation: shimmer 1.5s infinite;
+  z-index: 1;
+}
+.proj-media.loaded::before { display: none; }
+
+.proj-media img{
+  width:100%;height:100%;object-fit:cover;
+  transition:transform .4s ease, opacity .4s ease;
+  display:block;
+  opacity: 0;
+}
+.proj-media img.loaded { opacity: 1; }
+
 .proj-card:hover .proj-media img{transform:scale(1.05)}
+
+@keyframes shimmer {
+  100% { transform: translateX(100%); }
+}
 .proj-media-bg{
   width:100%;height:100%;display:flex;align-items:center;justify-content:center;
   position:relative;overflow:hidden;
@@ -422,8 +447,24 @@ h2{
   aspect-ratio:4/3;position:relative;
   transition:border-color var(--transition);
 }
+.artwork-item::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  transform: translateX(-100%);
+  animation: shimmer 1.5s infinite;
+  z-index: 1;
+}
+.artwork-item.loaded::before { display: none; }
+
 .artwork-item:hover{border-color:var(--mg)}
-.artwork-item img{width:100%;height:100%;object-fit:cover;transition:transform .4s ease;}
+.artwork-item img{
+  width:100%;height:100%;object-fit:cover;
+  transition:transform .4s ease, opacity .4s ease;
+  opacity: 0;
+}
+.artwork-item img.loaded { opacity: 1; }
 .artwork-item:hover img{transform:scale(1.04)}
 .artwork-caption{
   position:absolute;bottom:0;left:0;right:0;
@@ -519,6 +560,9 @@ h1.page-title{
 /* ── FADE-IN ─────────────────────────────────────────── */
 .reveal{opacity:0;transform:translateY(16px);transition:opacity .5s ease,transform .5s ease}
 .reveal.visible{opacity:1;transform:none}
+
+/* Global loading state for images */
+img.loaded { opacity: 1 !important; }
 @media(prefers-reduced-motion:reduce){
   .reveal{opacity:1;transform:none;transition:none}
   body *{transition:none!important}

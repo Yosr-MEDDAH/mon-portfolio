@@ -185,6 +185,9 @@ function renderStatic(){
     if(DATA.avatar){
       const img = document.createElement('img');
       img.src = DATA.avatar; img.alt = DATA.name;
+      img.decoding = 'async';
+      img.onload = () => img.style.opacity = '1';
+      img.style.opacity = '0'; img.style.transition = 'opacity .4s ease';
       img.onerror = () => { aw.textContent = initials(DATA.name); };
       aw.appendChild(img);
     } else { aw.textContent = initials(DATA.name); }
@@ -250,9 +253,6 @@ function renderStatic(){
 }
 
 function renderDynamic(){
-  /* Nav logo */
-  /* Nav logo */
-
   /* Hero */
   const hn = $('hero-name'); if(hn) hn.textContent = DATA.name;
   const ht = $('hero-title-el');
@@ -286,7 +286,7 @@ function renderDynamic(){
       d.className = 'exp-card reveal'; d.setAttribute('role','listitem');
       const imagesHtml = (e.images && e.images.length > 0) 
         ? `<div class="exp-gallery" style="display:flex; gap:10px; overflow-x:auto; margin-top:12px; padding-bottom:8px;">` + 
-          e.images.map(img => `<img src="${img}" style="height:120px; width:auto; border-radius:6px; border:1px solid var(--border); object-fit:cover;">`).join('') + 
+          e.images.map(img => `<img src="${img}" onload="this.classList.add('loaded')" style="height:120px; width:auto; border-radius:6px; border:1px solid var(--border); object-fit:cover; opacity:0; transition:opacity .4s ease;">`).join('') + 
           `</div>`
         : '';
 

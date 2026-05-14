@@ -491,9 +491,9 @@ const DATA = {
       period: "Mars 2026",
       context: { fr: "ISAMM — Génie Logiciel (chef d'équipe, 5 personnes) — Publié sur YouTube", en: "ISAMM — Software Engineering (team leader, 5 people) — Published on YouTube", ar: "ISAMM — هندسة البرمجيات" },
       description: {
-        fr: "Présentation de 2h30 sur les 11 patrons de comportement GoF (Chain of Responsibility, Observer, Mediator, State, Strategy, Template Method, Command, Memento, Visitor, Iterator, Interpreter). Thème fil rouge : ZooKeeper du Zodiaque Chinois. Activités interactives, diagrammes PlantUML, quiz HTML.",
-        en: "2.5-hour presentation on all 11 GoF behavioral patterns (Chain of Responsibility, Observer, Mediator, State, Strategy, Template Method, Command, Memento, Visitor, Iterator, Interpreter). Running theme: Chinese Zodiac ZooKeeper. Interactive activities, PlantUML diagrams, HTML quiz.",
-        ar: "عرض مدته 2.5 ساعة على 11 نمطًا سلوكيًا من GoF بموضوع حديقة حيوان الزودياك الصيني.",
+        fr: "Présentation de 1h13 sur les 9 patrons de comportement GoF (Chain of Responsibility, Mediator, State, Strategy, Template Method, Command, Memento, Visitor). Thème fil rouge : ZooKeeper du Zodiaque Chinois. Activités interactives, diagrammes PlantUML, quiz HTML.",
+        en: "1.13-hour presentation on all 9 GoF behavioral patterns (Chain of Responsibility, Mediator, State, Strategy, Template Method, Command, Memento, Visitor). Running theme: Chinese Zodiac ZooKeeper. Interactive activities, PlantUML diagrams, HTML quiz.",
+        ar: "عرض مدته 1.13 ساعة على 9 أنماط سلوكية من GoF بموضوع حديقة حيوان الزودياك الصيني.",
       },
       tags: ["GoF", "Design Patterns", "Génie Logiciel", "UML"],
       youtube: "https://youtu.be/Ezm1wgb-CSg?si=uEqTYMJtTRGi7lbK",
@@ -513,7 +513,7 @@ const DATA = {
     {
       title: { fr: "Méthode Agile — Scrum & Gestion de projet", en: "Agile Methodology — Scrum & Project Management", ar: "منهجية أجايل — Scrum وإدارة المشاريع" },
       period: "Déc. 2023",
-      context: { fr: "ISET Radès (binôme avec Wassim Ouertani)", en: "ISET Radès (pair with Wassim Ouertani)", ar: "ISET Radès" },
+      context: { fr: "ISET Radès (en binôme)", en: "ISET Radès (in pairs)", ar: "ISET Radès (في ثنائي)" },
       description: {
         fr: "Présentation sur les valeurs et principes Agile, transition du modèle en V/Waterfall vers le développement itératif. Analyse approfondie de Scrum : rôles (Scrum Master, Product Owner), Sprints, Daily Stand-ups.",
         en: "Presentation on Agile values and principles, transition from V-Model/Waterfall to iterative development. In-depth Scrum analysis: roles (Scrum Master, Product Owner), Sprints, Daily Stand-ups.",
@@ -525,7 +525,7 @@ const DATA = {
     {
       title: { fr: "Théorie C-K — Design & Innovation radicale", en: "C-K Theory — Design & Radical Innovation", ar: "نظرية C-K — التصميم والابتكار الجذري" },
       period: "Mai 2023",
-      context: { fr: "ISET Radès (binôme avec Wassim Ouertani)", en: "ISET Radès (pair with Wassim Ouertani)", ar: "ISET Radès" },
+      context: { fr: "ISET Radès (en binôme)", en: "ISET Radès (in pairs)", ar: "ISET Radès (في ثنائي)" },
       description: {
         fr: "Présentation de la théorie C-K (Concept-Knowledge), méthode formelle pour le design créatif et l'innovation radicale. Interaction entre l'espace Concept (idées inconnues) et l'espace Connaissance (faits établis).",
         en: "Presentation of C-K theory (Concept-Knowledge), a formal method for creative design and radical innovation. Interaction between the Concept space (unknown ideas) and the Knowledge space (established facts).",
@@ -537,7 +537,7 @@ const DATA = {
     {
       title: { fr: "Sécurité dans le Cloud Computing", en: "Security in Cloud Computing", ar: "الأمن في الحوسبة السحابية" },
       period: "Nov. 2023",
-      context: { fr: "ISET Radès (binôme avec Wassim Ouertani)", en: "ISET Radès (pair with Wassim Ouertani)", ar: "ISET Radès" },
+      context: { fr: "ISET Radès (en binôme)", en: "ISET Radès (in pairs)", ar: "ISET Radès (في ثنائي)" },
       description: {
         fr: "Modèle de responsabilité partagée entre fournisseurs et clients cloud. Chiffrement des données, IAM (Identity & Access Management) et sécurité réseau.",
         en: "Shared responsibility model between cloud providers and customers. Data encryption, IAM (Identity & Access Management) and network security.",
@@ -575,7 +575,7 @@ const DATA = {
   // ── FORMATION ──────────────────────────────────────────
   education: [
     {
-      degree: { fr: "Cycle Ingénieur en Sciences Appliquées et en Technologie", en: "Engineering Degree in Applied Sciences and Technology", ar: "شهادة هندسة في العلوم التطبيقية والتكنولوجيا" },
+      degree: { fr: "Cycle Ingénieur en Sciences Informatiques et Multimédia", en: "Engineering Degree in Computer Science and Multimedia", ar: "شهادة هندسة في علوم الحاسوب والوسائط المتعددة" },
       school: "ISAMM — Institut Supérieur des Arts Multimédia de la Manouba",
       period: "2024 – Présent", location: "Manouba",
     },

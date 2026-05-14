@@ -89,19 +89,8 @@ let lang = localStorage.getItem('lang') || 'fr';
 function t(k){ return (T[lang]||T.fr)[k] || k; }
 
 function setLang(l){
-  lang = l;
   localStorage.setItem('lang', l);
-  document.documentElement.lang = l;
-  document.documentElement.dir = l==='ar' ? 'rtl' : 'ltr';
-  const skip = document.getElementById('skip-link');
-  if(skip) skip.textContent =
-    l==='ar' ? 'انتقل إلى المحتوى الرئيسي' :
-    l==='en' ? 'Skip to main content' : 'Aller au contenu principal';
-  applyTheme();
-  document.querySelectorAll('[data-i18n]').forEach(el=>{
-    el.textContent = t(el.dataset.i18n);
-  });
-  if(typeof renderDynamic === 'function') renderDynamic();
+  location.reload();
 }
 
 /* ── Theme ───────────────────────────────────────────── */

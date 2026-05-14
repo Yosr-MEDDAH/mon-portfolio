@@ -274,7 +274,7 @@ h2{
   color:var(--text);margin-bottom:.5rem;
 }
 .hero-title{font-size:1rem;color:var(--mg);font-weight:400;margin-bottom:1.25rem;}
-.hero-about{color:var(--text-2);font-size:.97rem;max-width:52ch;margin-bottom:2rem;white-space:pre-line;}
+.hero-about{color:var(--text-2);font-size:.97rem;max-width:52ch;margin-bottom:2rem;white-space:pre-line;text-align:justify;}
 .hero-ctas{display:flex;gap:.75rem;flex-wrap:wrap}
 .btn{
   display:inline-flex;align-items:center;gap:.4rem;

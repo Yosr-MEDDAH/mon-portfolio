@@ -180,7 +180,12 @@ nav{
 .nav-logo{
   font-family:var(--font-serif);font-size:1.15rem;
   color:var(--text);text-decoration:none;letter-spacing:.01em;
+  display:flex;align-items:center;
 }
+.nav-logo img{height:28px;width:auto}
+.logo-dark-mode{display:none}
+[data-theme="dark"] .logo-light-mode{display:none}
+[data-theme="dark"] .logo-dark-mode{display:block}
 .nav-right{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap}
 .nav-links{display:flex;gap:clamp(.5rem,2vw,1.5rem);list-style:none;flex-wrap:wrap}
 .nav-links a{
@@ -212,7 +217,52 @@ h2{
 .divider{border:none;border-top:1px solid var(--border);margin:0}
 
 /* ── HERO ────────────────────────────────────────────── */
-#hero{padding:clamp(3rem,8vw,6rem) 0 var(--gap)}
+#hero{padding:clamp(3rem,8vw,6rem) 0 var(--gap);position:relative;overflow:hidden}
+
+/* ── TATREEZ DIVIDER ─────────────────────────────────── */
+/* Motif croix / losange inspiré du tatreez palestinien — CSS pur, zéro image */
+.tatreez-divider{
+  height:22px;border:none;margin:0;
+  background-image:
+    repeating-linear-gradient(45deg,
+      var(--mg-border) 0,var(--mg-border) 1.5px,
+      transparent 0,transparent 50%),
+    repeating-linear-gradient(-45deg,
+      var(--mg-border) 0,var(--mg-border) 1.5px,
+      transparent 0,transparent 50%);
+  background-size:10px 10px;
+  opacity:.55;
+}
+[data-theme="dark"] .tatreez-divider{opacity:.22}
+
+/* ── FLOATING CALLIGRAPHY DECORATION ─────────────────── */
+/* Lettres arabes + chinoises en arrière-plan — décoratives, WCAG OK */
+.deco-wrap{
+  position:absolute;inset:0;
+  pointer-events:none;overflow:hidden;z-index:0;
+}
+.deco-char{
+  position:absolute;
+  font-weight:300;
+  opacity:.042;
+  color:var(--mg);
+  line-height:1;
+  user-select:none;
+  animation:deco-float var(--dur,9s) ease-in-out infinite;
+  animation-delay:var(--delay,0s);
+  will-change:transform;
+}
+.deco-char.ar{font-family:'Amiri','Scheherazade New',serif}
+.deco-char.zh{font-family:'KaiTi','FangSong','STKaiTi','Noto Serif SC','SimSun',serif}
+
+@keyframes deco-float{
+  0%,100%{transform:translateY(0) rotate(var(--rot,0deg))}
+  50%{transform:translateY(-16px) rotate(var(--rot,0deg))}
+}
+@media(prefers-reduced-motion:reduce){
+  .deco-char{animation:none}
+}
+[data-theme="dark"] .deco-char{opacity:.03;color:var(--mg-text)}
 .hero-inner{
   display:grid;grid-template-columns:1fr auto;
   gap:2rem;align-items:start;
@@ -238,7 +288,7 @@ h2{
 .btn-outline{background:transparent;color:var(--text);border:1px solid var(--border)}
 .btn-outline:hover{border-color:var(--mg);color:var(--mg)}
 .avatar-wrap{
-  width:clamp(80px,14vw,140px);aspect-ratio:1;border-radius:50%;
+  width:clamp(100px, 18vw, 180px);aspect-ratio:1;border-radius:50%;
   overflow:hidden;border:2px solid var(--mg-border);
   background:var(--mg-pale);flex-shrink:0;
   display:flex;align-items:center;justify-content:center;

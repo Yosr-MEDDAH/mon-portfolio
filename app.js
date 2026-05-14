@@ -132,10 +132,17 @@ function buildArtworkItem(aw){
   const item = document.createElement('figure');
   item.className = 'artwork-item reveal';
   item.setAttribute('role','listitem');
-  if(aw.image){
-    const img = document.createElement('img');
-    img.src = aw.image; img.alt = aw.title||'Artwork'; img.loading = 'lazy';
-    item.appendChild(img);
+  if(aw.image && aw.image !== 'placeholder.png'){
+    if (aw.image.endsWith('.mp4')) {
+      const vid = document.createElement('video');
+      vid.src = aw.image; vid.autoplay = true; vid.loop = true; vid.muted = true; vid.playsInline = true;
+      vid.style.width = '100%'; vid.style.height = '100%'; vid.style.objectFit = 'cover';
+      item.appendChild(vid);
+    } else {
+      const img = document.createElement('img');
+      img.src = aw.image; img.alt = aw.title||'Artwork'; img.loading = 'lazy';
+      item.appendChild(img);
+    }
   } else {
     const ph = document.createElement('div');
     ph.className = 'artwork-placeholder'; ph.textContent = aw.title||'Image';
@@ -143,7 +150,37 @@ function buildArtworkItem(aw){
   }
   if(aw.title){
     const cap = document.createElement('figcaption');
-    cap.className = 'artwork-caption'; cap.textContent = aw.title;
+    cap.className = 'artwork-caption'; 
+    cap.style.display = 'flex';
+    cap.style.justifyContent = 'space-between';
+    cap.style.alignItems = 'center';
+    
+    const t = document.createElement('span');
+    t.textContent = aw.title;
+    cap.appendChild(t);
+    
+    if(aw.youtube || aw.behance){
+      const actions = document.createElement('div');
+      actions.style.display = 'flex';
+      actions.style.gap = '8px';
+      
+      if(aw.youtube){
+        const y = document.createElement('a');
+        y.href = aw.youtube; y.target = '_blank'; y.innerHTML = '▶';
+        y.style.cssText = 'color:#ff4e4e; text-decoration:none; font-size:16px;';
+        y.setAttribute('aria-label', `Voir ${aw.title} sur YouTube`);
+        actions.appendChild(y);
+      }
+      if(aw.behance){
+        const b = document.createElement('a');
+        b.href = aw.behance; b.target = '_blank'; b.innerHTML = 'Bē';
+        b.style.cssText = 'color:#5b8eff; text-decoration:none; font-size:16px; font-weight:bold; font-family:sans-serif;';
+        b.setAttribute('aria-label', `Voir ${aw.title} sur Behance`);
+        actions.appendChild(b);
+      }
+      cap.appendChild(actions);
+    }
+    
     item.appendChild(cap);
   }
   return item;
@@ -209,9 +246,20 @@ function buildProjectCard(p){
   media.className = 'proj-media';
   const hasReal = p.image && p.image !== 'placeholder.png';
   if(hasReal){
-    const img = document.createElement('img');
-    img.src = p.image; img.alt = title; img.loading = 'lazy';
-    media.appendChild(img);
+    if (p.image.endsWith('.mp4')) {
+      const vid = document.createElement('video');
+      vid.src = p.image; vid.autoplay = true; vid.loop = true; vid.muted = true; vid.playsInline = true;
+      vid.style.width = '100%'; vid.style.height = '100%'; vid.style.objectFit = 'cover';
+      vid.style.transition = 'transform .4s ease';
+      media.appendChild(vid);
+      // Hover effect for video
+      card.addEventListener('mouseenter', () => vid.style.transform = 'scale(1.05)');
+      card.addEventListener('mouseleave', () => vid.style.transform = 'scale(1)');
+    } else {
+      const img = document.createElement('img');
+      img.src = p.image; img.alt = title; img.loading = 'lazy';
+      media.appendChild(img);
+    }
   } else {
     const bg = document.createElement('div');
     bg.className = 'proj-media-bg';
@@ -276,6 +324,20 @@ function buildProjectCard(p){
     a.href=p.demo; a.target='_blank'; a.rel='noopener';
     a.className='proj-btn'; a.textContent='↗ Demo';
     a.setAttribute('aria-label',`${title} — Demo`);
+    actions.appendChild(a);
+  }
+  if(p.pdf){
+    const a = document.createElement('a');
+    a.href=p.pdf; a.target='_blank'; a.rel='noopener';
+    a.className='proj-btn'; a.textContent='📄 PDF';
+    a.setAttribute('aria-label',`${title} — Rapport PDF`);
+    actions.appendChild(a);
+  }
+  if(p.notebook){
+    const a = document.createElement('a');
+    a.href=p.notebook; a.target='_blank'; a.rel='noopener';
+    a.className='proj-btn'; a.textContent='📓 Notebook';
+    a.setAttribute('aria-label',`${title} — Jupyter Notebook`);
     actions.appendChild(a);
   }
   if(actions.children.length) body.appendChild(actions);

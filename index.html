@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>Portfolio — Yosr Meddah</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
-<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=IBM+Plex+Sans:wght@300;400;500&family=IBM+Plex+Sans+Arabic:wght@300;400;500&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Instrument+Serif:ital@0;1&family=IBM+Plex+Sans:wght@300;400;500&family=IBM+Plex+Sans+Arabic:wght@300;400;500&display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="style.css"/>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/devicons/devicon@v2.15.1/devicon.min.css"/>
 </head>
@@ -14,7 +14,10 @@
 <a class="skip-link" href="#main" id="skip-link">Aller au contenu principal</a>
 
 <nav aria-label="Navigation principale">
-  <a class="nav-logo" href="index.html" id="nav-logo" aria-label="Accueil">—</a>
+  <a class="nav-logo" href="index.html" id="nav-logo" aria-label="Accueil">
+    <img src="assets/logo-noir.png" class="logo-light-mode" alt="Yosr Meddah">
+    <img src="assets/logo-blanc.png" class="logo-dark-mode" alt="Yosr Meddah">
+  </a>
   <div class="nav-right">
     <ul class="nav-links" role="list">
       <li><a href="skills.html"         data-page="skills.html"         data-i18n="nav.skills">Compétences</a></li>
@@ -37,6 +40,13 @@
 
 <!-- HERO -->
 <section id="hero" aria-labelledby="hero-heading">
+  <div class="deco-wrap" aria-hidden="true">
+    <span class="deco-char ar" style="top:10%;left:5%;--rot:-15deg;--dur:12s;font-size:8rem;">إ</span>
+    <span class="deco-char zh" style="top:60%;left:8%;--rot:10deg;--dur:15s;--delay:2s;font-size:6rem;">創</span>
+    <span class="deco-char ar" style="top:15%;right:10%;--rot:20deg;--dur:10s;--delay:1s;font-size:10rem;">و</span>
+    <span class="deco-char zh" style="top:75%;right:15%;--rot:-10deg;--dur:14s;--delay:3s;font-size:7rem;">新</span>
+    <span class="deco-char ar" style="top:40%;left:45%;--rot:5deg;--dur:18s;font-size:5rem;">ي</span>
+  </div>
   <div class="container">
     <div class="hero-inner">
       <div>
@@ -51,7 +61,7 @@
   </div>
 </section>
 
-<hr class="divider"/>
+<hr class="divider tatreez-divider"/>
 
 <!-- SKILLS HIGHLIGHT -->
 <section id="skills" aria-labelledby="skills-heading" style="background:var(--surface);border-top:1px solid var(--border);border-bottom:1px solid var(--border)">
@@ -65,7 +75,7 @@
   </div>
 </section>
 
-<hr class="divider"/>
+<hr class="divider tatreez-divider"/>
 
 <!-- EXPERIENCE HIGHLIGHT -->
 <section id="experience" aria-labelledby="exp-heading">
@@ -79,7 +89,7 @@
   </div>
 </section>
 
-<hr class="divider"/>
+<hr class="divider tatreez-divider"/>
 
 <!-- PROJECTS HIGHLIGHT -->
 <section id="projects" aria-labelledby="proj-heading" style="background:var(--surface);border-top:1px solid var(--border);border-bottom:1px solid var(--border)">
@@ -93,7 +103,7 @@
   </div>
 </section>
 
-<hr class="divider"/>
+<hr class="divider tatreez-divider"/>
 
 <!-- PRESENTATIONS HIGHLIGHT -->
 <section id="presentations" aria-labelledby="pres-heading">
@@ -107,7 +117,7 @@
   </div>
 </section>
 
-<hr class="divider"/>
+<hr class="divider tatreez-divider"/>
 
 <!-- ARTWORKS HIGHLIGHT -->
 <section id="artworks" aria-labelledby="art-heading">
@@ -121,7 +131,7 @@
   </div>
 </section>
 
-<hr class="divider"/>
+<hr class="divider tatreez-divider"/>
 
 <!-- EDUCATION (full — short list) -->
 <section id="education" aria-labelledby="edu-heading">
@@ -132,7 +142,7 @@
   </div>
 </section>
 
-<hr class="divider"/>
+<hr class="divider tatreez-divider"/>
 
 <!-- CONTACT -->
 <section id="contact" aria-labelledby="contact-heading">
@@ -235,7 +245,7 @@ function renderStatic(){
 
 function renderDynamic(){
   /* Nav logo */
-  const nl = $('nav-logo'); if(nl) nl.textContent = DATA.name.split(' ')[0];
+  /* Nav logo */
 
   /* Hero */
   const hn = $('hero-name'); if(hn) hn.textContent = DATA.name;
@@ -268,6 +278,12 @@ function renderDynamic(){
       const desc = e.description[lang] || e.description['fr'] || e.description;
       const d = document.createElement('article');
       d.className = 'exp-card reveal'; d.setAttribute('role','listitem');
+      const imagesHtml = (e.images && e.images.length > 0) 
+        ? `<div class="exp-gallery" style="display:flex; gap:10px; overflow-x:auto; margin-top:12px; padding-bottom:8px;">` + 
+          e.images.map(img => `<img src="${img}" style="height:120px; width:auto; border-radius:6px; border:1px solid var(--border); object-fit:cover;">`).join('') + 
+          `</div>`
+        : '';
+
       d.innerHTML = `
         <div>
           <div class="exp-role">${e.role[lang]||e.role['fr']||e.role}</div>
@@ -275,6 +291,7 @@ function renderDynamic(){
         </div>
         <div class="exp-period">${e.period}</div>
         <p class="exp-desc">${desc}</p>
+        ${imagesHtml}
         <div class="exp-tags tags"></div>`;
       (e.tags||[]).forEach(tag=>{
         const sp = document.createElement('span'); sp.className = 'tag'; sp.textContent = tag;
@@ -304,7 +321,17 @@ function renderDynamic(){
       const context = typeof p.context === 'object'
         ? (p.context[lang] || p.context['fr'])
         : p.context;
+      const ytMatch = p.youtube ? p.youtube.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([^&?]+)/) : null;
+      const vidId = ytMatch ? ytMatch[1] : null;
+      const mediaHtml = vidId 
+        ? `<a href="${p.youtube}" target="_blank" rel="noopener" style="display:block; width:100%; height:180px; overflow:hidden; border-radius:var(--radius); margin-bottom:1rem; position:relative; background:#000;">
+            <img src="https://img.youtube.com/vi/${vidId}/hqdefault.jpg" style="width:100%; height:100%; object-fit:cover; opacity:0.8; transition:opacity .3s;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.8">
+            <div style="position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); width:48px; height:48px; background:rgba(255,0,0,0.9); border-radius:50%; display:flex; align-items:center; justify-content:center; color:white; font-size:18px; box-shadow:0 4px 12px rgba(0,0,0,0.3);">▶</div>
+          </a>`
+        : '';
+
       card.innerHTML = `
+        ${mediaHtml}
         <div class="pres-header">
           <span class="pres-title">${title}</span>
           <span class="pres-period">${p.period||''}</span>

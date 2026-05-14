@@ -14,20 +14,20 @@ const DATA = {
   behance:   "https://www.behance.net/yosr-meddah",
   youtube:   "https://www.youtube.com/@YosrMeddah",
   cv_url:    "cv.pdf",
-  avatar:    "avatar.jpg",
+  avatar:    "assets/yosr.png",
 
   // ── TITRE ──────────────────────────────────────────────
   title: {
-    fr: "Ingénieure informatique en formation — Accessibilité · Éco-conception · Full-Stack",
-    en: "Software Engineering Student — Accessibility · Eco-design · Full-Stack",
-    ar: "طالبة هندسة برمجيات — إمكانية الوصول · التصميم البيئي · تطوير شامل",
+    fr: "Ingénieure informatique en formation — Accessibilité · Éco-conception",
+    en: "Software Engineering Student — Accessibility · Eco-design",
+    ar: "مهندسة برمجيات في طور التكوين — إمكانية الوصول والتصميم الصديق للبيئة",
   },
 
   // ── À PROPOS ───────────────────────────────────────────
   about: {
-    fr: `Ingénieure informatique en 2ᵉ année à l'ISAMM, passionnée par le développement full-stack, l'accessibilité numérique (WCAG) et l'éco-conception web. Je conçois des solutions inclusives qui allient performance technique et responsabilité environnementale. Créatrice de contenu pédagogique sur YouTube autour de ces thématiques, avec un engagement fort pour la responsabilité numérique et le design durable.`,
-    en: `2nd-year software engineering student at ISAMM, passionate about full-stack development, digital accessibility (WCAG) and eco-design. I build inclusive solutions combining technical performance with environmental responsibility. Also a YouTube educator on these topics.`,
-    ar: `طالبة هندسة برمجيات في السنة الثانية بـ ISAMM، شغوفة بالتطوير الشامل وإمكانية الوصول الرقمي (WCAG) والتصميم البيئي. أصمم حلولاً شاملة تجمع بين الأداء التقني والمسؤولية البيئية. صانعة محتوى تعليمي على يوتيوب.`,
+    fr: `Ingénieure informatique en 2ᵉ année à l'ISAMM, passionnée par le développement frontend, l'accessibilité numérique (WCAG) et l'éco-conception web. Je conçois des solutions inclusives qui allient performance technique et responsabilité environnementale. Créatrice de contenu pédagogique sur YouTube autour de ces thématiques, avec un engagement fort pour la responsabilité numérique et le design durable.`,
+    en: `2nd-year software engineering student at ISAMM, passionate about frontend development, digital accessibility (WCAG) and eco-design. I build inclusive solutions combining technical performance with environmental responsibility. Also a YouTube educator on these topics.`,
+    ar: `طالبة هندسة برمجيات في السنة الثانية بـ ISAMM، شغوفة بالتطوير الواجهة الأمامية وإمكانية الوصول الرقمي (WCAG) والتصميم البيئي. أصمم حلولاً شاملة تجمع بين الأداء التقني والمسؤولية البيئية. صانعة محتوى تعليمي على يوتيوب.`,
   },
 
   // ── COMPÉTENCES ────────────────────────────────────────
@@ -53,6 +53,17 @@ const DATA = {
         ar: "تطوير الواجهة الأمامية الكاملة لنسخة Notion متعددة المستأجرين مع إدارة الأدوار والوضع الليلي وإعادة تعيين كلمة المرور.",
       },
       tags: ["React 18", "Tailwind CSS", "UI/UX"],
+      images: [
+        "assets/screenshots-notion-clone/VuePages.png",
+        "assets/screenshots-notion-clone/auth.png",
+        "assets/screenshots-notion-clone/darkLightMode.png",
+        "assets/screenshots-notion-clone/editeurPage.png",
+        "assets/screenshots-notion-clone/indiv.png",
+        "assets/screenshots-notion-clone/org ad.png",
+        "assets/screenshots-notion-clone/responsive.png",
+        "assets/screenshots-notion-clone/super ad.png",
+        "assets/screenshots-notion-clone/work_ow.png"
+      ],
     },
     {
       role:    { fr: "Stagiaire Développeuse Front-End", en: "Front-End Developer Intern", ar: "متدربة مطورة واجهات أمامية" },
@@ -134,9 +145,9 @@ const DATA = {
         ar: "منصة تدقيق مزدوجة ذكية: WCAG 2.1 + البصمة الكربونية. مساعد RAG (Llama 3.2/Groq)، محرك تدقيق آلي، حاسبة CO₂. واجهة WCAG AA مع RTL وهوية بصرية مستوحاة من التطريز الفلسطيني.",
       },
       tags: ["React 18", "TypeScript", "FastAPI", "Python", "ChromaDB", "MongoDB", "Groq", "Llama 3.2", "Docker", "OAuth2"],
-      github: "https://github.com/Yosr-MEDDAH",
+      github: "https://github.com/Yosr-MEDDAH/green-a11y-agent",
       demo:   "",
-      image: "placeholder.png",
+      image: "assets/green-a11y-agent-screenshots/home.png",
       featured: true,
     },
     {
@@ -165,10 +176,10 @@ const DATA = {
       tags: ["Arduino", "ESP32-CAM", "Flutter", "Blynk Cloud", "C++", "UART", "DHT11", "PIR"],
       github: "",
       demo:   "",
-      image: "placeholder.png",
+      image: "assets/iot-jenin.mp4",
     },
     {
-      title: { fr: "Frontend PFA Tracking (Jira-inspired)", en: "PFA Tracking Frontend (Jira-inspired)", ar: "واجهة تتبع مشاريع التخرج" },
+      title: { fr: "Frontend Tracking (Jira-inspired)", en: "Tracking Frontend (Jira-inspired)", ar: "واجهة تتبع مشاريع التخرج" },
       period: "Fév. – Mars 2026",
       context: "ISAMM (8 personnes)",
       description: {
@@ -176,7 +187,7 @@ const DATA = {
         en: "Frontend for the team-built PFE tracking API. Jira-inspired agile management interface: sprints, user stories, tasks, validations, meetings, dashboards and report versioning.",
         ar: "واجهة أمامية لواجهة برمجة تتبع مشاريع التخرج. إدارة أجايل مستوحاة من Jira.",
       },
-      tags: ["React", "TypeScript", "UI/UX"],
+      tags: ["React", "TypeScript"],
       github: "",
       demo:   "",
       image: "placeholder.png",
@@ -220,7 +231,7 @@ const DATA = {
         en: "REST backend API for PFE management following a Jira-inspired agile workflow. Sprints, user stories, tasks, validations, meetings, report versioning, activity logs and HTML report generation. Roles: student, company supervisor, university supervisor.",
         ar: "API REST لإدارة ومتابعة مشاريع التخرج وفق سير عمل أجايل. سبرينت، قصص مستخدم، مهام، تحقق، اجتماعات.",
       },
-      tags: ["Python", "FastAPI", "MongoDB", "REST API", "JWT", "Architecture logicielle"],
+      tags: ["NodeJS","Express js","MongoDB"],
       github: "",
       demo:   "",
       image: "placeholder.png",
@@ -237,7 +248,7 @@ const DATA = {
       tags: ["JavaScript", "HTML/CSS"],
       github: "",
       demo:   "",
-      image: "placeholder.png",
+      image: "assets/Guerre des Clans - Google Chrome 2025-04-27 21-01-18.mp4",
     },
     {
       title: { fr: "Le Dragon d'Or — Application restaurant Java", en: "Le Dragon d'Or — Java Restaurant App", ar: "التنين الذهبي — تطبيق مطعم Java" },
@@ -251,7 +262,7 @@ const DATA = {
       tags: ["Java", "Swing", "POO"],
       github: "",
       demo:   "",
-      image: "placeholder.png",
+      image: "assets/Le Dragon d'Or - Espace Client 2025-05-03 01-31-29.mp4",
     },
     {
       title: { fr: "TuniHist — UX Design éducatif", en: "TuniHist — Educational UX Design", ar: "TuniHist — تصميم تعليمي" },
@@ -265,7 +276,7 @@ const DATA = {
       tags: ["Figma", "UX Design", "Education"],
       github: "",
       demo:   "",
-      image: "placeholder.png",
+      image: "assets/Tunihist.png",
     },
     {
       title: { fr: "GPU-Accelerated Image Processing (CUDA)", en: "GPU-Accelerated Image Processing (CUDA)", ar: "معالجة صور بتسريع GPU (CUDA)" },
@@ -292,7 +303,7 @@ const DATA = {
       },
       tags: ["Python", "Pandas", "NumPy", "Plotly", "Seaborn", "spaCy", "TextBlob", "NLP"],
       github: "",
-      demo:   "https://www.youtube.com/@YosrMeddah",
+      demo:   "https://youtu.be/iAYV2910Fwg?si=Yqqc25Ht2Y_poa9T",
       image: "placeholder.png",
     },
     {
@@ -348,7 +359,7 @@ const DATA = {
       },
       tags: ["Unity", "C#", "2D Game Design"],
       github: "",
-      demo:   "https://lnkd.in/d5BV8csz",
+      demo:   "https://youtu.be/D2tdYaQoNwg?si=n4_CDtBkTvOnqfRC",
       image: "placeholder.png",
     },
     {
@@ -376,7 +387,9 @@ const DATA = {
       },
       tags: ["Python", "Monte Carlo", "Statistics", "Data Visualization"],
       github: "",
-      demo:   "",
+      demo:   "assets/ProjetMonteCarlo/index.html",
+      pdf:    "assets/ProjetMonteCarlo/RapportYosrMEDDAH1ing1.pdf",
+      notebook: "assets/ProjetMonteCarlo/MonteCarloFraisa.ipynb",
       image: "placeholder.png",
     },
     {
@@ -407,7 +420,7 @@ const DATA = {
         ar: "تحليل النظام التعليمي الصيني من الجذور التاريخية إلى الإصلاحات الحديثة.",
       },
       tags: ["Éducation", "Chine", "Sociologie"],
-      youtube: "https://lnkd.in/dPreW9Qb",
+      youtube: "https://youtu.be/s8Gdx8sP-2M?si=-z5KzA291mUeDgfn",
     },
     {
       title: { fr: "Les Nouveaux Médias : Jeux vidéo & Anime", en: "New Media: Video Games & Anime", ar: "وسائل الإعلام الجديدة: ألعاب الفيديو والأنيمي" },
@@ -419,7 +432,7 @@ const DATA = {
         ar: "كيف يمكن لألعاب الفيديو والأنيمي أن تصبح أدوات تعليمية حقيقية.",
       },
       tags: ["Médias", "Éducation", "Culture"],
-      youtube: "https://lnkd.in/d3gnRCyD",
+      youtube: "https://youtu.be/s6G7bNou6d8?si=KW1tZst55Z-4tJ3d",
     },
     {
       title: { fr: "Le Mur Invisible — Accessibilité numérique & ODD 10", en: "The Invisible Wall — Digital Accessibility & SDG 10", ar: "الجدار غير المرئي — إمكانية الوصول الرقمي" },
@@ -431,7 +444,7 @@ const DATA = {
         ar: "كيف أدى عام كامل من تطوير الويب إلى استبعاد 285 مليون شخص دون أن أدرك ذلك.",
       },
       tags: ["Accessibilité", "WCAG", "ODD 10", "Inclusion numérique"],
-      youtube: "https://lnkd.in/djFebr-5",
+      youtube: "https://youtu.be/iRd9SPUbov0?si=tVl82fpjj695pHNG",
     },
     {
       title: { fr: "Décadence Offerte — Art, Symbolisme & Océans", en: "Offered Decadence — Art, Symbolism & Oceans", ar: "الانحدار المُهدى — فن ورمزية وأمحيطات" },
@@ -443,7 +456,7 @@ const DATA = {
         ar: "تأمل في ما نقدمه لمحيطاتنا. عملية إبداعية كاملة من اللوحة إلى التحليل الرمزي.",
       },
       tags: ["Art", "Symbolisme", "Environnement", "Peinture"],
-      youtube: "https://lnkd.in/dB5qkCfD",
+      youtube: "https://youtu.be/eUfeOi0YTio?si=YUpUtkJGnMGX3AEI",
     },
     {
       title: { fr: "Architecture Web & Complexité — Notion Clone (Stage WebMedia)", en: "Web Architecture & Complexity — Notion Clone (WebMedia Internship)", ar: "معمارية الويب والتعقيد — نسخة Notion" },
@@ -455,7 +468,7 @@ const DATA = {
         ar: "تقرير تجربة تقنية حول التعقيد الخفي وراء Notion والانتقال من SQL إلى NoSQL.",
       },
       tags: ["FastAPI", "MongoDB", "React 18", "RBAC", "Architecture", "NoSQL"],
-      youtube: "https://lnkd.in/djbWs9HE",
+      youtube: "https://youtu.be/zs-Sz_ltXrw?si=q8YOonKEQ9iDNM41",
     },
     {
       title: { fr: "Patrons de comportement GoF — Zoo du Zodiaque Chinois", en: "GoF Behavioral Patterns — Chinese Zodiac Zoo", ar: "أنماط GoF السلوكية — حديقة حيوان الزودياك الصيني" },
@@ -467,7 +480,7 @@ const DATA = {
         ar: "عرض مدته 2.5 ساعة على 11 نمطًا سلوكيًا من GoF بموضوع حديقة حيوان الزودياك الصيني.",
       },
       tags: ["GoF", "Design Patterns", "Génie Logiciel", "UML"],
-      youtube: "https://www.youtube.com/@YosrMeddah",
+      youtube: "https://youtu.be/Ezm1wgb-CSg?si=uEqTYMJtTRGi7lbK",
     },
     {
       title: { fr: "Fondamentaux de JavaScript", en: "JavaScript Fundamentals", ar: "أساسيات JavaScript" },
@@ -479,7 +492,7 @@ const DATA = {
         ar: "قائمة تشغيل يوتيوب توثق أساسيات JavaScript ضمن المنهج الهندسي.",
       },
       tags: ["JavaScript", "Web", "Pédagogie"],
-      youtube: "https://lnkd.in/dTXyi_-i",
+      youtube: "https://youtu.be/T5uF_a_DEcI?si=FUejbSKJr87sDZ2Q",
     },
     {
       title: { fr: "Méthode Agile — Scrum & Gestion de projet", en: "Agile Methodology — Scrum & Project Management", ar: "منهجية أجايل — Scrum وإدارة المشاريع" },
@@ -521,7 +534,7 @@ const DATA = {
 
   // ── CRÉATION DE CONTENU ────────────────────────────────
   content: {
-    channel: "https://www.youtube.com/@YosrMeddah",
+    channel: "https://www.youtube.com/playlist?list=PLJY8pFMYqReqMKaBP2oCBhlwSRz3PT3X1",
     course: {
       title: { fr: "Développer pour l'Humain et la Planète", en: "Developing for Humans and the Planet", ar: "التطوير من أجل الإنسان والكوكب" },
       description: {
@@ -536,14 +549,11 @@ const DATA = {
 
   // ── ARTWORKS ───────────────────────────────────────────
   artworks: [
-    { title: "Calligraphie arabe",                     image: "placeholder.png" },
-    { title: "Calligraphie chinoise — 3ᵉ Prix 2026",  image: "placeholder.png" },
-    { title: "Calligraphie chinoise — 2ᵉ Prix 2025",  image: "placeholder.png" },
-    { title: "Peinture — Décadence Offerte",           image: "placeholder.png" },
-    { title: "Identité visuelle — Green-A11y",         image: "placeholder.png" },
-    { title: "Design UI — TuniHist",                   image: "placeholder.png" },
-    { title: "Broderie tatreez (inspiration UI)",      image: "placeholder.png" },
-    { title: "Illustrations — Fraisa",                 image: "placeholder.png" },
+    { title: "Peinture — Décadence Offerte",           image: "assets/OfferedDecadence-artwork.jpg" , youtube:"https://youtu.be/SnA0zi-Bqms?si=f_GLAVODaBfpoe7l", behance: "https://www.behance.net/gallery/238073733/Offered-Decadence"},
+    { title: "The Curse of Wealth",                    image: "assets/artwork-TheCurseOfWealth.jpg", behance: "https://www.behance.net/gallery/241390357/The-Curse-of-Wealth" },
+    { title: "The Effort Crown",                       image: "assets/artwork-TheEffortCrown.png", behance: "https://www.behance.net/gallery/241391541/The-Effort-Crown" },
+    { title: "When Machines Kneel",                    image: "assets/When Machines Kneel.jpg", youtube:"https://youtu.be/iN40R1spt6I?si=lBn_28-TQvbkCQA4", behance: "https://www.behance.net/gallery/238059971/When-Machines-Kneel" },
+    { title: "Calligraphie chinoise — Concours",       image: "assets/artwork-ReflectionOfTomorrow-chinese-bridge-competition.jpg", youtube:"https://youtu.be/598T_KiJzOI?si=pRZmHiZdsPZZDKpn", behance: "https://www.behance.net/gallery/241061843/Reflection-of-Tomorrow-From-Rice-Fields-to-Rockets"},
   ],
 
   // ── FORMATION ──────────────────────────────────────────

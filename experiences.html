@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>Expérience — Yosr Meddah</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
-<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=IBM+Plex+Sans:wght@300;400;500&family=IBM+Plex+Sans+Arabic:wght@300;400;500&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Instrument+Serif:ital@0;1&family=IBM+Plex+Sans:wght@300;400;500&family=IBM+Plex+Sans+Arabic:wght@300;400;500&display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="style.css"/>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/devicons/devicon@v2.15.1/devicon.min.css"/>
 </head>
@@ -14,7 +14,10 @@
 <a class="skip-link" href="#main" id="skip-link">Aller au contenu principal</a>
 
 <nav aria-label="Navigation principale">
-  <a class="nav-logo" href="index.html" id="nav-logo" aria-label="Accueil">—</a>
+  <a class="nav-logo" href="index.html" id="nav-logo" aria-label="Accueil">
+    <img src="assets/logo-noir.png" class="logo-light-mode" alt="Yosr Meddah">
+    <img src="assets/logo-blanc.png" class="logo-dark-mode" alt="Yosr Meddah">
+  </a>
   <div class="nav-right">
     <ul class="nav-links" role="list">
       <li><a href="skills.html"         data-page="skills.html"         data-i18n="nav.skills">Compétences</a></li>
@@ -57,7 +60,7 @@
 <script src="app.js"></script>
 <script>
 function renderDynamic(){
-  const nl = $('nav-logo'); if(nl) nl.textContent = DATA.name.split(' ')[0];
+  /* Nav logo is image */
 
   const pc = $('page-count');
   if(pc){
@@ -74,6 +77,12 @@ function renderDynamic(){
     const desc = e.description[lang] || e.description['fr'] || e.description;
     const d = document.createElement('article');
     d.className = 'exp-card reveal'; d.setAttribute('role','listitem');
+    const imagesHtml = (e.images && e.images.length > 0) 
+      ? `<div class="exp-gallery" style="display:flex; gap:10px; overflow-x:auto; margin-top:12px; padding-bottom:8px;">` + 
+        e.images.map(img => `<img src="${img}" style="height:120px; width:auto; border-radius:6px; border:1px solid var(--border); object-fit:cover;">`).join('') + 
+        `</div>`
+      : '';
+
     d.innerHTML = `
       <div>
         <div class="exp-role">${e.role[lang]||e.role['fr']||e.role}</div>
@@ -81,6 +90,7 @@ function renderDynamic(){
       </div>
       <div class="exp-period">${e.period}</div>
       <p class="exp-desc">${desc}</p>
+      ${imagesHtml}
       <div class="exp-tags tags"></div>`;
     (e.tags||[]).forEach(tag=>{
       const sp = document.createElement('span'); sp.className = 'tag'; sp.textContent = tag;

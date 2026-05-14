@@ -6,7 +6,7 @@
 <title>Présentations — Yosr Meddah</title>
 <meta name="description" content="Présentations académiques et techniques de Yosr Meddah : accessibilité numérique, design patterns, JavaScript, agile et plus."/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
-<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=IBM+Plex+Sans:wght@300;400;500&family=IBM+Plex+Sans+Arabic:wght@300;400;500&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Instrument+Serif:ital@0;1&family=IBM+Plex+Sans:wght@300;400;500&family=IBM+Plex+Sans+Arabic:wght@300;400;500&display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="style.css"/>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/devicons/devicon@v2.15.1/devicon.min.css"/>
 </head>
@@ -15,7 +15,10 @@
 <a class="skip-link" href="#main" id="skip-link">Aller au contenu principal</a>
 
 <nav aria-label="Navigation principale">
-  <a class="nav-logo" href="index.html" id="nav-logo" aria-label="Accueil">—</a>
+  <a class="nav-logo" href="index.html" id="nav-logo" aria-label="Accueil">
+    <img src="assets/logo-noir.png" class="logo-light-mode" alt="Yosr Meddah">
+    <img src="assets/logo-blanc.png" class="logo-dark-mode" alt="Yosr Meddah">
+  </a>
   <div class="nav-right">
     <ul class="nav-links" role="list">
       <li><a href="skills.html"         data-page="skills.html"         data-i18n="nav.skills">Compétences</a></li>
@@ -58,7 +61,7 @@
 <script src="app.js"></script>
 <script>
 function renderDynamic(){
-  const nl = $('nav-logo'); if(nl) nl.textContent = DATA.name.split(' ')[0];
+  /* Nav logo is image */
 
   const pc = $('page-count');
   if(pc){
@@ -82,7 +85,17 @@ function renderDynamic(){
       ? (p.context[lang] || p.context['fr'])
       : p.context;
 
+    const ytMatch = p.youtube ? p.youtube.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([^&?]+)/) : null;
+    const vidId = ytMatch ? ytMatch[1] : null;
+    const mediaHtml = vidId 
+      ? `<a href="${p.youtube}" target="_blank" rel="noopener" style="display:block; width:100%; height:180px; overflow:hidden; border-radius:var(--radius); margin-bottom:1rem; position:relative; background:#000;">
+          <img src="https://img.youtube.com/vi/${vidId}/hqdefault.jpg" style="width:100%; height:100%; object-fit:cover; opacity:0.8; transition:opacity .3s;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.8">
+          <div style="position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); width:48px; height:48px; background:rgba(255,0,0,0.9); border-radius:50%; display:flex; align-items:center; justify-content:center; color:white; font-size:18px; box-shadow:0 4px 12px rgba(0,0,0,0.3);">▶</div>
+        </a>`
+      : '';
+
     card.innerHTML = `
+      ${mediaHtml}
       <div class="pres-header">
         <span class="pres-title">${title}</span>
         <span class="pres-period">${p.period||''}</span>

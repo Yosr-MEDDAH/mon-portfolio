@@ -6,7 +6,7 @@
 <title>Projets — Yosr Meddah</title>
 <meta name="description" content="Tous les projets de Yosr Meddah : web, mobile, IoT, IA, jeux et plus."/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
-<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=IBM+Plex+Sans:wght@300;400;500&family=IBM+Plex+Sans+Arabic:wght@300;400;500&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Instrument+Serif:ital@0;1&family=IBM+Plex+Sans:wght@300;400;500&family=IBM+Plex+Sans+Arabic:wght@300;400;500&display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/devicons/devicon@v2.15.1/devicon.min.css"/>
 <link rel="stylesheet" href="style.css"/>
 </head>
@@ -15,7 +15,10 @@
 <a class="skip-link" href="#main" id="skip-link">Aller au contenu principal</a>
 
 <nav aria-label="Navigation principale">
-  <a class="nav-logo" href="index.html" id="nav-logo" aria-label="Accueil">—</a>
+  <a class="nav-logo" href="index.html" id="nav-logo" aria-label="Accueil">
+    <img src="assets/logo-noir.png" class="logo-light-mode" alt="Yosr Meddah">
+    <img src="assets/logo-blanc.png" class="logo-dark-mode" alt="Yosr Meddah">
+  </a>
   <div class="nav-right">
     <ul class="nav-links" role="list">
       <li><a href="skills.html"         data-page="skills.html"         data-i18n="nav.skills">Compétences</a></li>
@@ -58,7 +61,7 @@
 <script src="app.js"></script>
 <script>
 function renderDynamic(){
-  const nl = $('nav-logo'); if(nl) nl.textContent = DATA.name.split(' ')[0];
+  /* Nav logo is image */
 
   const pc = $('page-count');
   if(pc){

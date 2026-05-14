@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CatWhisperer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        
+        .app-container {
+            max-width: 500px;
+            margin: 0 auto;
+            background-color: white;
+            min-height: 100vh;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        header {
+            background-color: #7E57C2;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .content {
+            padding: 20px;
+        }
+        
+        h1 {
+            margin-bottom: 10px;
+            font-size: 1.8rem;
+        }
+        
+        .cat-profile {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            background-color: #f9f4ff;
+            border-radius: 10px;
+            padding: 15px;
+        }
+        
+        .cat-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background-color: #ddd;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            overflow: hidden;
+        }
+        
+        .cat-info h2 {
+            margin-bottom: 5px;
+            color: #5E35B1;
+        }
+        
+        form {
+            margin-top: 20px;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: #555;
+        }
+        
+        select, input[type="range"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+        
+        .range-value {
+            text-align: right;
+            font-size: 0.9rem;
+            color: #666;
+        }
+        
+        .checkbox-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 5px;
+        }
+        
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+        }
+        
+        .checkbox-item input {
+            margin-right: 5px;
+        }
+        
+        button {
+            background-color: #5E35B1;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 5px;
+            width: 100%;
+            font-size: 1rem;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        
+        button:hover {
+            background-color: #4527A0;
+        }
+        
+        .result {
+            margin-top: 30px;
+            text-align: center;
+            padding: 20px;
+            border-radius: 10px;
+            display: none;
+        }
+        
+        .result.high {
+            background-color: #E8F5E9;
+            border: 1px solid #A5D6A7;
+        }
+        
+        .result.medium {
+            background-color: #FFF8E1;
+            border: 1px solid #FFECB3;
+        }
+        
+        .result.low {
+            background-color: #FFEBEE;
+            border: 1px solid #FFCDD2;
+        }
+        
+        .result h3 {
+            margin-bottom: 10px;
+            color: #333;
+        }
+        
+        .probability-meter {
+            height: 20px;
+            background-color: #eee;
+            border-radius: 10px;
+            margin: 15px 0;
+            overflow: hidden;
+        }
+        
+        .probability-fill {
+            height: 100%;
+            background: linear-gradient(to right, #F44336, #FFC107, #4CAF50);
+            transition: width 0.5s ease-in-out;
+        }
+        
+        .tip-box {
+            background-color: #EDE7F6;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+        
+        .tip-box h4 {
+            color: #5E35B1;
+            margin-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <header>
+            <h1>Monte Carlo</h1>
+            <p>Simulateur d'interactions félines</p>
+        </header>
+        
+        <div class="content">
+            <div class="cat-profile">
+                <div class="cat-avatar">
+                    <svg width="60" height="60" viewBox="0 0 24 24">
+                        <path fill="#7E57C2" d="M12,8L10.67,8.09C9.81,7.07 7.4,4.5 5,4.5C5,4.5 3.03,7.46 4.96,11.41C4.41,12.24 4.07,13.17 4.07,14.15C4.07,17.3 7.88,19.96 12,20C16.12,19.96 19.93,17.3 19.93,14.15C19.93,13.17 19.59,12.24 19.04,11.41C20.97,7.46 19,4.5 19,4.5C16.6,4.5 14.19,7.07 13.33,8.09L12,8M9,11A1,1 0 0,1 10,12A1,1 0 0,1 9,13A1,1 0 0,1 8,12A1,1 0 0,1 9,11M15,11A1,1 0 0,1 16,12A1,1 0 0,1 15,13A1,1 0 0,1 14,12A1,1 0 0,1 15,11M12,14C12.6,14.8 13.4,15.15 14.34,15.15C14.6,15.15 14.85,15.12 15.09,15.06C14.16,16.27 13.16,17 12,17C10.84,17 9.84,16.27 8.91,15.06C9.15,15.12 9.4,15.15 9.66,15.15C10.6,15.15 11.4,14.8 12,14Z"/>
+                    </svg>
+                </div>
+                <div class="cat-info">
+                    <h2>Fraisa</h2>
+                    <p>Chatte • 7 ans • Timide</p>
+                </div>
+            </div>
+            
+            <form id="interactionForm">
+                <div class="form-group">
+                    <label for="interaction-type">Type d'interaction :</label>
+                    <select id="interaction-type">
+                        <option value="ignorer">Ignorer le chat</option>
+                        <option value="appater">Attirer son attention</option>
+                        <option value="nourrir">Offrir de la nourriture</option>
+                        <option value="caresser_doucement">Caresser doucement</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="sound-level">Niveau sonore :</label>
+                    <select id="sound-level">
+                        <option value="calme">Calme</option>
+                        <option value="moyen">Moyen</option>
+                        <option value="bruyant">Bruyant</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="time-exposure">Temps d'exposition (minutes) :</label>
+                    <input type="range" id="time-exposure" min="0" max="10" step="0.5" value="2">
+                    <div class="range-value">2.0</div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Facteurs environnementaux :</label>
+                    <div class="checkbox-group">
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="new-furniture">
+                            <label for="new-furniture">Nouveaux meubles</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="familiar-territory">
+                            <label for="familiar-territory">Territoire familier</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="other-animals">
+                            <label for="other-animals">Présence d'autres animaux</label>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Comportement humain :</label>
+                    <div class="checkbox-group">
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="near-seat">
+                            <label for="near-seat">Proche du siège du chat</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="touch-toys">
+                            <label for="touch-toys">Touche les jouets</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="talks-too-much">
+                            <label for="talks-too-much">Parle beaucoup</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="respects-privacy" checked>
+                            <label for="respects-privacy">Respecte l'intimité</label>
+                        </div>
+                    </div>
+                </div>
+                
+                <button type="button" id="predictButton">Prédire l'interaction</button>
+            </form>
+            
+            <div class="result" id="result">
+                <h3>Probabilité d'acceptation</h3>
+                <div class="probability-meter">
+                    <div class="probability-fill" id="probability-fill"></div>
+                </div>
+                <p id="probability-text">65% de chances que Fraisa accepte cette interaction</p>
+                
+                <div class="tip-box">
+                    <h4>Conseil personnalisé :</h4>
+                    <p id="tip-text">Fraisa semble moyennement réceptive à cette approche. Essayez d'augmenter légèrement votre distance et assurez-vous d'avoir de la nourriture appétissante pour améliorer vos chances.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Simulation simplifiée basée sur le modèle Monte Carlo
+        function calculateProbability(params) {
+            let probability = 0;
+            
+            // Base factors from the model
+            const interactionWeights = {
+                'ignorer': -0.3,
+                'appater': 0.1,
+                'nourrir': 0.5,
+                'caresser_doucement': 0.4
+            };
+            
+            const soundWeights = {
+                'calme': 0.2,
+                'moyen': 0,
+                'bruyant': -0.2
+            };
+            
+            // Add interaction type impact
+            probability += interactionWeights[params.interactionType];
+            
+            // Add sound level impact
+            probability += soundWeights[params.soundLevel];
+            
+            // Add time exposure impact (max 0.7)
+            probability += Math.min(params.timeExposure * 0.3 / 10, 0.7);
+            
+            // Environmental factors
+            if (params.newFurniture) probability -= 0.15;
+            if (params.familiarTerritory) probability += 0.2;
+            if (params.otherAnimals) probability -= 0.25;
+            
+            // Human behavior
+            if (params.nearSeat) probability -= 0.2;
+            if (params.touchToys) probability -= 0.15;
+            if (params.talksTooMuch) probability -= 0.1;
+            if (params.respectsPrivacy) probability += 0.1;
+            
+            // Add some randomness to simulate the cat's mood and personality
+            probability += (Math.random() - 0.5) * 0.2;
+            
+            // Ensure probability is between 0 and 1
+            return Math.max(0, Math.min(1, probability));
+        }
+        
+        function getTip(probability, params) {
+            if (probability < 0.3) {
+                if (params.interactionType === 'caresser_doucement' || params.interactionType === 'appater')
+                    return "Fraisa semble très réticente. Essayez d'offrir de la nourriture et gardez vos distances. La patience est votre meilleure stratégie.";
+                else if (params.interactionType === 'ignorer')
+                    return "Continuer à l'ignorer peut être une bonne stratégie à long terme, mais n'attendez pas de résultats immédiats.";
+                else
+                    return "Même la nourriture ne semble pas très efficace actuellement. Réduisez les facteurs de stress environnementaux.";
+            } else if (probability < 0.7) {
+                if (params.soundLevel !== 'calme')
+                    return "Essayez de réduire le bruit ambiant pour augmenter vos chances d'interaction positive.";
+                else if (!params.respectsPrivacy)
+                    return "Respecter davantage l'espace personnel de Fraisa pourrait améliorer vos chances.";
+                else
+                    return "Vous êtes sur la bonne voie ! Continuez cette approche et soyez patient.";
+            } else {
+                if (params.interactionType === 'nourrir')
+                    return "Excellente stratégie ! La nourriture est clairement le meilleur moyen d'établir un lien avec Fraisa.";
+                else
+                    return "Fraisa semble très réceptive à votre approche. C'est le moment idéal pour renforcer votre lien.";
+            }
+        }
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            const timeExposureInput = document.getElementById('time-exposure');
+            const rangeValue = document.querySelector('.range-value');
+            const predictButton = document.getElementById('predictButton');
+            const resultDiv = document.getElementById('result');
+            const probabilityFill = document.getElementById('probability-fill');
+            const probabilityText = document.getElementById('probability-text');
+            const tipText = document.getElementById('tip-text');
+            
+            // Update range value display
+            timeExposureInput.addEventListener('input', function() {
+                rangeValue.textContent = parseFloat(this.value).toFixed(1);
+            });
+            
+            // Prediction button click handler
+            predictButton.addEventListener('click', function() {
+                const params = {
+                    interactionType: document.getElementById('interaction-type').value,
+                    soundLevel: document.getElementById('sound-level').value,
+                    timeExposure: parseFloat(document.getElementById('time-exposure').value),
+                    newFurniture: document.getElementById('new-furniture').checked,
+                    familiarTerritory: document.getElementById('familiar-territory').checked,
+                    otherAnimals: document.getElementById('other-animals').checked,
+                    nearSeat: document.getElementById('near-seat').checked,
+                    touchToys: document.getElementById('touch-toys').checked,
+                    talksTooMuch: document.getElementById('talks-too-much').checked,
+                    respectsPrivacy: document.getElementById('respects-privacy').checked
+                };
+                
+                // Calculate probability using our model
+                const probability = calculateProbability(params);
+                const probabilityPercentage = Math.round(probability * 100);
+                
+                // Update UI
+                probabilityFill.style.width = `${probabilityPercentage}%`;
+                probabilityText.textContent = `${probabilityPercentage}% de chances que Fraisa accepte cette interaction`;
+                tipText.textContent = getTip(probability, params);
+                
+                // Show result with appropriate styling
+                resultDiv.style.display = 'block';
+                resultDiv.className = 'result';
+                if (probability < 0.3) {
+                    resultDiv.classList.add('low');
+                } else if (probability < 0.7) {
+                    resultDiv.classList.add('medium');
+                } else {
+                    resultDiv.classList.add('high');
+                }
+                
+                // Scroll to result
+                resultDiv.scrollIntoView({ behavior: 'smooth' });
+            });
+        });
+    </script>
+</body>
+</html>

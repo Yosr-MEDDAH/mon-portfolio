@@ -8,6 +8,7 @@ import {
 } from '../data/portfolio.ts';
 import { withBase } from '../utils/url.ts';
 import type { SupportedLocale } from '../i18n/types.ts';
+import { DEFAULT_LOCALE } from '../i18n/types.ts';
 
 interface Props {
   project: ProjectItem;
@@ -23,6 +24,12 @@ const context = typeof project.context === 'object'
   : (project.context || '');
 
 const tags = project.tags || [];
+
+const detailHref = project.slug
+  ? (locale === 'en' || locale === DEFAULT_LOCALE
+      ? withBase(`/projects/${project.slug}.html`)
+      : withBase(`/${locale}/projects/${project.slug}/index.html`))
+  : null;
 
 const hasRealImage = project.image && project.image !== 'placeholder.png' && project.image.trim() !== '';
 const isVideo = hasRealImage && project.image!.endsWith('.mp4');
@@ -46,7 +53,13 @@ const gradStyle = `background: linear-gradient(135deg, ${getProjGrad(tags)});`;
 const emoji = getProjEmoji(tags);
 ---
 
-<article class="proj-card reveal visible" role="listitem">
+<article
+  class="proj-card reveal visible"
+  role="link"
+  tabindex="0"
+  data-href={detailHref || ''}
+  style="cursor: pointer;"
+>
   <div class="proj-media">
     {hasRealImage ? (
       isVideo ? (
@@ -149,3 +162,20 @@ const emoji = getProjEmoji(tags);
     )}
   </div>
 </article>
+
+<script is:inline>
+  document.querySelectorAll('.proj-card[data-href]').forEach((card) => {
+    const href = card.getAttribute('data-href');
+    if (!href) return;
+    card.addEventListener('click', (e) => {
+      if (e.target.closest('a')) return;
+      window.location.href = href;
+    });
+    card.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        window.location.href = href;
+      }
+    });
+  });
+</script>

@@ -1,6 +1,7 @@
 import React from 'react';
 import {
   LayoutDashboard,
+  User,
   Layers,
   FileText,
   Image,
@@ -15,6 +16,7 @@ import { getFirebaseStatus } from '../../firebase/config.ts';
 
 export type AdminTab =
   | 'dashboard'
+  | 'profile'
   | 'content-types'
   | 'entries'
   | 'media'
@@ -46,6 +48,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
   const navItems: NavItem[] = [
     { id: 'dashboard',      labelKey: 'nav.dashboard',    Icon: LayoutDashboard },
+    { id: 'profile',        labelKey: 'nav.profile',      Icon: User },
     { id: 'content-types',  labelKey: 'nav.contentTypes', Icon: Layers },
     { id: 'entries',        labelKey: 'nav.entries',       Icon: FileText },
     { id: 'media',          labelKey: 'nav.media',         Icon: Image },

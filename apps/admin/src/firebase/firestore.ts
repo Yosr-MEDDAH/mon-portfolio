@@ -241,6 +241,45 @@ const DEFAULT_SETTINGS: SiteSettings = {
       ar: 'ملف أعمال يسر مداح في هندسة البرمجيات والأنظمة الموزعة وإمكانية الوصول.',
     },
   },
+  profile: {
+    name: 'Yosr Meddah',
+    title: {
+      fr: 'Ingénieure informatique en formation — Accessibilité · Éco-conception',
+      en: 'Software Engineering Student — Accessibility · Eco-design',
+      ar: 'مهندسة برمجيات في طور التكوين — إمكانية الوصول والتصميم الصديق للبيئة',
+    },
+    bio: {
+      fr: "Ingénieure informatique en 2ᵉ année à l'ISAMM, passionnée par le développement frontend, l'accessibilité numérique (WCAG) et l'éco-conception web. Je conçois des solutions inclusives qui allient performance technique et responsabilité environnementale. Créatrice de contenu pédagogique sur YouTube autour de ces thématiques, avec un engagement fort pour la responsabilité numérique et le design durable.",
+      en: "2nd-year software engineering student at ISAMM, passionate about frontend development, digital accessibility (WCAG) and eco-design. I build inclusive solutions combining technical performance with environmental responsibility. Also a YouTube educator on these topics.",
+      ar: "طالبة هندسة برمجيات في السنة الثانية بـ ISAMM، شغوفة بالتطوير الواجهة الأمامية وإمكانية الوصول الرقمي (WCAG) والتصميم البيئي. أصمم حلولاً شاملة تجمع بين الأداء التقني والمسؤولية البيئية. صانعة محتوى تعليمي على يوتيوب.",
+    },
+    cvUrl: {
+      fr: 'cv.pdf',
+      en: 'cv.pdf',
+      ar: 'cv.pdf',
+    },
+    email: 'yosrmeddah@outlook.com',
+    phone: '+216 50 231 459',
+    location: 'Tunis / Bizerte, Tunisie',
+    socials: {
+      github: 'https://github.com/Yosr-MEDDAH',
+      linkedin: 'https://www.linkedin.com/in/yosr-meddah/',
+      behance: 'https://www.behance.net/yosr-meddah',
+      youtube: 'https://www.youtube.com/@YosrMeddah',
+    },
+    contactLabels: {
+      heading: {
+        fr: 'Restons en contact',
+        en: 'Get in Touch',
+        ar: 'تواصل معي',
+      },
+      subheading: {
+        fr: "Disponible pour stages, collaborations et projets autour de l'accessibilité et de l'éco-conception.",
+        en: 'Available for internships, collaborations and projects around accessibility and eco-design.',
+        ar: 'متاحة للتدريب والتعاون والمشاريع في مجالات إمكانية الوصول والتصميم المستدام.',
+      },
+    },
+  },
 };
 
 export const DEFAULT_TEMPLATES: TemplateDefinition[] = [

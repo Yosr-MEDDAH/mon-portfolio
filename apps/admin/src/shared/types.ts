@@ -153,6 +153,28 @@ export interface AdminUser {
   createdAt: string;
 }
 
+// Profile & Homepage settings
+export interface ProfileSettings {
+  name: string;
+  title: Partial<Record<SupportedLocale, string>>;
+  bio: Partial<Record<SupportedLocale, string>>;
+  cvUrl: Partial<Record<SupportedLocale, string>>;
+  email: string;
+  phone: string;
+  location: string;
+  socials: {
+    github?: string;
+    linkedin?: string;
+    behance?: string;
+    youtube?: string;
+    [key: string]: string | undefined;
+  };
+  contactLabels?: {
+    heading?: Partial<Record<SupportedLocale, string>>;
+    subheading?: Partial<Record<SupportedLocale, string>>;
+  };
+}
+
 // Site settings
 export interface SiteSettings {
   siteTitle: Localized<string>;
@@ -163,6 +185,7 @@ export interface SiteSettings {
     metaTitle: Localized<string>;
     metaDescription: Localized<string>;
   };
+  profile?: ProfileSettings;
 }
 
 // Activity log

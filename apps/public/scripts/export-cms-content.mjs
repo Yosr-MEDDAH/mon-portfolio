@@ -388,6 +388,59 @@ export function sanitizeMediaItem(id, data) {
 }
 
 /**
+ * Deep-sanitizes profile settings for the public site payload.
+ */
+export function sanitizeProfileSettings(raw) {
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return undefined;
+
+  const name = typeof raw.name === 'string' ? raw.name.trim() : '';
+  const title = sanitizeLocalizedString(raw.title, '');
+  const bio = sanitizeLocalizedString(raw.bio || raw.about, '');
+
+  let cvUrl;
+  if (typeof raw.cvUrl === 'string') {
+    cvUrl = raw.cvUrl;
+  } else if (raw.cvUrl && typeof raw.cvUrl === 'object') {
+    cvUrl = sanitizeLocalizedString(raw.cvUrl, 'cv.pdf');
+  } else {
+    cvUrl = 'cv.pdf';
+  }
+
+  const email = typeof raw.email === 'string' ? raw.email.trim() : '';
+  const phone = typeof raw.phone === 'string' ? raw.phone.trim() : '';
+  const location = typeof raw.location === 'string' ? raw.location.trim() : '';
+
+  const socials = {};
+  if (raw.socials && typeof raw.socials === 'object' && !Array.isArray(raw.socials)) {
+    for (const [k, v] of Object.entries(raw.socials)) {
+      if (typeof v === 'string' && v.trim()) {
+        socials[k] = v.trim();
+      }
+    }
+  }
+
+  let contactLabels = undefined;
+  if (raw.contactLabels && typeof raw.contactLabels === 'object' && !Array.isArray(raw.contactLabels)) {
+    contactLabels = {
+      heading: sanitizeLocalizedString(raw.contactLabels.heading, ''),
+      subheading: sanitizeLocalizedString(raw.contactLabels.subheading, ''),
+    };
+  }
+
+  return {
+    name,
+    title,
+    bio,
+    cvUrl,
+    email,
+    phone,
+    location,
+    socials,
+    contactLabels,
+  };
+}
+
+/**
  * Deep-sanitizes site settings using explicit allowlists.
  */
 export function sanitizeSiteSettings(data) {
@@ -410,12 +463,21 @@ export function sanitizeSiteSettings(data) {
     };
   }
 
-  return {
+  let profile = undefined;
+  if (data.profile && typeof data.profile === 'object' && !Array.isArray(data.profile)) {
+    profile = sanitizeProfileSettings(data.profile);
+  }
+
+  const result = {
     siteTitle,
     defaultLocale,
     supportedLocales: supportedLocales.length > 0 ? supportedLocales : ['en', 'fr', 'ar'],
     seoDefaults,
   };
+  if (profile) {
+    result.profile = profile;
+  }
+  return result;
 }
 
 /**

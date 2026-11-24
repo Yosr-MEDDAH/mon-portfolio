@@ -8,6 +8,7 @@ import { AdminLayout } from './components/Layout/AdminLayout.tsx';
 import type { AdminTab } from './components/Layout/Sidebar.tsx';
 import { LoginPage } from './pages/LoginPage.tsx';
 import { DashboardPage } from './pages/DashboardPage.tsx';
+import { ProfilePage } from './pages/ProfilePage.tsx';
 import { ContentTypesPage } from './pages/ContentTypesPage.tsx';
 import { EntriesPage } from './pages/EntriesPage.tsx';
 import { MediaPage } from './pages/MediaPage.tsx';
@@ -26,6 +27,7 @@ export const App: React.FC = () => {
             <AuthGuard fallbackLogin={<LoginPage />}>
               <AdminLayout currentTab={currentTab} onSelectTab={setCurrentTab}>
                 {currentTab === 'dashboard' && <DashboardPage onNavigate={setCurrentTab} />}
+                {currentTab === 'profile' && <ProfilePage />}
                 {currentTab === 'content-types' && <ContentTypesPage />}
                 {currentTab === 'entries' && <EntriesPage />}
                 {currentTab === 'media' && <MediaPage />}

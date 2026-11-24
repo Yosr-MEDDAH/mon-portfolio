@@ -6,6 +6,7 @@ import {
   Clock,
   Plus,
   ArrowRight,
+  User,
 } from 'lucide-react';
 import {
   fetchContentTypes,
@@ -127,8 +128,15 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
         </h2>
         <div className="flex flex-wrap gap-2.5">
           <button
-            onClick={() => onNavigate('entries')}
+            onClick={() => onNavigate('profile')}
             className="px-3.5 py-2 rounded bg-mg hover:bg-mg-light text-white font-medium text-xs transition-colors flex items-center gap-2 cursor-pointer"
+          >
+            <User size={14} strokeWidth={1.5} />
+            <span>Profile & Homepage</span>
+          </button>
+          <button
+            onClick={() => onNavigate('entries')}
+            className="px-3.5 py-2 rounded border border-border bg-surface hover:border-mg hover:text-mg text-content font-medium text-xs transition-colors flex items-center gap-2 cursor-pointer"
           >
             <Plus size={14} strokeWidth={1.5} />
             <span>New Content Entry</span>

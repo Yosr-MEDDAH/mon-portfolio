@@ -100,6 +100,10 @@ export const PORTFOLIO_DATA = {
   youtube: "https://www.youtube.com/@YosrMeddah",
   cv_url: "cv.pdf",
   avatar: "assets/yosr.png",
+  contactLabels: {
+    heading: { fr: "Restons en contact", en: "Get in Touch", ar: "تواصل معي" },
+    subheading: { fr: "", en: "", ar: "" },
+  },
 
   // ── TITRE ──────────────────────────────────────────────
   title: {
@@ -220,314 +224,8 @@ export const PORTFOLIO_DATA = {
   ] as AssociativeExperience[],
 
   // ── PROJETS ────────────────────────────────────────────
-  projects: [
-    // ── 2026 ──
-    {
-      slug: "green-a11y-agent",
-      title: { fr: "Green-A11y Agent — PFA", en: "Green-A11y Agent — Final Year Project", ar: "Green-A11y Agent — مشروع التخرج" },
-      period: "Fév. – Mai 2026",
-      context: "ISAMM — Projet de Fin d'Année",
-      description: {
-        fr: "Plateforme intelligente d'audit dual : accessibilité WCAG 2.1 + empreinte carbone (modèle Sustainable Web Design). Assistant conversationnel RAG (Llama 3.2/Groq), moteur d'audit automatisé, calculateur d'impact CO₂. Interface WCAG AA, support RTL arabe, identité visuelle inspirée du tatreez palestinien. Résultats : Lighthouse 100/100, axe DevTools 0 violation, WAVE AIM 10/10, EcoIndex A.",
-        en: "Intelligent dual-audit platform: WCAG 2.1 accessibility + carbon footprint (Sustainable Web Design model). RAG conversational assistant (Llama 3.2/Groq), automated audit engine, CO₂ impact calculator. WCAG AA interface with RTL support and tatreez-inspired visual identity. Results: Lighthouse 100/100, axe DevTools 0 violation, WAVE AIM 10/10, EcoIndex A.",
-        ar: "منصة تدقيق مزدوجة ذكية: WCAG 2.1 + البصمة الكربونية. مساعد RAG (Llama 3.2/Groq)، محرك تدقيق آلي، حاسبة CO₂. واجهة WCAG AA مع RTL وهوية بصرية مستوحاة من التطريز الفلسطيني.",
-      },
-      tags: ["React 18", "TypeScript", "FastAPI", "Python", "ChromaDB", "MongoDB", "Groq", "Llama 3.2", "Docker", "OAuth2"],
-      github: "",
-      demo: "",
-      image: "assets/green-a11y-agent-screenshots/home.png",
-      featured: true,
-    },
-    {
-      slug: "tweet-information-retrieval-system",
-      title: { fr: "Système de Recherche d'Information sur Tweets (TREC)", en: "Tweet Information Retrieval System (TREC)", ar: "نظام استرجاع معلومات التغريدات (TREC)" },
-      period: "Mars – Mai 2026",
-      context: "ISAMM — Cours SRI (6 personnes)",
-      description: {
-        fr: "Système de recherche d'information expérimental sur tweets en anglais (guerre en Iran) selon une campagne TREC. Trois modèles de RI (BM25, TF-IDF, PL2) × 3 représentations (lexèmes, stems, lemmes) = 9 configurations évaluées via MAP, P@1, P@5, P@10. Résultat clé : PL2 + lexèmes → MAP = 0.161, R@30 = 0.367.",
-        en: "Experimental information retrieval system on English tweets (Iran war) following TREC campaign methodology. Three IR models (BM25, TF-IDF, PL2) × 3 representations (tokens, stems, lemmas) = 9 configurations evaluated via MAP, P@1, P@5, P@10. Key result: PL2 + tokens → MAP = 0.161, R@30 = 0.367.",
-        ar: "نظام استرجاع معلومات تجريبي على تغريدات إنجليزية وفق منهجية TREC. ثلاثة نماذج × ثلاث تمثيلات = 9 إعدادات تم تقييمها.",
-      },
-      tags: ["Python", "PyTerrier", "NLTK", "BM25", "TF-IDF", "PL2", "NLP"],
-      github: "",
-      demo: "",
-      image: "placeholder.png",
-    },
-    {
-      slug: "smartfarm-iot",
-      title: { fr: "SmartFarm IoT — Serre intelligente Jenin", en: "SmartFarm IoT — Smart Greenhouse", ar: "SmartFarm IoT — دفيئة ذكية" },
-      period: "Mars – Avr. 2026",
-      context: "ISAMM (6 personnes)",
-      description: {
-        fr: "Système IoT bout-en-bout pour l'automatisation d'une serre agricole connectée. Arrosage automatique (humidité sol), détection d'incendie, surveillance d'intrusion avec capture photo (PIR + ESP32-CAM), contrôle à distance via Flutter/Blynk. Protocole UART sécurisé avec checksum XOR entre Arduino et ESP32.",
-        en: "End-to-end IoT system for connected greenhouse automation. Auto-watering (soil humidity), fire detection, intrusion surveillance with photo capture (PIR + ESP32-CAM), remote control via Flutter/Blynk. Secure UART protocol with XOR checksum between Arduino and ESP32.",
-        ar: "نظام IoT متكامل لأتمتة الدفيئة: ري تلقائي، كشف الحريق، مراقبة التسلل بالتقاط صور، تحكم عبر Flutter.",
-      },
-      tags: ["Arduino", "ESP32-CAM", "Flutter", "Blynk Cloud", "C++", "UART", "DHT11", "PIR"],
-      github: "",
-      demo: "",
-      image: "assets/iot3-jenin.jpeg",
-    },
-    {
-      slug: "frontend-tracking-jira",
-      title: { fr: "Frontend Tracking (Jira-inspired)", en: "Tracking Frontend (Jira-inspired)", ar: "واجهة تتبع مشاريع التخرج" },
-      period: "Fév. – Mars 2026",
-      context: "ISAMM (8 personnes)",
-      description: {
-        fr: "Frontend de l'API de suivi de projets de fin d'études (PFE) développée en équipe. Interface de gestion agile inspirée de Jira : sprints, user stories, tâches, validations, réunions, tableaux de bord et versionnage des rapports.",
-        en: "Frontend for the team-built PFE tracking API. Jira-inspired agile management interface: sprints, user stories, tasks, validations, meetings, dashboards and report versioning.",
-        ar: "واجهة أمامية لواجهة برمجة تتبع مشاريع التخرج. إدارة أجايل مستوحاة من Jira.",
-      },
-      tags: ["React", "TypeScript"],
-      github: "",
-      demo: "",
-      image: "placeholder.png",
-    },
-    {
-      slug: "refonte-gec-tunisie-telecom",
-      title: { fr: "Refonte GEC Tunisie Télécom", en: "GEC Tunisie Télécom Refactoring", ar: "إعادة هيكلة GEC تونس تيليكوم" },
-      period: "Mars – Mai 2026",
-      context: "ISAMM — Génie Logiciel (5 personnes, chef d'équipe)",
-      description: {
-        fr: "Refonte architecturale d'une application Laravel de Gestion Électronique des Courriers (GEC) pour la DCF de Tunisie Télécom. Application des patrons GoF (Facade, Strategy, State, Observer, Factory Method…), principes GRASP et SOLID, contraintes OCL. Circuit de validation séquentiel multi-niveaux (BOF, AP, Fiscaliste, Trésorerie), synchronisation Oracle ERP, fusion PDF automatique.",
-        en: "Architectural refactoring of a Laravel Electronic Document Management (GEC) app for Tunisie Télécom's DCF. Applied GoF patterns (Facade, Strategy, State, Observer, Factory Method…), GRASP and SOLID principles, OCL constraints. Multi-level sequential validation circuit, Oracle ERP sync, automatic PDF merging.",
-        ar: "إعادة هيكلة معمارية لتطبيق Laravel لإدارة المراسلات لتونس تيليكوم. تطبيق أنماط GoF ومبادئ GRASP وSOLID وقيود OCL.",
-      },
-      tags: ["Laravel", "PHP", "UML", "OCL", "GoF Patterns", "SOLID", "GRASP"],
-      github: "https://github.com/Yosr-MEDDAH/GL-Projet-Integratif",
-      demo: "",
-      image: "placeholder.png",
-    },
-
-    // ── 2025 ──
-    {
-      slug: "philonodes-six-minds-one-quote",
-      title: { fr: "PhiloNodes — Six Minds, One Quote", en: "PhiloNodes — Six Minds, One Quote", ar: "PhiloNodes — ستة عقول، اقتباس واحد" },
-      period: "Nov. – Déc. 2025",
-      context: "ISAMM — Systèmes parallèles",
-      description: {
-        fr: "Extension Chrome couplée à un backend Python de 6 nœuds philosophes (Aristote, Kant, Nietzsche…) votant en parallèle par consensus TCP pour recommander une citation contextualisée à la page lue. Gain de performance mesuré : ×4,5 en mode parallèle vs séquentiel.",
-        en: "Chrome extension connected to a Python backend of 6 philosopher nodes (Aristotle, Kant, Nietzsche…) voting in parallel TCP consensus to recommend a contextual quote for the current page. Measured 4.5× performance gain in parallel vs sequential mode.",
-        ar: "إضافة Chrome مرتبطة بـ 6 عقد فلسفية تصوت بالتوافق عبر TCP. مكسب أداء ×4.5 في الوضع المتوازي.",
-      },
-      tags: ["Python", "Multiprocessing", "Threading", "AsyncIO", "FastAPI", "TCP Sockets", "Chrome Extension"],
-      github: "https://github.com/Yosr-MEDDAH/PhiloNodes-Six-Minds-One-Quote",
-      demo: "",
-      image: "placeholder.png",
-    },
-    {
-      slug: "api-pfe-tracking-backend",
-      title: { fr: "API PFE Tracking — Backend Jira-inspired", en: "PFE Tracking API — Jira-inspired Backend", ar: "واجهة برمجة تتبع مشاريع التخرج" },
-      period: "Nov. – Déc. 2025",
-      context: "ISAMM (8 personnes)",
-      description: {
-        fr: "API REST backend de gestion et suivi de projets de fin d'études (PFE) selon un workflow agile inspiré de Jira. Sprints, user stories, tâches, validations, réunions, versionnage des rapports, journaux d'activité et génération de rapports HTML. Rôles : étudiant, encadrant entreprise, encadrant université.",
-        en: "REST backend API for PFE management following a Jira-inspired agile workflow. Sprints, user stories, tasks, validations, meetings, report versioning, activity logs and HTML report generation. Roles: student, company supervisor, university supervisor.",
-        ar: "API REST لإدارة ومتابعة مشاريع التخرج وفق سير عمل أجايل. سبرينت، قصص مستخدم، مهام، تحقق، اجتماعات.",
-      },
-      tags: ["NodeJS", "Express js", "MongoDB"],
-      github: "",
-      demo: "",
-      image: "placeholder.png",
-    },
-    {
-      slug: "clans-war",
-      title: { fr: "Clans War — Jeu de stratégie navigateur", en: "Clans War — Browser Strategy Game", ar: "Clans War — لعبة استراتيجية" },
-      period: "Avr. – Mai 2025",
-      context: "ISAMM (binôme avec Hamza Jema)",
-      description: {
-        fr: "Jeu de stratégie au tour par tour sur une grille 10×10. Guerriers, archers et mages avec capacités spéciales, mécanique de dés et mode IA adverse.",
-        en: "Turn-based strategy game on a 10×10 grid. Warriors, archers and mages with special abilities, dice mechanics and AI opponent mode.",
-        ar: "لعبة استراتيجية بالأدوار على شبكة 10×10. محاربون وقناصة وسحرة مع قدرات خاصة ووضع ذكاء اصطناعي.",
-      },
-      tags: ["JavaScript", "HTML/CSS"],
-      github: "",
-      demo: "",
-      image: "",
-    },
-    {
-      slug: "le-dragon-dor",
-      title: { fr: "Le Dragon d'Or — Application restaurant Java", en: "Le Dragon d'Or — Java Restaurant App", ar: "التنين الذهبي — تطبيق مطعم Java" },
-      period: "Avr. – Mai 2025",
-      context: "ISAMM (binôme avec Hamza Jema)",
-      description: {
-        fr: "Application desktop native pour un restaurant chinois : gestion des commandes, suivi des livraisons et interface thématique chinoise conçue uniquement avec les composants standard Java Swing.",
-        en: "Native desktop application for a Chinese restaurant: order management, delivery tracking and Chinese-themed custom interface designed using standard Java Swing components only.",
-        ar: "تطبيق سطح مكتب لمطعم صيني: إدارة الطلبات وتتبع التوصيل وواجهة Java Swing مخصصة.",
-      },
-      tags: ["Java", "Swing", "POO"],
-      github: "",
-      demo: "",
-      image: "",
-    },
-    {
-      slug: "tunihist",
-      title: { fr: "TuniHist — UX Design éducatif", en: "TuniHist — Educational UX Design", ar: "TuniHist — تصميم تعليمي" },
-      period: "Mars – Mai 2025",
-      context: "ISAMM (binôme avec Mohamed Amine Yeferni)",
-      description: {
-        fr: "Application éducative multilingue (FR/AR) sur l'histoire de la Tunisie pour enfants. Frise chronologique, cartes interactives et quiz. Conception UX centrée sur la lisibilité pour jeune public.",
-        en: "Multilingual educational app (FR/AR) on Tunisian history for children. Timeline, interactive maps and quizzes. UX design focused on readability for young audiences.",
-        ar: "تطبيق تعليمي متعدد اللغات عن تاريخ تونس للأطفال. خط زمني وخرائط تفاعلية وأسئلة.",
-      },
-      tags: ["Figma", "UX Design", "Education"],
-      github: "",
-      demo: "",
-      image: "assets/Tunihist.png",
-    },
-    {
-      slug: "gpu-cuda-image-processing",
-      title: { fr: "GPU-Accelerated Image Processing (CUDA)", en: "GPU-Accelerated Image Processing (CUDA)", ar: "معالجة صور بتسريع GPU (CUDA)" },
-      period: "Mars – Avr. 2025",
-      context: "ISAMM",
-      description: {
-        fr: "Application de traitement d'image haute performance (rotation, luminosité, contraste) via kernels CUDA personnalisés. Benchmark démontrant un gain de vitesse significatif pour images 2048px vs traitement CPU séquentiel.",
-        en: "High-performance image processing app (rotation, brightness, contrast) via custom CUDA kernels. Benchmark showing significant speed gains for 2048px images vs sequential CPU processing.",
-        ar: "تطبيق معالجة صور عالي الأداء عبر CUDA kernels مخصصة. أداء أعلى بكثير من CPU للصور 2048px.",
-      },
-      tags: ["C++", "NVIDIA CUDA", "GPU", "HPC"],
-      github: "",
-      demo: "",
-      image: "placeholder.png",
-    },
-    {
-      slug: "netflix-content-analysis",
-      title: { fr: "Netflix Content Analysis — Big Data & NLP", en: "Netflix Content Analysis — Big Data & NLP", ar: "تحليل محتوى Netflix — ضخامة البيانات" },
-      period: "Nov. – Déc. 2023",
-      context: "ISET Radès",
-      description: {
-        fr: "Analyse Big Data end-to-end du catalogue Netflix : nettoyage avec Pandas/NumPy, visualisations avancées (Plotly, Seaborn), NLP (spaCy, TextBlob) pour extraire les tendances de contenu et les patterns de métadonnées. Publié sur YouTube.",
-        en: "End-to-end Big Data analysis of Netflix's catalog: data cleaning with Pandas/NumPy, advanced visualizations (Plotly, Seaborn), NLP (spaCy, TextBlob) to extract content trends and metadata patterns. Published on YouTube.",
-        ar: "تحليل شامل لكتالوج Netflix: تنظيف البيانات، تصورات متقدمة، NLP لاستخراج الاتجاهات.",
-      },
-      tags: ["Python", "Pandas", "NumPy", "Plotly", "Seaborn", "spaCy", "TextBlob", "NLP"],
-      github: "",
-      demo: "https://youtu.be/iAYV2910Fwg?si=Yqqc25Ht2Y_poa9T",
-      image: "placeholder.png",
-    },
-    {
-      slug: "mongodb-notebook",
-      title: { fr: "Analyse de Données — Notebook MongoDB", en: "Data Analysis — MongoDB Notebook", ar: "تحليل البيانات — دفتر MongoDB" },
-      period: "Nov. – Déc. 2023",
-      context: "ISET Radès",
-      description: {
-        fr: "Projet de gestion et d'exploration de données via des notebooks Jupyter avec MongoDB. Mise en œuvre de requêtes NoSQL et de pipelines d'agrégation.",
-        en: "Data management and exploration project using Jupyter notebooks with MongoDB. Implementation of NoSQL queries and aggregation pipelines.",
-        ar: "مشروع إدارة واستكشاف البيانات باستخدام دفاتر Jupyter مع MongoDB. تنفيذ استعلامات NoSQL.",
-      },
-      tags: ["Jupyter Notebook", "MongoDB", "NoSQL", "Python"],
-      github: "https://github.com/Yosr-MEDDAH/MongoDB-notebook",
-      demo: "",
-      image: "placeholder.png",
-    },
-    {
-      slug: "sentiment-analysis-youtube",
-      title: { fr: "Analyse de sentiment — Messagerie subliminale YouTube", en: "Sentiment Analysis — YouTube Subliminal Messaging", ar: "تحليل المشاعر — الرسائل الخفية في يوتيوب" },
-      period: "Mai – Juin 2023",
-      context: "ISET Radès",
-      description: {
-        fr: "Analyse de l'impact psychologique de messages subliminaux via extraction de milliers de commentaires YouTube (YouTube Data API + Node.js), traitement haute performance en C++ et catégorisation des sentiments utilisateurs.",
-        en: "Analysis of the psychological impact of subliminal messages via extraction of thousands of YouTube comments (YouTube Data API + Node.js), high-performance C++ processing and user sentiment categorization.",
-        ar: "تحليل التأثير النفسي للرسائل الخفية عبر استخراج آلاف التعليقات من YouTube ومعالجة C++ عالية الأداء.",
-      },
-      tags: ["Node.js", "YouTube Data API", "C++", "NLP", "Data Mining"],
-      github: "",
-      demo: "",
-      image: "placeholder.png",
-    },
-    {
-      slug: "yosart-virtual-gallery",
-      title: { fr: "Yosart — Galerie d'art virtuelle immersive 360°", en: "Yosart — Immersive 360° Virtual Art Gallery", ar: "Yosart — معرض فني افتراضي 360°" },
-      period: "Fév. – Mai 2023",
-      context: "ISET Radès — Projet d'intégration 1",
-      description: {
-        fr: "Galerie virtuelle 360° reliant artistes contemporains et amateurs d'art. Visite immersive, espaces interactifs pour artistes, événements artistiques en ligne, support multilingue et sécurité renforcée pour une audience internationale.",
-        en: "360° virtual gallery connecting contemporary artists and art lovers. Immersive visit, interactive spaces for artists, online artistic events, multilingual support and enhanced security for a global audience.",
-        ar: "معرض افتراضي 360° يربط الفنانين بمحبي الفن. زيارة غامرة ومساحات تفاعلية متعددة اللغات.",
-      },
-      tags: ["Three.js", "JavaScript", "WebGL"],
-      github: "",
-      demo: "",
-      image: "placeholder.png",
-    },
-    {
-      slug: "unipartner",
-      title: { fr: "Unipartner — Jumelage d'étudiants", en: "Unipartner — Student Matching Platform", ar: "Unipartner — منصة توأمة الطلاب" },
-      period: "2023",
-      context: "ISET Radès — Projet d'intégration 2 (binôme)",
-      description: {
-        fr: "Application web de jumelage d'étudiants selon leurs projets de fin d'études. Les étudiants se trouvent des partenaires complémentaires en fonction de leurs compétences et thématiques de PFE.",
-        en: "Web application for matching students based on their final year project topics. Students find complementary partners based on their skills and PFE themes.",
-        ar: "تطبيق ويب لمطابقة الطلاب وفق مواضيع مشاريع تخرجهم.",
-      },
-      tags: ["Angular", "Spring Boot", "MongoDB", "Python"],
-      github: "https://github.com/Yosr-MEDDAH/Unipartner",
-      demo: "",
-      image: "placeholder.png",
-    },
-    {
-      slug: "fraisa-path-to-home",
-      title: { fr: "Fraisa : Path to Home — Jeu 2D Platformer", en: "Fraisa: Path to Home — 2D Platformer", ar: "Fraisa: طريق البيت — لعبة 2D" },
-      period: "Nov. – Déc. 2024",
-      context: "ISAMM",
-      description: {
-        fr: "Jeu 2D platformer en 3 niveaux inspiré d'une histoire personnelle : ma chatte Fraisa s'est perdue, et ce jeu retrace son chemin vers la maison. Systèmes d'ennemis, d'obstacles et de progression de niveaux. Premier projet Unity. Publié sur YouTube.",
-        en: "2D platformer in 3 levels inspired by a personal story: my cat Fraisa went missing, and this game traces her way home. Enemy systems, obstacles and level progression. First Unity project. Published on YouTube.",
-        ar: "لعبة منصات ثنائية الأبعاد من 3 مستويات مستوحاة من قصة شخصية عن قطتي فريسة.",
-      },
-      tags: ["Unity", "C#", "2D Game Design"],
-      github: "https://github.com/Yosr-MEDDAH/path-to-home-FRAISA-",
-      demo: "https://youtu.be/D2tdYaQoNwg?si=n4_CDtBkTvOnqfRC",
-      image: "placeholder.png",
-    },
-    {
-      slug: "histoire-du-monde-enfants",
-      title: { fr: "Histoire du monde — Application éducative pour enfants", en: "World History — Educational Children App", ar: "تاريخ العالم — تطبيق تعليمي للأطفال" },
-      period: "2024",
-      context: "ISAMM",
-      description: {
-        fr: "Application de vulgarisation historique pour enfants avec contenu multilingue dynamique, simplification automatique via LLM (Phi-2), génération automatique de quiz et synthèse vocale enfantine (Azure Speech).",
-        en: "Historical popularization app for children with dynamic multilingual content, automatic LLM-based simplification (Phi-2), automatic quiz generation and child-friendly text-to-speech (Azure Speech).",
-        ar: "تطبيق تعليمي تاريخي للأطفال مع محتوى متعدد اللغات، تبسيط تلقائي بالذكاء الاصطناعي وتوليف صوتي.",
-      },
-      tags: ["Flask", "SQLAlchemy", "Wikipedia API", "Phi-2", "Azure Speech", "Unsplash"],
-      github: "https://github.com/Yosr-MEDDAH/Histoire-du-monde-enfants-",
-      demo: "",
-      image: "placeholder.png",
-    },
-    {
-      slug: "monte-carlo-fraisa",
-      title: { fr: "Monte Carlo — Simulation comportementale féline", en: "Monte Carlo — Feline Behavioral Simulation", ar: "مونتي كارلو — محاكاة سلوك القطط" },
-      period: "2025",
-      context: "ISAMM — Probabilités et statistiques",
-      description: {
-        fr: "Simulation probabiliste Monte Carlo modélisant les interactions entre humains et une chatte (Fraisa). Analyse des probabilités d'acceptation de différentes stratégies d'interaction selon des variables stochastiques : humeur, mémoire, environnement. Visualisations statistiques : convergence, histogrammes, distributions comparées.",
-        en: "Monte Carlo probabilistic simulation modeling human-cat interactions (Fraisa). Acceptance probability analysis of different interaction strategies with stochastic variables: mood, memory, environment. Statistical visualizations: convergence graphs, histograms, comparative distributions.",
-        ar: "محاكاة مونتي كارلو لنمذجة التفاعلات بين الإنسان والقطة. تحليل احتمالات القبول مع متغيرات عشوائية.",
-      },
-      tags: ["Python", "Monte Carlo", "Statistics", "Data Visualization"],
-      github: "",
-      demo: "assets/ProjetMonteCarlo/index.html",
-      pdf: "assets/ProjetMonteCarlo/RapportYosrMEDDAH1ing1.pdf",
-      notebook: "assets/ProjetMonteCarlo/MonteCarloFraisa.ipynb",
-      image: "placeholder.png",
-    },
-    {
-      slug: "smart-farming-irrigation",
-      title: { fr: "Smart Farming — Prototype d'irrigation intelligente (ISET)", en: "Smart Farming — Intelligent Irrigation Prototype", ar: "الزراعة الذكية — نموذج ري ذكي" },
-      period: "Mars – Mai 2022",
-      context: "ISET Radès",
-      description: {
-        fr: "Prototype IoT d'arrosage automatique basé sur capteurs d'humidité du sol (MH-FC28) et DHT11 via ESP32. Transmission sans fil vers Firebase, affichage temps réel sur application Android native. Pipeline IoT complet : capteurs → connectivité → cloud → interface mobile.",
-        en: "IoT auto-watering prototype using soil humidity sensor (MH-FC28) and DHT11 via ESP32. Wireless transmission to Firebase, real-time display on native Android app. Complete IoT pipeline: sensors → connectivity → cloud → mobile interface.",
-        ar: "نموذج IoT للري التلقائي عبر مستشعرات الرطوبة وESP32. إرسال لاسلكي إلى Firebase وعرض فوري على تطبيق أندرويد.",
-      },
-      tags: ["ESP32", "Arduino IDE", "Firebase", "Android Studio", "IoT", "DHT11"],
-      github: "",
-      demo: "",
-      image: "placeholder.png",
-    },
-  ] as ProjectItem[],
+  // All projects are managed exclusively via the CMS (Firestore)
+  projects: [] as ProjectItem[],
 
   // ── PRÉSENTATIONS ──────────────────────────────────────
   presentations: [
@@ -787,11 +485,10 @@ export function getPortfolioProjects(): ProjectItem[] {
   );
 
   if (cmsProjects.length === 0) {
-    return PORTFOLIO_DATA.projects;
+    return [];
   }
 
-  // Map CMS entries to ProjectItem format
-  const mappedCms: ProjectItem[] = cmsProjects.map((entry: any) => {
+  return cmsProjects.map((entry: any) => {
     const f = entry.fields || {};
     return {
       slug: entry.slug || entry.id,
@@ -808,14 +505,6 @@ export function getPortfolioProjects(): ProjectItem[] {
       featured: Boolean(f.featured),
     };
   });
-
-  // Combine: CMS projects first, then static projects that aren't duplicates by slug
-  const cmsSlugs = new Set(mappedCms.map((p) => p.slug));
-  const nonDuplicateStatic = PORTFOLIO_DATA.projects.filter(
-    (p) => !p.slug || !cmsSlugs.has(p.slug)
-  );
-
-  return [...mappedCms, ...nonDuplicateStatic];
 }
 
 export function resolvePortfolioText(
@@ -825,4 +514,49 @@ export function resolvePortfolioText(
   if (!value) return '';
   if (typeof value === 'string') return value;
   return value[locale] || value['fr'] || value['en'] || '';
+}
+
+// Dynamic CMS profile override from published Firestore data
+const _cmsProfile = (publishedData as any)?.siteSettings?.profile;
+if (_cmsProfile) {
+  if (_cmsProfile.name) PORTFOLIO_DATA.name = _cmsProfile.name;
+  if (_cmsProfile.email) PORTFOLIO_DATA.email = _cmsProfile.email;
+  if (_cmsProfile.phone) PORTFOLIO_DATA.phone = _cmsProfile.phone;
+  if (_cmsProfile.location) PORTFOLIO_DATA.location = _cmsProfile.location;
+  if (_cmsProfile.github || _cmsProfile.socials?.github) PORTFOLIO_DATA.github = _cmsProfile.github || _cmsProfile.socials?.github;
+  if (_cmsProfile.linkedin || _cmsProfile.socials?.linkedin) PORTFOLIO_DATA.linkedin = _cmsProfile.linkedin || _cmsProfile.socials?.linkedin;
+  if (_cmsProfile.behance || _cmsProfile.socials?.behance) PORTFOLIO_DATA.behance = _cmsProfile.behance || _cmsProfile.socials?.behance;
+  if (_cmsProfile.youtube || _cmsProfile.socials?.youtube) PORTFOLIO_DATA.youtube = _cmsProfile.youtube || _cmsProfile.socials?.youtube;
+  if (_cmsProfile.cvUrl || _cmsProfile.cv_url) PORTFOLIO_DATA.cv_url = _cmsProfile.cvUrl || _cmsProfile.cv_url;
+  if (_cmsProfile.title) {
+    PORTFOLIO_DATA.title = {
+      fr: _cmsProfile.title.fr || PORTFOLIO_DATA.title.fr,
+      en: _cmsProfile.title.en || PORTFOLIO_DATA.title.en,
+      ar: _cmsProfile.title.ar || PORTFOLIO_DATA.title.ar,
+    };
+  }
+  if (_cmsProfile.bio || _cmsProfile.about) {
+    const bioSrc = _cmsProfile.bio || _cmsProfile.about;
+    PORTFOLIO_DATA.about = {
+      fr: bioSrc.fr || PORTFOLIO_DATA.about.fr,
+      en: bioSrc.en || PORTFOLIO_DATA.about.en,
+      ar: bioSrc.ar || PORTFOLIO_DATA.about.ar,
+    };
+  }
+  if (_cmsProfile.contactLabels) {
+    if (_cmsProfile.contactLabels.heading) {
+      PORTFOLIO_DATA.contactLabels.heading = {
+        fr: _cmsProfile.contactLabels.heading.fr || PORTFOLIO_DATA.contactLabels.heading.fr,
+        en: _cmsProfile.contactLabels.heading.en || PORTFOLIO_DATA.contactLabels.heading.en,
+        ar: _cmsProfile.contactLabels.heading.ar || PORTFOLIO_DATA.contactLabels.heading.ar,
+      };
+    }
+    if (_cmsProfile.contactLabels.subheading) {
+      PORTFOLIO_DATA.contactLabels.subheading = {
+        fr: _cmsProfile.contactLabels.subheading.fr || PORTFOLIO_DATA.contactLabels.subheading.fr,
+        en: _cmsProfile.contactLabels.subheading.en || PORTFOLIO_DATA.contactLabels.subheading.en,
+        ar: _cmsProfile.contactLabels.subheading.ar || PORTFOLIO_DATA.contactLabels.subheading.ar,
+      };
+    }
+  }
 }

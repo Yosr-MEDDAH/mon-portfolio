@@ -19,6 +19,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
 
   const tabTitles: Record<AdminTab, string> = {
     dashboard: t('nav.dashboard'),
+    profile: t('nav.profile'),
     'content-types': t('nav.contentTypes'),
     entries: t('nav.entries'),
     media: t('nav.media'),

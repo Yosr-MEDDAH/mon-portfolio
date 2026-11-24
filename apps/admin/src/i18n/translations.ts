@@ -3,6 +3,7 @@ import type { SupportedLocale } from '../shared/types.ts';
 export const adminTranslations: Record<string, Record<SupportedLocale, string>> = {
   // Navigation
   'nav.dashboard': { en: 'Dashboard', fr: 'Tableau de bord', ar: 'لوحة التحكم' },
+  'nav.profile': { en: 'Profile & Homepage', fr: 'Profil & Accueil', ar: 'الملف التعريفي والصفحة الرئيسية' },
   'nav.contentTypes': { en: 'Content Types', fr: 'Types de contenu', ar: 'أنواع المحتوى' },
   'nav.entries': { en: 'Content Entries', fr: 'Entrées de contenu', ar: 'عناصر المحتوى' },
   'nav.media': { en: 'Media Library', fr: 'Médiathèque', ar: 'مكتبة الوسائط' },

@@ -3,6 +3,9 @@ name: Publish Portfolio to GitHub Pages
 
 on:
   workflow_dispatch:
+  schedule:
+    # Automated periodic sync (every 6 hours) at 0€ on GitHub Actions + Firebase Spark
+    - cron: '0 */6 * * *'
 
 permissions:
   contents: read
@@ -26,12 +29,14 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: npm
-          cache-dependency-path: apps/public/package-lock.json
 
-      - name: Install dependencies
+      - name: Install public dependencies
         run: npm ci
         working-directory: apps/public
+
+      - name: Install admin dependencies
+        run: npm ci
+        working-directory: apps/admin
 
       - name: Export published CMS content from Firestore
         run: npm run export:content
@@ -47,6 +52,13 @@ jobs:
         working-directory: apps/public
         env:
           NODE_ENV: production
+
+      - name: Build Admin React app
+        run: npm run build
+        working-directory: apps/admin
+
+      - name: Embed Admin in static distribution
+        run: node -e "const fs = require('fs'); fs.cpSync('apps/admin/dist', 'apps/public/dist/admin', { recursive: true });"
 
       - name: Upload GitHub Pages artifact
         uses: actions/upload-pages-artifact@v3

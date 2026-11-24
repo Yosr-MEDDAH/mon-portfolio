@@ -7,6 +7,7 @@ import {
   sanitizeEntry,
   sanitizeTemplate,
   sanitizeSiteSettings,
+  sanitizeProfileSettings,
   sanitizeFieldOptions,
   sanitizeDefaultVisible,
 } from '../../scripts/export-cms-content.mjs';
@@ -273,6 +274,21 @@ async function runPipelineTests() {
   );
   assert(!('maintenanceMode' in sanitizedSettings!) && !('secretApiKey' in sanitizedSettings!), 'Site settings secrets stripped');
   assert(!('internalMeta' in (sanitizedSettings?.seoDefaults || {})), 'SEO internal metadata stripped');
+
+  const dirtyProfile = {
+    name: '  Yosr Meddah  ',
+    title: { fr: 'Ingénieure', en: 'Engineer', ar: 'مهندسة' },
+    bio: { fr: 'Bio FR', en: 'Bio EN', ar: 'Bio AR' },
+    cvUrl: 'cv.pdf',
+    email: 'test@example.com',
+    socials: { github: 'https://github.com/test', badSecret: 'leak' },
+    privateToken: 'SECRET_123',
+  };
+  const sanitizedProfile = sanitizeProfileSettings(dirtyProfile);
+  assert(sanitizedProfile !== undefined && sanitizedProfile.name === 'Yosr Meddah', 'Profile name trimmed');
+  assert(sanitizedProfile?.title.fr === 'Ingénieure', 'Profile title translations preserved');
+  assert(sanitizedProfile?.cvUrl === 'cv.pdf', 'Profile CV URL preserved');
+  assert(!('privateToken' in sanitizedProfile!), 'Profile private tokens stripped');
 
   // --- 4. Missing Schema Handling & Field Value Preservation ---
   console.log('\n4. Testing missing schema handling & preservation of field values...');

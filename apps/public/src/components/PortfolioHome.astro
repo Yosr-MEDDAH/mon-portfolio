@@ -51,7 +51,12 @@ const artworksHref = locale === DEFAULT_LOCALE
   : withBase(`/${locale}/artworks/index.html`);
 
 const avatarSrc = withBase(`/${PORTFOLIO_DATA.avatar.replace(/^\//, '')}`);
-const cvSrc = withBase(`/${PORTFOLIO_DATA.cv_url.replace(/^\//, '')}`);
+const rawCv = typeof PORTFOLIO_DATA.cv_url === 'object'
+  ? ((PORTFOLIO_DATA.cv_url as any)[locale] || (PORTFOLIO_DATA.cv_url as any).fr || (PORTFOLIO_DATA.cv_url as any).en || 'cv.pdf')
+  : (PORTFOLIO_DATA.cv_url || 'cv.pdf');
+
+const isExternalCv = rawCv.startsWith('http://') || rawCv.startsWith('https://') || rawCv.startsWith('data:');
+const cvSrc = isExternalCv ? rawCv : withBase(`/${rawCv.replace(/^\//, '')}`);
 ---
 
 <BaseLayout
@@ -71,7 +76,15 @@ const cvSrc = withBase(`/${PORTFOLIO_DATA.cv_url.replace(/^\//, '')}`);
           <p class="hero-title" id="hero-title-el">{resolvePortfolioText(PORTFOLIO_DATA.title, locale)}</p>
           <p class="hero-about" id="hero-about">{resolvePortfolioText(PORTFOLIO_DATA.about, locale)}</p>
           <div class="hero-ctas" id="hero-ctas">
-            <a href={cvSrc} class="btn btn-primary" download="">{t('btn.cv', locale)}</a>
+            <a
+              href={cvSrc}
+              class="btn btn-primary"
+              download={isExternalCv ? undefined : ""}
+              target={isExternalCv ? "_blank" : undefined}
+              rel={isExternalCv ? "noopener noreferrer" : undefined}
+            >
+              {t('btn.cv', locale)}
+            </a>
             <a href={`mailto:${PORTFOLIO_DATA.email}`} class="btn btn-outline">{t('btn.contact', locale)}</a>
           </div>
         </div>
@@ -372,9 +385,9 @@ const cvSrc = withBase(`/${PORTFOLIO_DATA.cv_url.replace(/^\//, '')}`);
     <div class="container">
       <div class="contact-inner">
         <p class="section-label">{t('section.contact', locale)}</p>
-        <h2 id="contact-heading">{t('heading.contact', locale)}</h2>
+        <h2 id="contact-heading">{resolvePortfolioText(PORTFOLIO_DATA.contactLabels?.heading, locale) || t('heading.contact', locale)}</h2>
         <p id="contact-sub" style="color:var(--text-2);font-size:.95rem">
-          {t('contact.sub', locale)}
+          {resolvePortfolioText(PORTFOLIO_DATA.contactLabels?.subheading, locale) || t('contact.sub', locale)}
         </p>
         <div class="contact-grid" id="contact-grid">
           <a href={`mailto:${PORTFOLIO_DATA.email}`} class="contact-link">{PORTFOLIO_DATA.email}</a>

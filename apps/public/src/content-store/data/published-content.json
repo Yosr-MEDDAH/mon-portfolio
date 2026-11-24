@@ -1,5 +1,5 @@
 {
-  "exportedAt": "2026-11-24T09:00:00.000Z",
+  "exportedAt": "2026-11-24T14:49:40.469Z",
   "contentTypes": [
     {
       "id": "projects",
@@ -9,19 +9,11 @@
         "ar": "المشاريع"
       },
       "description": {
-        "en": "Software engineering, digital accessibility, AI systems, and sustainable web development projects",
-        "fr": "Projets d'ingénierie logicielle, accessibilité numérique, systèmes IA et développement web durable",
-        "ar": "مشاريع هندسة البرمجيات وإمكانية الوصول الرقمي وأنظمة الذكاء الاصطناعي والتطوير المستدام"
+        "en": "",
+        "fr": "",
+        "ar": ""
       },
       "slug": "projects",
-      "defaultVisibility": {
-        "title": true,
-        "description": true,
-        "date": true,
-        "coverImage": true,
-        "tags": true,
-        "externalLink": true
-      },
       "fields": [
         {
           "key": "title",
@@ -30,7 +22,34 @@
             "fr": "Titre",
             "ar": "العنوان"
           },
+          "description": "",
           "type": "text",
+          "required": true,
+          "localized": true,
+          "defaultVisible": true
+        },
+        {
+          "key": "slug",
+          "name": {
+            "en": "New Field",
+            "fr": "Nouveau Champ",
+            "ar": "حقل جديد"
+          },
+          "description": "",
+          "type": "text",
+          "required": true,
+          "localized": false,
+          "defaultVisible": true
+        },
+        {
+          "key": "shortDescription",
+          "name": {
+            "en": "New Field",
+            "fr": "Nouveau Champ",
+            "ar": "حقل جديد"
+          },
+          "description": "",
+          "type": "textarea",
           "required": true,
           "localized": true,
           "defaultVisible": true
@@ -38,326 +57,181 @@
         {
           "key": "description",
           "name": {
-            "en": "Description",
-            "fr": "Description",
-            "ar": "الوصف"
+            "en": "New Field",
+            "fr": "Nouveau Champ",
+            "ar": "حقل جديد"
           },
-          "type": "textarea",
-          "required": true,
+          "description": "",
+          "type": "richtext",
+          "required": false,
           "localized": true,
-          "defaultVisible": true
-        },
-        {
-          "key": "date",
-          "name": {
-            "en": "Date",
-            "fr": "Date",
-            "ar": "التاريخ"
-          },
-          "type": "date",
-          "required": true,
-          "localized": false,
           "defaultVisible": true
         },
         {
           "key": "coverImage",
           "name": {
-            "en": "Cover Image",
-            "fr": "Image de couverture",
-            "ar": "صورة الغلاف"
+            "en": "New Field",
+            "fr": "Nouveau Champ",
+            "ar": "حقل جديد"
           },
+          "description": "",
           "type": "image",
-          "required": true,
+          "required": false,
           "localized": false,
           "defaultVisible": true
         },
         {
-          "key": "tags",
+          "key": "technologies",
           "name": {
-            "en": "Tags",
-            "fr": "Mots-clés",
-            "ar": "الوسوم"
+            "en": "New Field",
+            "fr": "Nouveau Champ",
+            "ar": "حقل جديد"
           },
+          "description": "",
           "type": "tags",
-          "required": true,
+          "required": false,
           "localized": false,
           "defaultVisible": true
         },
         {
-          "key": "externalLink",
+          "key": "liveUrl",
           "name": {
-            "en": "External Link",
-            "fr": "Lien externe",
-            "ar": "الرابط الخارجي"
+            "en": "New Field",
+            "fr": "Nouveau Champ",
+            "ar": "حقل جديد"
           },
+          "description": "",
           "type": "url",
           "required": false,
           "localized": false,
           "defaultVisible": true
-        }
-      ]
-    },
-    {
-      "id": "research",
-      "name": {
-        "en": "Research",
-        "fr": "Recherche",
-        "ar": "البحث العلمي"
-      },
-      "description": {
-        "en": "Academic and applied research papers, publications, and studies",
-        "fr": "Articles, publications et études de recherche académique et appliquée",
-        "ar": "أوراق بحثية ودراسات أكاديمية وتطبيقية"
-      },
-      "slug": "research",
-      "defaultVisibility": {
-        "title": true,
-        "description": true,
-        "date": true,
-        "coverImage": true,
-        "tags": true,
-        "externalLink": true
-      },
-      "fields": [
-        {
-          "key": "title",
-          "name": {
-            "en": "Title",
-            "fr": "Titre",
-            "ar": "العنوان"
-          },
-          "type": "text",
-          "required": true,
-          "localized": true,
-          "defaultVisible": true
         },
         {
-          "key": "description",
+          "key": "githubUrl",
           "name": {
-            "en": "Description",
-            "fr": "Description",
-            "ar": "الوصف"
+            "en": "New Field",
+            "fr": "Nouveau Champ",
+            "ar": "حقل جديد"
           },
-          "type": "textarea",
-          "required": true,
-          "localized": true,
-          "defaultVisible": true
-        },
-        {
-          "key": "date",
-          "name": {
-            "en": "Publication Date",
-            "fr": "Date de publication",
-            "ar": "تاريخ النشر"
-          },
-          "type": "date",
-          "required": true,
-          "localized": false,
-          "defaultVisible": true
-        },
-        {
-          "key": "coverImage",
-          "name": {
-            "en": "Cover Image",
-            "fr": "Image de couverture",
-            "ar": "صورة الغلاف"
-          },
-          "type": "image",
-          "required": true,
-          "localized": false,
-          "defaultVisible": true
-        },
-        {
-          "key": "tags",
-          "name": {
-            "en": "Tags",
-            "fr": "Mots-clés",
-            "ar": "الوسوم"
-          },
-          "type": "tags",
-          "required": true,
-          "localized": false,
-          "defaultVisible": true
-        },
-        {
-          "key": "externalLink",
-          "name": {
-            "en": "External Link",
-            "fr": "Lien externe",
-            "ar": "الرابط الخارجي"
-          },
+          "description": "",
           "type": "url",
-          "required": true,
+          "required": false,
+          "localized": false,
+          "defaultVisible": true
+        },
+        {
+          "key": "startDate",
+          "name": {
+            "en": "New Field",
+            "fr": "Nouveau Champ",
+            "ar": "حقل جديد"
+          },
+          "description": "",
+          "type": "date",
+          "required": false,
+          "localized": false,
+          "defaultVisible": true
+        },
+        {
+          "key": "endDate",
+          "name": {
+            "en": "New Field",
+            "fr": "Nouveau Champ",
+            "ar": "حقل جديد"
+          },
+          "description": "",
+          "type": "date",
+          "required": false,
+          "localized": false,
+          "defaultVisible": true
+        },
+        {
+          "key": "featured",
+          "name": {
+            "en": "New Field",
+            "fr": "Nouveau Champ",
+            "ar": "حقل جديد"
+          },
+          "description": "",
+          "type": "boolean",
+          "required": false,
           "localized": false,
           "defaultVisible": true
         }
-      ]
+      ],
+      "defaultVisibility": {
+        "title": true
+      },
+      "contextDefaultVisibility": {}
     }
   ],
   "entries": [
     {
-      "id": "project-green-a11y-agent",
+      "id": "projects-387331",
       "contentTypeId": "projects",
-      "slug": "green-a11y-agent",
+      "slug": "cairn-llm-reliability",
       "status": "published",
       "fields": {
-        "title": {
-          "en": "Green-A11y Agent — Final Year Project",
-          "fr": "Green-A11y Agent — Projet de Fin d'Année",
-          "ar": "Green-A11y Agent — مشروع التخرج"
-        },
+        "slug": "cairn-llm-reliability",
         "description": {
-          "en": "Dual-audit platform evaluating WCAG 2.1 accessibility and digital carbon footprint (Sustainable Web Design model). Features a RAG conversational assistant (Llama 3.2 via Groq), automated audit engine, and CO₂ impact calculator.",
-          "fr": "Plateforme intelligente d'audit dual : accessibilité WCAG 2.1 + empreinte carbone (modèle Sustainable Web Design). Assistant conversationnel RAG (Llama 3.2/Groq), moteur d'audit automatisé et calculateur d'impact CO₂.",
-          "ar": "منصة تدقيق مزدوجة ذكية تجمع بين إمكانية الوصول WCAG 2.1 وحساب البصمة الكربونية للويب، مع مساعد محادثة ذكي ومحرك تدقيق آلي."
+          "fr": "Cairn est une expérimentation indépendante qui explore les moyens d'améliorer la fiabilité factuelle des réponses générées par les grands modèles de langage (LLM).\n\nLe projet utilise une petite base de connaissances fictive pour comparer la génération directe par un LLM à un pipeline structuré combinant recherche d'informations, raisonnement fondé sur des règles déterministes et validation des réponses.\n\nL'expérimentation évalue différents types de questions : questions factuelles, raisonnement en plusieurs étapes, demandes ambiguës, questions liées aux autorisations, formulations trompeuses et situations dans lesquelles les informations sont indisponibles.\n\nL'objectif est de produire des réponses mieux ancrées dans les connaissances disponibles et plus transparentes, notamment lorsque les informations sont insuffisantes.\n\nLe projet examine également le compromis entre fiabilité des réponses et latence.",
+          "en": "Cairn is an independent experiment exploring how to improve the factual reliability of Large Language Model (LLM) generation.\n\nThe project uses a small fictional knowledge base to compare direct LLM generation with a structured pipeline combining information retrieval, deterministic rule-based reasoning, and answer validation.\n\nIt evaluates different types of questions, including factual queries, multi-hop reasoning, ambiguous requests, permission-related questions, misleading inputs, and cases where information is unavailable.\n\nThe experiment focuses on making answers more grounded and transparent, particularly when the available knowledge is insufficient.\n\nIt also examines the trade-offs between answer reliability and response latency.",
+          "ar": "Cairn هو مشروع تجريبي مستقل يستكشف كيفية تحسين الموثوقية الواقعية للإجابات التي تولدها نماذج اللغة الكبيرة.\n\nيعتمد المشروع على قاعدة معرفة خيالية صغيرة لمقارنة التوليد المباشر للإجابات باستخدام نموذج لغوي مع نظام منظم يجمع بين استرجاع المعلومات والاستدلال القائم على قواعد حتمية والتحقق من الإجابات.\n\nيقيّم المشروع أنواعًا مختلفة من الأسئلة، بما في ذلك الأسئلة الواقعية والاستدلال متعدد الخطوات والطلبات الغامضة والأسئلة المتعلقة بالصلاحيات والأسئلة المضللة والحالات التي تكون فيها المعلومات غير متاحة.\n\nيركز المشروع على إنتاج إجابات أكثر ارتباطًا بالمعرفة المتاحة وأكثر شفافية، خاصة عندما تكون المعلومات غير كافية.\n\nكما يدرس المفاضلة بين موثوقية الإجابات وزمن الاستجابة."
         },
-        "date": "2026-05-01",
-        "coverImage": "/assets/green-a11y-agent-screenshots/home.png",
-        "tags": [
-          "React 18",
-          "TypeScript",
-          "FastAPI",
+        "title": {
+          "fr": "Cairn — Expérience de fiabilité des LLM",
+          "en": "Cairn — LLM Reliability Experiment",
+          "ar": "Cairn — تجربة موثوقية نماذج اللغة الكبيرة"
+        },
+        "technologies": [
           "Python",
-          "WCAG",
-          "RAG"
+          "Ollama",
+          "Qwen3",
+          "Knowledge Retrieval",
+          "Rule-Based Reasoning",
+          "Benchmarking"
         ],
-        "externalLink": "https://github.com/Yosr-MEDDAH"
+        "shortDescription": {
+          "fr": "Une expérimentation visant à améliorer la fiabilité factuelle des réponses des LLM grâce à la recherche documentaire, au raisonnement déterministe et à la validation.",
+          "en": "An experiment exploring more reliable LLM generation through knowledge retrieval, deterministic reasoning, and answer validation.",
+          "ar": "تجربة تهدف إلى تحسين الدقة الواقعية لإجابات نماذج اللغة الكبيرة باستخدام استرجاع المعرفة والاستدلال الحتمي والتحقق من الإجابات."
+        },
+        "featured": false
       },
-      "visibilityOverrides": {}
-    },
-    {
-      "id": "project-tweet-ir-system",
-      "contentTypeId": "projects",
-      "slug": "tweet-information-retrieval-system",
-      "status": "published",
-      "fields": {
-        "title": {
-          "en": "Tweet Information Retrieval System (TREC)",
-          "fr": "Système de Recherche d'Information sur Tweets (TREC)",
-          "ar": "نظام استرجاع معلومات التغريدات (TREC)"
-        },
-        "description": {
-          "en": "Experimental information retrieval system on English tweets evaluated according to TREC campaign methodology. Compares BM25, TF-IDF, and PL2 probabilistic models across multiple token representations.",
-          "fr": "Système expérimental de recherche d'information sur tweets en anglais selon une méthodologie TREC. Évaluation et comparaison de modèles BM25, TF-IDF et PL2 sur différentes représentations textuelles.",
-          "ar": "نظام استرجاع معلومات تجريبي على تغريدات باللغة الإنجليزية وفق منهجية حملات TREC مع مقارنة نماذج احتمالية متعددة."
-        },
-        "date": "2026-04-15",
-        "coverImage": "/placeholder.png",
-        "tags": [
-          "Python",
-          "PyTerrier",
-          "BM25",
-          "TF-IDF",
-          "NLP",
-          "Data Science"
-        ],
-        "externalLink": "https://github.com/Yosr-MEDDAH"
-      },
-      "visibilityOverrides": {}
-    },
-    {
-      "id": "project-smartfarm-iot",
-      "contentTypeId": "projects",
-      "slug": "smartfarm-iot-greenhouse",
-      "status": "published",
-      "fields": {
-        "title": {
-          "en": "SmartFarm IoT — Connected Smart Greenhouse",
-          "fr": "SmartFarm IoT — Serre intelligente Jenin",
-          "ar": "SmartFarm IoT — دفيئة ذكية متصلة"
-        },
-        "description": {
-          "en": "End-to-end IoT automation system for smart greenhouses. Features automatic soil-moisture irrigation, fire detection, PIR motion intrusion capture with ESP32-CAM, and remote mobile telemetry via Flutter/Blynk.",
-          "fr": "Système IoT complet pour l'automatisation d'une serre agricole connectée : arrosage automatique, détection incendie, surveillance d'intrusion avec caméra ESP32-CAM et télémétrie Flutter/Blynk.",
-          "ar": "نظام إنترنت الأشياء متكامل لأتمتة الدفيئات الزراعية الذكية مع ري آلي ومراقبة أمنية بالصور وتحكم عن بعد عبر تطبيق فلاتر."
-        },
-        "date": "2026-03-20",
-        "coverImage": "/assets/iot3-jenin.jpeg",
-        "tags": [
-          "Arduino",
-          "ESP32-CAM",
-          "Flutter",
-          "IoT",
-          "C++",
-          "UART"
-        ],
-        "externalLink": "https://github.com/Yosr-MEDDAH"
-      },
-      "visibilityOverrides": {}
-    },
-    {
-      "id": "research-quantum-safe-crypto-2026",
-      "contentTypeId": "research",
-      "slug": "quantum-safe-cryptography-ai-infrastructure",
-      "status": "published",
-      "fields": {
-        "title": {
-          "en": "Post-Quantum Cryptography in Distributed AI Infrastructure",
-          "fr": "Cryptographie post-quantique dans les infrastructures IA distribuées",
-          "ar": "التشفير ما بعد الكمي في البنى التحتية الموزعة للذكاء الاصطناعي"
-        },
-        "description": {
-          "en": "An in-depth investigation into lattice-based cryptographic algorithms applied to secure multi-agent communication networks and distributed computation pipelines.",
-          "fr": "Une étude approfondie des algorithmes cryptographiques basés sur les réseaux euclidiens appliqués à la sécurisation des communications multi-agents et des flux de calcul distribués.",
-          "ar": "دراسة متعمقة لخوارزميات التشفير المستندة إلى الشبيكات المطبقة لتأمين شبكات اتصالات الوكلاء المتعددين وخطوط الحوسبة الموزعة."
-        },
-        "date": "2026-04-15",
-        "coverImage": "/assets/images/research/quantum-crypto.webp",
-        "tags": [
-          "Cryptographie",
-          "Post-Quantum",
-          "Artificial Intelligence",
-          "Security"
-        ],
-        "externalLink": "https://arxiv.org/abs/2604.12345"
-      },
-      "visibilityOverrides": {
-        "externalLink": false
-      }
+      "visibilityOverrides": {},
+      "contextVisibilityOverrides": {},
+      "publishedAt": "2026-11-24T13:24:12.852Z"
     }
   ],
   "templates": [
     {
-      "id": "research-card",
-      "name": "Research Card",
+      "id": "template-card-standard",
+      "name": "Standard Responsive Card",
       "targetType": "card",
       "layout": "grid",
       "aspectRatio": "16/9",
-      "description": "Pre-configured card template for Research publications",
-      "visibilitySettings": {
-        "contextVisibility": {
-          "card": {
-            "date": false,
-            "description": true
-          }
-        }
-      }
+      "description": "Used for collection listings in responsive grid layout with cover image header.",
+      "visibilitySettings": {}
     },
     {
-      "id": "research-detail",
-      "name": "Research Detail",
+      "id": "template-detail-standard",
+      "name": "Standard Comprehensive Detail",
       "targetType": "detail",
       "layout": "single",
       "aspectRatio": "16/9",
-      "description": "Pre-configured detail template for Research publications",
-      "visibilitySettings": {
-        "contextVisibility": {
-          "detail": {
-            "date": true,
-            "description": false
-          }
-        }
-      }
+      "description": "Full-page detail layout with breadcrumb, hero header, tags, and body sections.",
+      "visibilitySettings": {}
+    },
+    {
+      "id": "template-research-card",
+      "name": "Research Publication Card",
+      "targetType": "card",
+      "layout": "grid",
+      "aspectRatio": "16/9",
+      "description": "Preconfigured for Research items with date hidden and description summary visible.",
+      "visibilitySettings": {}
     }
   ],
   "media": [],
-  "siteSettings": {
-    "siteTitle": {
-      "en": "Yosr Meddah",
-      "fr": "Yosr Meddah",
-      "ar": "يسر مداح"
-    },
-    "defaultLocale": "en",
-    "supportedLocales": ["en", "fr", "ar"]
-  }
+  "siteSettings": null
 }

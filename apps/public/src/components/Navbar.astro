@@ -1,0 +1,142 @@
+---
+import { withBase } from '../utils/url.ts';
+import { t } from '../i18n/utils.ts';
+import { DEFAULT_LOCALE, type SupportedLocale } from '../i18n/types.ts';
+
+interface Props {
+  locale?: SupportedLocale;
+  currentPath?: string;
+}
+
+const {
+  locale = 'fr',
+  currentPath = Astro.url.pathname,
+} = Astro.props;
+
+// Determine page base name (e.g. 'index', 'skills', 'projects', 'experiences', 'presentations', 'artworks')
+let pageName = 'index';
+if (currentPath.includes('skills')) pageName = 'skills';
+else if (currentPath.includes('experiences')) pageName = 'experiences';
+else if (currentPath.includes('projects')) pageName = 'projects';
+else if (currentPath.includes('presentations')) pageName = 'presentations';
+else if (currentPath.includes('artworks')) pageName = 'artworks';
+
+// Localized navigation links for the current locale
+const homeHref = locale === 'fr'
+  ? withBase('/index.html')
+  : withBase(`/${locale}/index.html`);
+
+const skillsHref = locale === 'fr'
+  ? withBase('/skills.html')
+  : withBase(`/${locale}/skills/index.html`);
+
+const expHref = locale === 'fr'
+  ? withBase('/experiences.html')
+  : withBase(`/${locale}/experiences/index.html`);
+
+const projectsHref = locale === 'fr'
+  ? withBase('/projects.html')
+  : withBase(`/${locale}/projects/index.html`);
+
+const presHref = locale === 'fr'
+  ? withBase('/presentations.html')
+  : withBase(`/${locale}/presentations/index.html`);
+
+const artworksHref = locale === 'fr'
+  ? withBase('/artworks.html')
+  : withBase(`/${locale}/artworks/index.html`);
+
+const contactHref = locale === 'fr'
+  ? withBase('/index.html#contact')
+  : withBase(`/${locale}/index.html#contact`);
+
+const logoNoirHref = withBase('/assets/logo-noir.png');
+const logoBlancHref = withBase('/assets/logo-blanc.png');
+
+// Language switcher routes:
+// French is default at root (/index.html, /projects.html, etc.) and also available at /fr/
+const frRoute = pageName === 'index'
+  ? withBase('/index.html')
+  : withBase(`/${pageName}.html`);
+
+const enRoute = pageName === 'index'
+  ? withBase('/en/index.html')
+  : withBase(`/en/${pageName}/index.html`);
+
+const arRoute = pageName === 'index'
+  ? withBase('/ar/index.html')
+  : withBase(`/ar/${pageName}/index.html`);
+---
+
+<nav aria-label={locale === 'ar' ? 'التنقل الرئيسي' : locale === 'en' ? 'Main navigation' : 'Navigation principale'}>
+  <a class="nav-logo" href={homeHref} id="nav-logo" aria-label="Accueil">
+    <img src={logoNoirHref} class="logo-light-mode" alt="Yosr Meddah" />
+    <img src={logoBlancHref} class="logo-dark-mode" alt="Yosr Meddah" />
+  </a>
+
+  <div class="nav-right">
+    <ul class="nav-links" role="list">
+      <li><a href={skillsHref} class={currentPath.includes('skills') ? 'active' : ''}>{t('nav.skills', locale)}</a></li>
+      <li><a href={expHref} class={currentPath.includes('experiences') ? 'active' : ''}>{t('nav.experience', locale)}</a></li>
+      <li><a href={projectsHref} class={currentPath.includes('projects') ? 'active' : ''}>{t('nav.projects', locale)}</a></li>
+      <li><a href={presHref} class={currentPath.includes('presentations') ? 'active' : ''}>{t('nav.presentations', locale)}</a></li>
+      <li><a href={artworksHref} class={currentPath.includes('artworks') ? 'active' : ''}>{t('nav.artworks', locale)}</a></li>
+      <li><a href={contactHref}>{t('nav.contact', locale)}</a></li>
+    </ul>
+
+    <div role="group" aria-label="Langue" style="display:flex; gap:0.25rem;">
+      <a
+        href={frRoute}
+        class={`icon-btn ${locale === 'fr' ? 'active' : ''}`}
+        aria-label="Français"
+        style={locale === 'fr' ? 'border-color:var(--mg);color:var(--mg);font-weight:700;' : ''}
+      >
+        FR
+      </a>
+      <a
+        href={enRoute}
+        class={`icon-btn ${locale === 'en' ? 'active' : ''}`}
+        aria-label="English"
+        style={locale === 'en' ? 'border-color:var(--mg);color:var(--mg);font-weight:700;' : ''}
+      >
+        EN
+      </a>
+      <a
+        href={arRoute}
+        class={`icon-btn ${locale === 'ar' ? 'active' : ''}`}
+        aria-label="العربية"
+        style={locale === 'ar' ? 'border-color:var(--mg);color:var(--mg);font-weight:700;' : ''}
+      >
+        ع
+      </a>
+    </div>
+
+    <button
+      class="icon-btn"
+      id="theme-btn"
+      aria-label="Basculer le thème"
+      onclick="toggleTheme()"
+    >
+      ◑
+    </button>
+  </div>
+</nav>
+
+<script is:inline>
+  function applyTheme() {
+    const t = localStorage.getItem('theme') ||
+      (window.matchMedia('(prefers-color-scheme:dark)').matches ? 'dark' : 'light');
+    document.documentElement.dataset.theme = t;
+    const btn = document.getElementById('theme-btn');
+    if (btn) {
+      btn.setAttribute('aria-label', t === 'dark' ? 'Switch to light mode' : 'Switch to dark mode');
+    }
+  }
+
+  function toggleTheme() {
+    const current = document.documentElement.dataset.theme || 'light';
+    const next = current === 'dark' ? 'light' : 'dark';
+    localStorage.setItem('theme', next);
+    applyTheme();
+  }
+</script>

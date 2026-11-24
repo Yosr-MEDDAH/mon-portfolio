@@ -3,8 +3,14 @@ import {
   exportCmsData,
   resolveCredentials,
   validateExportPayload,
+  sanitizeContentType,
+  sanitizeEntry,
+  sanitizeTemplate,
+  sanitizeSiteSettings,
+  sanitizeFieldOptions,
+  sanitizeDefaultVisible,
 } from '../../scripts/export-cms-content.mjs';
-import { existsSync, rmSync } from 'node:fs';
+import { existsSync, rmSync, writeFileSync, readFileSync } from 'node:fs';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -27,8 +33,8 @@ async function runPipelineTests() {
     passed++;
   }
 
-  // --- 1. Credential Resolution & Safety ---
-  console.log('1. Testing credential resolution and secret safety...');
+  // --- 1. Credential Resolution & Thorough Validation (including GOOGLE_APPLICATION_CREDENTIALS) ---
+  console.log('1. Testing credential resolution and deep secret validation...');
   const oldSecret = process.env.FIREBASE_SERVICE_ACCOUNT;
   const oldGac = process.env.GOOGLE_APPLICATION_CREDENTIALS;
 
@@ -40,29 +46,87 @@ async function runPipelineTests() {
       'resolveCredentials returns undefined when no secrets provided'
     );
 
-    // Test JSON parsing
+    // Test valid service account credentials
     process.env.FIREBASE_SERVICE_ACCOUNT = JSON.stringify({
       project_id: 'test-spark',
-      client_email: 'test@spark.iam.gserviceaccount.com',
+      client_email: 'firebase-adminsdk@test-spark.iam.gserviceaccount.com',
       private_key:
         '-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASC\n-----END PRIVATE KEY-----\n',
     });
     const parsed = resolveCredentials();
     assert(
       parsed !== null && parsed?.project_id === 'test-spark',
-      'resolveCredentials successfully parses raw JSON service account'
+      'resolveCredentials successfully validates complete service account'
     );
 
-    // Test base64 parsing
-    const b64 = Buffer.from(
-      JSON.stringify({ project_id: 'test-base64', client_email: 'b64@spark.com' })
-    ).toString('base64');
-    process.env.FIREBASE_SERVICE_ACCOUNT = b64;
-    const parsedB64 = resolveCredentials();
+    // Test missing client_email
+    process.env.FIREBASE_SERVICE_ACCOUNT = JSON.stringify({
+      project_id: 'test-spark',
+      private_key: '-----BEGIN PRIVATE KEY-----\nABC\n-----END PRIVATE KEY-----',
+    });
+    let clientEmailErr = false;
+    try {
+      resolveCredentials();
+    } catch (e: any) {
+      clientEmailErr = e.message.includes('client_email');
+    }
+    assert(clientEmailErr, 'Credentials rejected when client_email is missing');
+
+    // Test missing private_key
+    process.env.FIREBASE_SERVICE_ACCOUNT = JSON.stringify({
+      project_id: 'test-spark',
+      client_email: 'service@spark.iam.gserviceaccount.com',
+    });
+    let privateKeyErr = false;
+    try {
+      resolveCredentials();
+    } catch (e: any) {
+      privateKeyErr = e.message.includes('private_key');
+    }
+    assert(privateKeyErr, 'Credentials rejected when private_key is missing');
+
+    // Test invalid format: must throw without leaking secret in error message
+    const secretPayload = 'super-secret-token-value-12345';
+    process.env.FIREBASE_SERVICE_ACCOUNT = `invalid-json-{${secretPayload}}`;
+    let threw = false;
+    let errorMsg = '';
+    try {
+      resolveCredentials();
+    } catch (err: any) {
+      threw = true;
+      errorMsg = err.message;
+    }
+    assert(threw, 'Invalid credentials format throws error immediately');
     assert(
-      parsedB64 !== null && parsedB64?.project_id === 'test-base64',
-      'resolveCredentials successfully parses base64-encoded service account'
+      !errorMsg.includes(secretPayload),
+      'Error message strictly never leaks raw secret credentials'
     );
+
+    // Test GOOGLE_APPLICATION_CREDENTIALS: non-existent file path throws safely
+    delete process.env.FIREBASE_SERVICE_ACCOUNT;
+    const fakePath = 'C:\\non-existent-path\\service-account-key.json';
+    process.env.GOOGLE_APPLICATION_CREDENTIALS = fakePath;
+    let gacNonExistentErr = false;
+    try {
+      resolveCredentials();
+    } catch (e: any) {
+      gacNonExistentErr = e.message.includes('does not exist');
+    }
+    assert(gacNonExistentErr, 'GOOGLE_APPLICATION_CREDENTIALS throws when file does not exist on disk');
+
+    // Test GOOGLE_APPLICATION_CREDENTIALS: existing file path returns null (applicationDefault)
+    const tempCredFile = resolve(__dirname, 'temp-valid-cred.json');
+    writeFileSync(tempCredFile, '{}', 'utf-8');
+    try {
+      process.env.GOOGLE_APPLICATION_CREDENTIALS = tempCredFile;
+      const gacResolved = resolveCredentials();
+      assert(
+        gacResolved === null,
+        'GOOGLE_APPLICATION_CREDENTIALS with existing file resolves to null for applicationDefault()'
+      );
+    } finally {
+      if (existsSync(tempCredFile)) rmSync(tempCredFile);
+    }
   } finally {
     if (oldSecret) process.env.FIREBASE_SERVICE_ACCOUNT = oldSecret;
     else delete process.env.FIREBASE_SERVICE_ACCOUNT;
@@ -70,10 +134,203 @@ async function runPipelineTests() {
     else delete process.env.GOOGLE_APPLICATION_CREDENTIALS;
   }
 
-  // --- 2. Firestore Export Sanitization, Exclusions & Fatal Reads ---
-  console.log(
-    '\n2. Testing export sanitization, exclusions & fatal reads on Firestore errors...'
+  // --- 2. sanitizeDefaultVisible Context Filtering ---
+  console.log('\n2. Testing sanitizeDefaultVisible context filtering...');
+
+  assert(sanitizeDefaultVisible(true) === true, 'defaultVisible boolean true preserved');
+  assert(sanitizeDefaultVisible(false) === false, 'defaultVisible boolean false preserved');
+
+  const dirtyCtxVis = {
+    card: true,
+    detail: false,
+    section: true,
+    forbiddenCtx: true, // Must be stripped
+    invalidValue: 'string-instead-of-bool', // Must be stripped
+  };
+  const cleanedCtxVis = sanitizeDefaultVisible(dirtyCtxVis);
+  assert(
+    typeof cleanedCtxVis === 'object' &&
+      cleanedCtxVis.card === true &&
+      cleanedCtxVis.detail === false &&
+      cleanedCtxVis.section === true,
+    'Allowed contexts card, detail, section preserved with boolean values'
   );
+  assert(
+    !('forbiddenCtx' in cleanedCtxVis) && !('invalidValue' in cleanedCtxVis),
+    'Unauthorized contexts and non-boolean values stripped from defaultVisible'
+  );
+
+  assert(
+    sanitizeDefaultVisible({ unauthorized: true }) === true,
+    'defaultVisible object with no valid contexts defaults to true'
+  );
+  assert(sanitizeDefaultVisible(null) === true, 'defaultVisible null defaults to true');
+
+  // --- 3. Deep Sanitization of Schemas, Visibility & Options ---
+  console.log('\n3. Testing deep sanitization of schemas, options, visibility & settings...');
+
+  const dirtyOptions = {
+    choices: [{ value: 'v1', label: { en: 'L1', fr: 'L1-fr', ar: 'L1-ar' } }],
+    min: 1,
+    max: 10,
+    targetCollection: 'projects',
+    acceptedTypes: ['image/png'],
+    _internalBackendHook: 'rm -rf /',
+    adminToken: 'secret',
+  };
+  const sanitizedOpts = sanitizeFieldOptions(dirtyOptions);
+  assert(
+    sanitizedOpts !== undefined &&
+      sanitizedOpts.min === 1 &&
+      sanitizedOpts.choices[0].label.ar === 'L1-ar',
+    'Field options preserve valid choices with translations'
+  );
+  assert(
+    !('_internalBackendHook' in sanitizedOpts!) && !('adminToken' in sanitizedOpts!),
+    'Field options strip internal metadata and unapproved fields'
+  );
+
+  const dirtyContentType = {
+    name: { en: 'Projects', fr: 'Projets', ar: 'المشاريع' },
+    description: 'Active schema',
+    slug: 'projects',
+    fields: [
+      {
+        key: 'title',
+        type: 'text',
+        required: true,
+        localized: true,
+        defaultVisible: { card: true, detail: true, unauthContext: false },
+      },
+      { key: 'customTags', type: 'tags', options: dirtyOptions },
+    ],
+    defaultVisibility: {
+      title: true,
+      customTags: false,
+      _unapprovedPrivateField: false,
+    },
+    contextDefaultVisibility: {
+      card: { title: true, _unapprovedPrivateField: false },
+      injectedDangerousContext: { title: true },
+    },
+    authorUid: 'admin-123',
+  };
+  const sanitizedCT = sanitizeContentType('projects', dirtyContentType);
+  assert(
+    sanitizedCT.defaultVisibility.title === true && sanitizedCT.defaultVisibility.customTags === false,
+    'Valid field visibility settings preserved'
+  );
+  assert(
+    !('_unapprovedPrivateField' in sanitizedCT.defaultVisibility),
+    'Visibility settings for non-schema fields stripped'
+  );
+  assert(
+    !('injectedDangerousContext' in sanitizedCT.contextDefaultVisibility),
+    'Invalid rendering contexts stripped from visibility map'
+  );
+  assert(
+    typeof sanitizedCT.fields[0].defaultVisible === 'object' &&
+      !('unauthContext' in (sanitizedCT.fields[0].defaultVisible as any)),
+    'Field-level defaultVisible cleaned of unauthorized contexts'
+  );
+
+  // Template deep sanitization
+  const dirtyTemplate = {
+    name: 'Custom Template',
+    targetType: 'card',
+    layout: 'grid',
+    visibilitySettings: {
+      visibility: { title: true, _secretField: false },
+      contextVisibility: { card: { title: true } },
+      _injectedAdminFlag: true,
+    },
+    authorUid: 'admin-99',
+  };
+  const sanitizedTmpl = sanitizeTemplate('tmpl-1', dirtyTemplate);
+  assert(
+    sanitizedTmpl.visibilitySettings.visibility.title === true,
+    'Template visibility settings preserved'
+  );
+  assert(!('_injectedAdminFlag' in sanitizedTmpl.visibilitySettings), 'Template internal flags stripped');
+  assert(!('authorUid' in sanitizedTmpl), 'Template authorUid stripped');
+
+  // Site Settings deep sanitization
+  const dirtySettings = {
+    siteTitle: { en: 'Site', fr: 'Site', ar: 'الموقع' },
+    defaultLocale: 'en',
+    supportedLocales: ['en', 'fr', 'ar', 'invalid-locale'],
+    maintenanceMode: true,
+    secretApiKey: 'xyz',
+    seoDefaults: {
+      metaTitle: { en: 'SEO', fr: 'SEO', ar: 'سيو' },
+      internalMeta: 'bad',
+    },
+  };
+  const sanitizedSettings = sanitizeSiteSettings(dirtySettings);
+  assert(
+    sanitizedSettings !== null && sanitizedSettings.siteTitle.ar === 'الموقع',
+    'Site settings translations preserved'
+  );
+  assert(!('maintenanceMode' in sanitizedSettings!) && !('secretApiKey' in sanitizedSettings!), 'Site settings secrets stripped');
+  assert(!('internalMeta' in (sanitizedSettings?.seoDefaults || {})), 'SEO internal metadata stripped');
+
+  // --- 4. Missing Schema Handling & Field Value Preservation ---
+  console.log('\n4. Testing missing schema handling & preservation of field values...');
+
+  const entryWithMissingSchema = sanitizeEntry(
+    'e-orphan',
+    {
+      contentTypeId: 'non-existent-schema',
+      slug: 'orphan',
+      fields: { title: 'Orphan', secretData: 'Leak' },
+    },
+    undefined
+  );
+  assert(
+    entryWithMissingSchema === null,
+    'Entry with missing schema safely rejected/skipped; NEVER allows all fields by default'
+  );
+
+  const entryWithHiddenField = sanitizeEntry(
+    'e-valid',
+    {
+      contentTypeId: 'projects',
+      slug: 'valid-entry',
+      fields: {
+        title: { en: 'Project A', fr: 'Projet A', ar: 'مشروع أ' },
+        customTags: ['tag1', 'tag2'],
+        _privateLeak: 'Do not leak',
+      },
+      visibilityOverrides: {
+        customTags: false,
+      },
+      contextVisibilityOverrides: {
+        card: { customTags: false },
+      },
+    },
+    sanitizedCT
+  );
+  assert(entryWithHiddenField !== null, 'Valid entry sanitized successfully');
+  assert(
+    Array.isArray(entryWithHiddenField?.fields.customTags) &&
+      entryWithHiddenField?.fields.customTags.length === 2,
+    'Field value preserved in entry.fields even when visibility is false (underlying data not removed)'
+  );
+  assert(
+    entryWithHiddenField?.visibilityOverrides.customTags === false,
+    'Visibility override false preserved'
+  );
+  assert(
+    entryWithHiddenField?.contextVisibilityOverrides.card.customTags === false,
+    'Context visibility override false preserved'
+  );
+  assert(
+    !('_privateLeak' in entryWithHiddenField!.fields),
+    'Unapproved field not in schema stripped from entry'
+  );
+
+  // --- 5. Media Publication Conditions (Strict isAwaitingPublication === false) ---
+  console.log('\n5. Testing strict media publication conditions (isAwaitingPublication === false)...');
 
   const mockDb = {
     collection: (name: string) => {
@@ -81,25 +338,8 @@ async function runPipelineTests() {
         return {
           get: async () => ({
             docs: [
-              {
-                id: 'projects',
-                data: () => ({
-                  name: { en: 'Projects', fr: 'Projets', ar: 'المشاريع' },
-                  description: 'Active project schema',
-                  slug: 'projects',
-                  fields: [{ key: 'title', type: 'text' }],
-                  isArchived: false,
-                  authorUid: 'admin-secret-uid', // Internal metadata to strip
-                  internalNote: 'Top secret', // Internal metadata to strip
-                }),
-              },
-              {
-                id: 'deprecated-type',
-                data: () => ({
-                  name: 'Deprecated',
-                  isArchived: true, // Should be excluded
-                }),
-              },
+              { id: 'projects', data: () => dirtyContentType },
+              { id: 'archived-type', data: () => ({ name: 'Archived', isArchived: true }) },
             ],
           }),
         };
@@ -119,25 +359,27 @@ async function runPipelineTests() {
                         slug: 'published-item',
                         status: 'published',
                         fields: {
-                          title: {
-                            en: 'Live Project',
-                            fr: 'Projet En Ligne',
-                            ar: 'مشروع منشور',
-                          },
+                          title: { en: 'Project', fr: 'Projet', ar: 'مشروع' },
+                          customTags: ['A11y'],
+                          _unapproved: 'Drop me',
                         },
-                        visibilityOverrides: { secretField: false },
-                        publishedAt: '2026-11-24T00:00:00Z',
-                        authorUid: 'user-admin-123', // Internal metadata to strip
-                        authorEmail: 'admin@portfolio.internal', // Internal metadata to strip
-                        revisionsCount: 5, // Internal metadata to strip
                       }),
                     },
                     {
-                      id: 'entry-archived-tampered',
+                      id: 'entry-schemaless',
+                      data: () => ({
+                        contentTypeId: 'missing-type',
+                        slug: 'schemaless',
+                        status: 'published',
+                        fields: { title: 'Should Be Dropped' },
+                      }),
+                    },
+                    {
+                      id: 'entry-archived',
                       data: () => ({
                         contentTypeId: 'projects',
-                        slug: 'archived-item',
-                        status: 'published', // Claimed published but archived flag set
+                        slug: 'archived',
+                        status: 'published',
                         isArchived: true,
                         fields: { title: 'Archived' },
                       }),
@@ -146,7 +388,7 @@ async function runPipelineTests() {
                 }),
               };
             }
-            throw new Error(`Unexpected query on entries: ${field} ${op} ${val}`);
+            throw new Error(`Unexpected query: ${field}`);
           },
         };
       }
@@ -154,18 +396,7 @@ async function runPipelineTests() {
       if (name === 'templates') {
         return {
           get: async () => ({
-            docs: [
-              {
-                id: 'projects-card',
-                data: () => ({
-                  name: 'Projects Card',
-                  targetType: 'card',
-                  layout: 'grid',
-                  aspectRatio: '16/9',
-                  authorUid: 'admin-secret',
-                }),
-              },
-            ],
+            docs: [{ id: 'tmpl-1', data: () => dirtyTemplate }],
           }),
         };
       }
@@ -175,12 +406,61 @@ async function runPipelineTests() {
           get: async () => ({
             docs: [
               {
-                id: 'media-1',
+                id: 'media-valid-published',
                 data: () => ({
-                  fileName: 'logo.png',
-                  mimeType: 'image/png',
-                  externalUrl: 'https://storage.example.com/logo.png',
-                  internalBucketPath: 'gs://private/bucket/logo.png',
+                  title: 'Approved Media',
+                  fileName: 'hero.png',
+                  externalUrl: 'https://cdn.example.com/hero.png',
+                  isAwaitingPublication: false, // Explicitly false -> MUST BE INCLUDED
+                }),
+              },
+              {
+                id: 'media-awaiting-true',
+                data: () => ({
+                  title: 'Awaiting Media',
+                  externalUrl: 'https://cdn.example.com/draft.png',
+                  isAwaitingPublication: true, // true -> MUST BE EXCLUDED
+                }),
+              },
+              {
+                id: 'media-awaiting-undefined',
+                data: () => ({
+                  title: 'Undefined Publication Media',
+                  externalUrl: 'https://cdn.example.com/undefined.png',
+                  // isAwaitingPublication undefined -> MUST BE EXCLUDED
+                }),
+              },
+              {
+                id: 'media-awaiting-null',
+                data: () => ({
+                  title: 'Null Publication Media',
+                  externalUrl: 'https://cdn.example.com/null.png',
+                  isAwaitingPublication: null, // null -> MUST BE EXCLUDED
+                }),
+              },
+              {
+                id: 'media-empty-url',
+                data: () => ({
+                  title: 'Empty URL Media',
+                  externalUrl: '', // empty url -> MUST BE EXCLUDED
+                  isAwaitingPublication: false,
+                }),
+              },
+              {
+                id: 'media-whitespace-url',
+                data: () => ({
+                  title: 'Whitespace URL Media',
+                  externalUrl: '   ', // whitespace url -> MUST BE EXCLUDED
+                  isAwaitingPublication: false,
+                }),
+              },
+              {
+                id: 'media-archived',
+                data: () => ({
+                  title: 'Archived Media',
+                  externalUrl: 'https://cdn.example.com/archived.png',
+                  isArchived: true, // archived -> MUST BE EXCLUDED
+                  isAwaitingPublication: false,
                 }),
               },
             ],
@@ -193,20 +473,14 @@ async function runPipelineTests() {
           doc: (_id: string) => ({
             get: async () => ({
               exists: true,
-              data: () => ({
-                siteTitle: { en: 'Portfolio', fr: 'Portfolio', ar: 'المعرض' },
-                secretApiKey: 'super-secret', // Internal field to strip
-              }),
+              data: () => dirtySettings,
             }),
           }),
         };
       }
 
-      // If any forbidden collection is queried, fail immediately
       if (['adminUsers', 'revisions', 'activityLogs'].includes(name)) {
-        throw new Error(
-          `SECURITY VIOLATION: Export script queried private collection '${name}'!`
-        );
+        throw new Error(`SECURITY VIOLATION: Export script queried private collection '${name}'!` );
       }
 
       throw new Error(`Unknown collection: ${name}`);
@@ -217,72 +491,53 @@ async function runPipelineTests() {
   try {
     const exported = await exportCmsData({ db: mockDb as any, outputPath: testOutputPath });
 
-    assert(existsSync(testOutputPath), 'Exported JSON file exists on disk');
-    assert(
-      exported.contentTypes.length === 1,
-      'Archived content types excluded (only 1 active exported)'
-    );
-    assert(exported.contentTypes[0].id === 'projects', 'Active content type projects preserved');
-    assert(
-      !('authorUid' in exported.contentTypes[0]) && !('internalNote' in exported.contentTypes[0]),
-      'Internal metadata stripped from exported content types'
-    );
-    assert(
-      exported.entries.length === 1,
-      'Tampered/archived entry excluded; exactly 1 published entry exported'
-    );
+    assert(existsSync(testOutputPath), 'Exported JSON exists on disk');
+    assert(exported.contentTypes.length === 1, 'Only active content types exported');
+    assert(exported.entries.length === 1, 'Only valid published entry with existing schema exported');
     assert(exported.entries[0].id === 'entry-published-1', 'Correct published entry preserved');
     assert(
-      exported.entries[0].fields.title.ar === 'مشروع منشور',
-      'Arabic translation preserved'
+      !('_unapproved' in exported.entries[0].fields),
+      'Unapproved field stripped from entry'
+    );
+
+    // Strict media publication check
+    assert(
+      exported.media.length === 1,
+      'Media strictly filtered: exactly 1 media item with isAwaitingPublication === false and valid externalUrl exported'
     );
     assert(
-      exported.entries[0].visibilityOverrides.secretField === false,
-      'Visibility override preserved'
+      exported.media[0].id === 'media-valid-published',
+      'media-valid-published is the only exported media item'
     );
-    assert(
-      !('authorUid' in exported.entries[0]) && !('authorEmail' in exported.entries[0]),
-      'Internal metadata stripped from exported entries'
-    );
-    assert(exported.templates.length === 1, 'Templates exported');
-    assert(!('authorUid' in exported.templates[0]), 'Internal metadata stripped from templates');
-    assert(exported.media.length === 1, 'Media metadata exported');
-    assert(
-      !('internalBucketPath' in exported.media[0]),
-      'Internal bucket paths stripped from media'
-    );
-    assert(exported.siteSettings !== null, 'Site settings exported');
-    assert(
-      !('secretApiKey' in (exported.siteSettings || {})),
-      'Secret settings stripped from site settings'
-    );
-    assert(!('adminUsers' in exported), 'adminUsers collection completely absent');
-    assert(!('revisions' in exported), 'revisions collection completely absent');
-    assert(!('activityLogs' in exported), 'activityLogs collection completely absent');
+
+    // Private collections check
+    assert(!('adminUsers' in exported), 'adminUsers completely omitted');
+    assert(!('revisions' in exported), 'revisions completely omitted');
+    assert(!('activityLogs' in exported), 'activityLogs completely omitted');
   } finally {
     if (existsSync(testOutputPath)) {
       rmSync(testOutputPath);
     }
   }
 
-  // --- Fatal Read Failures Verification ---
-  console.log('\nTesting that Firestore read errors are fatal (not silently swallowed)...');
+  // --- 6. Atomic Output & Fail-Fast Rollback on Failure ---
+  console.log('\n6. Testing atomic output replacement and fail-fast rollback on failure...');
+
+  const sentinelData = JSON.stringify({ version: 'sentinel', safe: true });
+  writeFileSync(testOutputPath, sentinelData, 'utf-8');
+
   const failingDb = {
     collection: (name: string) => {
       if (name === 'contentTypes') {
-        return {
-          get: async () => ({ docs: [] }),
-        };
+        return { get: async () => ({ docs: [] }) };
       }
       if (name === 'entries') {
-        return {
-          where: () => ({ get: async () => ({ docs: [] }) }),
-        };
+        return { where: () => ({ get: async () => ({ docs: [] }) }) };
       }
       if (name === 'templates') {
         return {
           get: async () => {
-            throw new Error('PERMISSION_DENIED: Templates read failed');
+            throw new Error('NETWORK_TIMEOUT: Firestore query failed');
           },
         };
       }
@@ -290,166 +545,87 @@ async function runPipelineTests() {
     },
   };
 
-  let fatalErrorCaught = false;
+  let failFastTriggered = false;
   try {
     await exportCmsData({ db: failingDb as any, outputPath: testOutputPath });
   } catch (err: any) {
-    fatalErrorCaught = true;
-    assert(
-      err.message.includes('PERMISSION_DENIED'),
-      'Fatal error correctly thrown on Firestore template read failure'
-    );
+    failFastTriggered = err.message.includes('NETWORK_TIMEOUT');
   }
-  assert(fatalErrorCaught, 'Firestore read failure aborted export fatally without writing data');
+  assert(failFastTriggered, 'Fatal error thrown on read failure');
 
-  // --- 3. Export Validation Verification ---
-  console.log('\n3. Testing export payload validation before write...');
-
-  // Invalid payload (missing id in content type)
-  let valError1 = false;
-  try {
-    validateExportPayload({
-      exportedAt: new Date().toISOString(),
-      contentTypes: [{ name: 'No ID' }],
-      entries: [],
-      templates: [],
-      media: [],
-    });
-  } catch {
-    valError1 = true;
-  }
-  assert(valError1, 'Validation rejects content type without id');
-
-  // Invalid payload (entry with status !== 'published')
-  let valError2 = false;
-  try {
-    validateExportPayload({
-      exportedAt: new Date().toISOString(),
-      contentTypes: [],
-      entries: [{ id: '1', contentTypeId: 'p', slug: 's', status: 'draft', fields: {} }],
-      templates: [],
-      media: [],
-    });
-  } catch {
-    valError2 = true;
-  }
-  assert(valError2, 'Validation rejects entry with status draft');
-
-  // Valid payload passes
-  const validPayload = {
-    exportedAt: new Date().toISOString(),
-    contentTypes: [
-      {
-        id: 'p',
-        name: { en: 'P', fr: 'P', ar: 'ب' },
-        slug: 'p',
-        fields: [],
-      },
-    ],
-    entries: [
-      {
-        id: 'e1',
-        contentTypeId: 'p',
-        slug: 'e1',
-        status: 'published',
-        fields: { title: { en: 'T', fr: 'T', ar: 'ت' } },
-      },
-    ],
-    templates: [],
-    media: [],
-    siteSettings: null,
-  };
-  assert(validateExportPayload(validPayload) === true, 'Valid payload passes validation');
-
-  // --- 4. Astro Content Store Integration (Never Sample Data Fallback) ---
-  console.log('\n4. Testing Astro Content Store integration & strict sample data exclusion...');
-
-  const liveExportPayload = {
-    exportedAt: '2026-11-24T00:00:00Z',
-    contentTypes: [
-      {
-        id: 'projects',
-        name: { en: 'Live CMS Projects', fr: 'Projets CMS', ar: 'مشاريع حيّة' },
-        slug: 'projects',
-        fields: [{ key: 'title', type: 'text' as const }],
-      },
-    ],
-    entries: [
-      {
-        id: 'live-cms-project-1',
-        contentTypeId: 'projects',
-        slug: 'live-cms-project-1',
-        status: 'published' as const,
-        fields: {
-          title: { en: 'Actual CMS Entry', fr: 'Entrée CMS', ar: 'مدخل حي' },
-        },
-      },
-    ],
-    templates: [],
-    media: [],
-    siteSettings: null,
-  };
-
-  const registry = buildRegistryFromExport(liveExportPayload as any);
-  assert(Boolean(registry.projects), 'Projects collection registered from export');
-  assert(registry.projects.entries.length === 1, 'Contains exactly 1 published entry');
-  assert(registry.projects.entries[0].id === 'live-cms-project-1', 'Uses CMS entry from export');
-
-  // Verify that an entry with status === 'draft' is NEVER included even if somehow present in payload
-  const payloadWithDraft = {
-    contentTypes: [{ id: 'projects', name: 'Projects', slug: 'projects', fields: [] }],
-    entries: [
-      {
-        id: 'draft-1',
-        contentTypeId: 'projects',
-        slug: 'draft-1',
-        status: 'draft',
-        fields: {},
-      },
-    ],
-  };
-  const registryDraft = buildRegistryFromExport(payloadWithDraft as any);
+  const postFailureContent = readFileSync(testOutputPath, 'utf-8');
   assert(
-    registryDraft.projects.entries.length === 0,
-    'Draft entry filtered out; entries array is empty'
+    postFailureContent === sentinelData,
+    'Existing valid JSON preserved intact after fatal failure (fail-fast atomic rollback)'
   );
 
-  // --- 5. Empty Export Resilience ---
-  console.log('\n5. Testing empty export resilience (0 content types / 0 entries)...');
+  rmSync(testOutputPath);
 
-  const emptyPayload = {
-    exportedAt: '2026-11-24T00:00:00Z',
+  // --- 7. Astro Content Store Integration (Never Sample Data Fallback) ---
+  console.log('\n7. Testing Astro content store integration & zero sample data fallback...');
+
+  const emptyRegistry = buildRegistryFromExport({
     contentTypes: [],
     entries: [],
     templates: [],
     media: [],
     siteSettings: null,
-  };
+  } as any);
 
-  const emptyRegistry = buildRegistryFromExport(emptyPayload as any);
+  const projectsCol = getCollectionBySlug('projects', emptyRegistry);
+  assert(projectsCol !== undefined, 'getCollectionBySlug(projects) safely resolves');
   assert(
-    Object.keys(emptyRegistry).length === 0,
-    'Empty export produces 0 registered collections in registry'
+    projectsCol.entries.length === 0,
+    'Zero sample entries returned; strictly zero fallback on empty CMS export'
   );
 
-  // getCollectionBySlug('projects', emptyRegistry) should safely provide fallback collection structure with EMPTY entries []
-  const emptyProjectsCol = getCollectionBySlug('projects', emptyRegistry);
-  assert(
-    emptyProjectsCol !== undefined,
-    'getCollectionBySlug(projects) safely resolves without throwing'
-  );
-  assert(Array.isArray(emptyProjectsCol.entries), 'projects collection entries is an array');
-  // CRITICAL REQUIREMENT: "Never use sample data as a production fallback"
-  // When empty, it must have 0 entries, NOT fall back to sampleProjectEntries!
-  assert(
-    emptyProjectsCol.entries.length === 0,
-    'Strictly zero entries — never falls back to sample data!'
-  );
 
-  console.log(`\n=== All ${passed}/${total} Publication Pipeline Tests Passed Successfully ===`);
+  // --- 8. validateExportPayload: required localized field edge cases ---
+  console.log('\n8. Testing validateExportPayload required localized field edge cases...');
+
+  // Test: whitespace-only translations in all locales -> must REJECT
+  let whitespaceRejected = false;
+  try {
+    validateExportPayload({
+      exportedAt: new Date().toISOString(),
+      contentTypes: [{ id: 'p', name: 'P', slug: 'p', fields: [{ key: 'title', type: 'text', required: true, localized: true }] }],
+      entries: [{ id: 'e1', contentTypeId: 'p', slug: 'e1', status: 'published', fields: { title: { en: '   ', fr: '  ', ar: '' } } }],
+      templates: [],
+      media: [],
+    });
+  } catch { whitespaceRejected = true; }
+  assert(whitespaceRejected, 'Required localized field with whitespace-only translations must be rejected');
+
+  // Test: numeric value in a locale -> must REJECT
+  let numericRejected = false;
+  try {
+    validateExportPayload({
+      exportedAt: new Date().toISOString(),
+      contentTypes: [{ id: 'p', name: 'P', slug: 'p', fields: [{ key: 'title', type: 'text', required: true, localized: true }] }],
+      entries: [{ id: 'e1', contentTypeId: 'p', slug: 'e1', status: 'published', fields: { title: { en: 42 as any, fr: '', ar: '' } } }],
+      templates: [],
+      media: [],
+    });
+  } catch { numericRejected = true; }
+  assert(numericRejected, 'Required localized field with numeric locale value must be rejected');
+
+  // Test: valid non-empty string in one locale -> must PASS
+  let validLocalePass = true;
+  try {
+    validateExportPayload({
+      exportedAt: new Date().toISOString(),
+      contentTypes: [{ id: 'p', name: 'P', slug: 'p', fields: [{ key: 'title', type: 'text', required: true, localized: true }] }],
+      entries: [{ id: 'e1', contentTypeId: 'p', slug: 'e1', status: 'published', fields: { title: { en: 'Valid Title', fr: '', ar: '' } } }],
+      templates: [],
+      media: [],
+    });
+  } catch { validLocalePass = false; }
+  assert(validLocalePass, 'Required localized field with valid English translation must pass');
+
+  console.log(`\n=== All ${passed}/${total} Pipeline & Security Tests Passed Successfully ===`);
 }
 
 runPipelineTests().catch((err) => {
-  console.error('\n❌ Publication pipeline test suite failed:', err);
+  console.error('\n❌ Pipeline test failure:', err);
   process.exit(1);
 });

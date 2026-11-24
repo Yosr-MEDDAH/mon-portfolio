@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import { initializeApp, cert, getApps } from 'firebase-admin/app';
 import { getFirestore } from 'firebase-admin/firestore';
-import { writeFileSync, mkdirSync } from 'node:fs';
+import { writeFileSync, mkdirSync, renameSync, unlinkSync, existsSync } from 'node:fs';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -16,27 +16,66 @@ export const DEFAULT_OUTPUT_PATH = resolve(
 
 /**
  * Resolves Firebase Admin credentials from environment variables safely.
- * Never logs or exposes credentials.
+ * Validates required service account fields beyond project_id.
+ * Safely verifies GOOGLE_APPLICATION_CREDENTIALS existence without exposing secrets.
  */
 export function resolveCredentials() {
   const rawSecret = process.env.FIREBASE_SERVICE_ACCOUNT;
   if (rawSecret && rawSecret.trim().length > 0) {
     const trimmed = rawSecret.trim();
     try {
+      let parsed;
       if (trimmed.startsWith('{')) {
-        return JSON.parse(trimmed);
+        parsed = JSON.parse(trimmed);
+      } else {
+        const decoded = Buffer.from(trimmed, 'base64').toString('utf-8');
+        parsed = JSON.parse(decoded);
       }
-      // Attempt base64 decoding if not direct JSON
-      const decoded = Buffer.from(trimmed, 'base64').toString('utf-8');
-      return JSON.parse(decoded);
+
+      if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+        throw new Error('Service account must be a valid JSON object.');
+      }
+      if (!parsed.project_id || typeof parsed.project_id !== 'string') {
+        throw new Error('Service account missing valid project_id.');
+      }
+      if (
+        !parsed.client_email ||
+        typeof parsed.client_email !== 'string' ||
+        !parsed.client_email.includes('@')
+      ) {
+        throw new Error('Service account missing valid client_email.');
+      }
+      if (
+        !parsed.private_key ||
+        typeof parsed.private_key !== 'string' ||
+        !parsed.private_key.includes('PRIVATE KEY')
+      ) {
+        throw new Error('Service account missing valid private_key.');
+      }
+
+      return parsed;
     } catch (err) {
+      const isKnownCheck =
+        err instanceof Error &&
+        (err.message.includes('project_id') ||
+          err.message.includes('client_email') ||
+          err.message.includes('private_key'));
       throw new Error(
-        `Failed to parse FIREBASE_SERVICE_ACCOUNT: ${err instanceof Error ? err.message : String(err)}`
+        `Failed to parse FIREBASE_SERVICE_ACCOUNT: ${
+          isKnownCheck ? err.message : 'Invalid JSON or base64 structure.'
+        }`
       );
     }
   }
 
-  if (process.env.GOOGLE_APPLICATION_CREDENTIALS) {
+  const gacPath = process.env.GOOGLE_APPLICATION_CREDENTIALS;
+  if (gacPath && typeof gacPath === 'string' && gacPath.trim().length > 0) {
+    const trimmedPath = gacPath.trim();
+    if (!existsSync(trimmedPath)) {
+      throw new Error(
+        'GOOGLE_APPLICATION_CREDENTIALS file path does not exist on disk.'
+      );
+    }
     return null; // Will trigger applicationDefault() in Firebase Admin
   }
 
@@ -44,119 +83,344 @@ export function resolveCredentials() {
 }
 
 /**
- * Strips internal metadata and sanitizes content types to approved public fields only.
+ * Sanitizes a localized string object or string, preserving EN/FR/AR translations.
+ */
+export function sanitizeLocalizedString(val, fallback = '') {
+  if (typeof val === 'string') {
+    return { en: val, fr: val, ar: val };
+  }
+  if (val && typeof val === 'object' && !Array.isArray(val)) {
+    return {
+      en: typeof val.en === 'string' ? val.en : fallback,
+      fr: typeof val.fr === 'string' ? val.fr : '',
+      ar: typeof val.ar === 'string' ? val.ar : '',
+    };
+  }
+  return { en: fallback, fr: '', ar: '' };
+}
+
+/**
+ * Sanitizes defaultVisible settings: accepts boolean, or object limited to allowed contexts.
+ */
+export function sanitizeDefaultVisible(rawDefaultVisible) {
+  if (typeof rawDefaultVisible === 'boolean') {
+    return rawDefaultVisible;
+  }
+  if (
+    rawDefaultVisible &&
+    typeof rawDefaultVisible === 'object' &&
+    !Array.isArray(rawDefaultVisible)
+  ) {
+    const allowedContexts = ['card', 'detail', 'section'];
+    const sanitized = {};
+    for (const ctx of allowedContexts) {
+      if (typeof rawDefaultVisible[ctx] === 'boolean') {
+        sanitized[ctx] = rawDefaultVisible[ctx];
+      }
+    }
+    if (Object.keys(sanitized).length > 0) {
+      return sanitized;
+    }
+  }
+  return true;
+}
+
+/**
+ * Deep-sanitizes field options using an explicit allowlist.
+ */
+export function sanitizeFieldOptions(options) {
+  if (!options || typeof options !== 'object' || Array.isArray(options)) return undefined;
+  const allowed = {};
+
+  if (Array.isArray(options.choices)) {
+    allowed.choices = options.choices
+      .filter((c) => c && typeof c === 'object')
+      .map((c) => ({
+        value: String(c.value ?? ''),
+        label:
+          typeof c.label === 'object' && c.label !== null
+            ? sanitizeLocalizedString(c.label, String(c.value ?? ''))
+            : String(c.label ?? c.value ?? ''),
+      }));
+  }
+
+  if (typeof options.min === 'number') allowed.min = options.min;
+  if (typeof options.max === 'number') allowed.max = options.max;
+  if (typeof options.targetCollection === 'string') allowed.targetCollection = options.targetCollection;
+  if (Array.isArray(options.acceptedTypes)) {
+    allowed.acceptedTypes = options.acceptedTypes.map(String);
+  }
+
+  return Object.keys(allowed).length > 0 ? allowed : undefined;
+}
+
+/**
+ * Deep-sanitizes visibility settings using explicit allowlists and schema field keys.
+ */
+export function sanitizeVisibilitySettings(rawVisibility, rawContextVisibility, allowedFieldKeys) {
+  const allowedContexts = new Set(['card', 'detail', 'section']);
+  const defaultVisibility = {};
+
+  if (rawVisibility && typeof rawVisibility === 'object' && !Array.isArray(rawVisibility)) {
+    for (const [k, v] of Object.entries(rawVisibility)) {
+      if (allowedFieldKeys.has(k) && typeof v === 'boolean' && !k.startsWith('_')) {
+        defaultVisibility[k] = v;
+      }
+    }
+  }
+
+  const contextDefaultVisibility = {};
+  if (
+    rawContextVisibility &&
+    typeof rawContextVisibility === 'object' &&
+    !Array.isArray(rawContextVisibility)
+  ) {
+    for (const [ctx, fieldMap] of Object.entries(rawContextVisibility)) {
+      if (
+        allowedContexts.has(ctx) &&
+        fieldMap &&
+        typeof fieldMap === 'object' &&
+        !Array.isArray(fieldMap)
+      ) {
+        const map = {};
+        for (const [k, v] of Object.entries(fieldMap)) {
+          if (allowedFieldKeys.has(k) && typeof v === 'boolean' && !k.startsWith('_')) {
+            map[k] = v;
+          }
+        }
+        if (Object.keys(map).length > 0) {
+          contextDefaultVisibility[ctx] = map;
+        }
+      }
+    }
+  }
+
+  return { defaultVisibility, contextDefaultVisibility };
+}
+
+/**
+ * Deep-sanitizes content types to approved public fields only.
  */
 export function sanitizeContentType(id, data) {
+  const fields = Array.isArray(data.fields) ? data.fields : [];
+  const sanitizedFields = fields
+    .filter((f) => f && typeof f === 'object' && f.key)
+    .map((f) => {
+      const fieldDef = {
+        key: String(f.key),
+        name:
+          typeof f.name === 'object' && f.name !== null
+            ? sanitizeLocalizedString(f.name, String(f.key))
+            : String(f.name || f.key),
+        description: f.description
+          ? typeof f.description === 'object'
+            ? sanitizeLocalizedString(f.description, '')
+            : String(f.description)
+          : '',
+        type: String(f.type || 'text'),
+        required: Boolean(f.required),
+        localized: Boolean(f.localized),
+        defaultVisible: sanitizeDefaultVisible(f.defaultVisible),
+      };
+      const opts = sanitizeFieldOptions(f.options);
+      if (opts) fieldDef.options = opts;
+      return fieldDef;
+    });
+
+  const fieldKeys = new Set(sanitizedFields.map((f) => f.key));
+  const { defaultVisibility, contextDefaultVisibility } = sanitizeVisibilitySettings(
+    data.defaultVisibility,
+    data.contextDefaultVisibility,
+    fieldKeys
+  );
+
   return {
     id: String(id),
-    name: data.name,
-    description: data.description || '',
+    name:
+      typeof data.name === 'object' && data.name !== null
+        ? sanitizeLocalizedString(data.name, String(id))
+        : String(data.name || id),
+    description: data.description
+      ? typeof data.description === 'object'
+        ? sanitizeLocalizedString(data.description, '')
+        : String(data.description)
+      : '',
     slug: data.slug ? String(data.slug) : String(id),
-    fields: Array.isArray(data.fields)
-      ? data.fields.map((f) => ({
-          key: String(f.key),
-          name: f.name,
-          description: f.description || '',
-          type: f.type,
-          required: Boolean(f.required),
-          localized: Boolean(f.localized),
-          defaultVisible: f.defaultVisible !== undefined ? f.defaultVisible : true,
-          ...(f.options ? { options: f.options } : {}),
-        }))
-      : [],
-    defaultVisibility:
-      data.defaultVisibility && typeof data.defaultVisibility === 'object'
-        ? data.defaultVisibility
-        : {},
-    contextDefaultVisibility:
-      data.contextDefaultVisibility && typeof data.contextDefaultVisibility === 'object'
-        ? data.contextDefaultVisibility
-        : {},
+    fields: sanitizedFields,
+    defaultVisibility,
+    contextDefaultVisibility,
   };
 }
 
 /**
- * Strips internal metadata and sanitizes entries to approved public fields only.
+ * Sanitizes entries using an explicit public-field allowlist based on the content type schema.
+ * Rejects or safely skips published entries whose content type schema is missing.
+ * Never allows all fields by default.
+ * Preserves all underlying field values and context-specific visibility overrides.
  */
-export function sanitizeEntry(id, data) {
+export function sanitizeEntry(id, data, contentType) {
+  if (!contentType || !Array.isArray(contentType.fields)) {
+    return null; // Safely skip entry when schema is missing
+  }
+
+  const allowedKeys = new Set(contentType.fields.map((f) => f.key));
+  const rawFields =
+    data.fields && typeof data.fields === 'object' && !Array.isArray(data.fields)
+      ? data.fields
+      : {};
+  const sanitizedFields = {};
+
+  for (const [key, val] of Object.entries(rawFields)) {
+    if (allowedKeys.has(key)) {
+      sanitizedFields[key] = val; // Preserves EN/FR/AR and custom field values intact
+    }
+  }
+
+  // Deep-sanitize visibility overrides to schema-defined fields only
+  const {
+    defaultVisibility: visibilityOverrides,
+    contextDefaultVisibility: contextVisibilityOverrides,
+  } = sanitizeVisibilitySettings(
+    data.visibilityOverrides,
+    data.contextVisibilityOverrides,
+    allowedKeys
+  );
+
   return {
     id: String(id),
     contentTypeId: String(data.contentTypeId),
     slug: data.slug ? String(data.slug) : String(id),
     status: 'published',
-    fields: data.fields && typeof data.fields === 'object' ? data.fields : {},
-    visibilityOverrides:
-      data.visibilityOverrides && typeof data.visibilityOverrides === 'object'
-        ? data.visibilityOverrides
-        : {},
-    contextVisibilityOverrides:
-      data.contextVisibilityOverrides && typeof data.contextVisibilityOverrides === 'object'
-        ? data.contextVisibilityOverrides
-        : {},
+    fields: sanitizedFields,
+    visibilityOverrides,
+    contextVisibilityOverrides,
     publishedAt: data.publishedAt || data.createdAt || new Date().toISOString(),
   };
 }
 
 /**
- * Strips internal metadata and sanitizes templates to approved public fields only.
+ * Deep-sanitizes templates using explicit allowlists.
  */
 export function sanitizeTemplate(id, data) {
+  const allowedTargets = new Set(['card', 'detail', 'section']);
+  const allowedLayouts = new Set(['grid', 'list', 'single']);
+
+  let visibilitySettings = {};
+  if (
+    data.visibilitySettings &&
+    typeof data.visibilitySettings === 'object' &&
+    !Array.isArray(data.visibilitySettings)
+  ) {
+    const raw = data.visibilitySettings;
+    const sanitized = {};
+
+    if (raw.visibility && typeof raw.visibility === 'object' && !Array.isArray(raw.visibility)) {
+      const vis = {};
+      for (const [k, v] of Object.entries(raw.visibility)) {
+        if (typeof v === 'boolean' && !k.startsWith('_')) vis[k] = v;
+      }
+      sanitized.visibility = vis;
+    }
+
+    if (
+      raw.contextVisibility &&
+      typeof raw.contextVisibility === 'object' &&
+      !Array.isArray(raw.contextVisibility)
+    ) {
+      const ctxVis = {};
+      for (const [ctx, fMap] of Object.entries(raw.contextVisibility)) {
+        if (allowedTargets.has(ctx) && fMap && typeof fMap === 'object' && !Array.isArray(fMap)) {
+          const map = {};
+          for (const [k, v] of Object.entries(fMap)) {
+            if (typeof v === 'boolean' && !k.startsWith('_')) map[k] = v;
+          }
+          ctxVis[ctx] = map;
+        }
+      }
+      sanitized.contextVisibility = ctxVis;
+    }
+
+    for (const [k, v] of Object.entries(raw)) {
+      if (k !== 'visibility' && k !== 'contextVisibility' && typeof v === 'boolean' && !k.startsWith('_')) {
+        sanitized[k] = v;
+      }
+    }
+    visibilitySettings = sanitized;
+  }
+
   return {
     id: String(id),
-    name: data.name ? String(data.name) : String(id),
-    targetType: data.targetType || 'card',
-    layout: data.layout || 'grid',
-    aspectRatio: data.aspectRatio || '16/9',
-    description: data.description || '',
-    visibilitySettings:
-      data.visibilitySettings && typeof data.visibilitySettings === 'object'
-        ? data.visibilitySettings
-        : {},
+    name: String(data.name || id),
+    targetType: allowedTargets.has(data.targetType) ? data.targetType : 'card',
+    layout: allowedLayouts.has(data.layout) ? data.layout : 'grid',
+    aspectRatio: String(data.aspectRatio || '16/9'),
+    description: String(data.description || ''),
+    visibilitySettings,
   };
 }
 
 /**
- * Strips internal metadata and sanitizes media items to approved public fields only.
+ * Deep-sanitizes media items to approved public fields only.
  */
 export function sanitizeMediaItem(id, data) {
+  const allowedMediaTypes = new Set([
+    'image',
+    'video',
+    'audio',
+    'pdf',
+    'notebook',
+    'linkedin',
+    'external',
+    'other',
+  ]);
+
   return {
     id: String(id),
-    title: data.title ? String(data.title) : '',
-    fileName: data.fileName ? String(data.fileName) : '',
-    mimeType: data.mimeType ? String(data.mimeType) : '',
-    externalUrl: data.externalUrl ? String(data.externalUrl) : '',
-    mediaType: data.mediaType || 'image',
-    altText:
-      data.altText && typeof data.altText === 'object'
-        ? data.altText
-        : { en: String(data.altText || ''), fr: '', ar: '' },
-    captions:
-      data.captions && typeof data.captions === 'object'
-        ? data.captions
-        : { en: String(data.captions || ''), fr: '', ar: '' },
+    title: String(data.title || ''),
+    fileName: String(data.fileName || ''),
+    mimeType: String(data.mimeType || ''),
+    externalUrl: String(data.externalUrl || ''),
+    mediaType: allowedMediaTypes.has(data.mediaType) ? data.mediaType : 'image',
+    altText: sanitizeLocalizedString(data.altText, ''),
+    captions: sanitizeLocalizedString(data.captions, ''),
     tags: Array.isArray(data.tags) ? data.tags.map(String) : [],
   };
 }
 
 /**
- * Strips internal metadata and sanitizes site settings to approved public fields only.
+ * Deep-sanitizes site settings using explicit allowlists.
  */
 export function sanitizeSiteSettings(data) {
-  if (!data || typeof data !== 'object') return null;
+  if (!data || typeof data !== 'object' || Array.isArray(data)) return null;
+
+  const validLocales = ['en', 'fr', 'ar'];
+  const defaultLocale = validLocales.includes(data.defaultLocale) ? data.defaultLocale : 'en';
+  const supportedLocales = Array.isArray(data.supportedLocales)
+    ? data.supportedLocales.filter((l) => validLocales.includes(l))
+    : ['en', 'fr', 'ar'];
+
+  const siteTitle = sanitizeLocalizedString(data.siteTitle, 'Portfolio');
+
+  let seoDefaults = {};
+  if (data.seoDefaults && typeof data.seoDefaults === 'object' && !Array.isArray(data.seoDefaults)) {
+    const rawSeo = data.seoDefaults;
+    seoDefaults = {
+      metaTitle: sanitizeLocalizedString(rawSeo.metaTitle, ''),
+      metaDescription: sanitizeLocalizedString(rawSeo.metaDescription, ''),
+    };
+  }
+
   return {
-    siteTitle: data.siteTitle || { en: 'Portfolio', fr: 'Portfolio', ar: 'المعرض' },
-    defaultLocale: data.defaultLocale || 'en',
-    supportedLocales: Array.isArray(data.supportedLocales)
-      ? data.supportedLocales
-      : ['en', 'fr', 'ar'],
-    seoDefaults:
-      data.seoDefaults && typeof data.seoDefaults === 'object' ? data.seoDefaults : {},
+    siteTitle,
+    defaultLocale,
+    supportedLocales: supportedLocales.length > 0 ? supportedLocales : ['en', 'fr', 'ar'],
+    seoDefaults,
   };
 }
 
 /**
  * Validates the complete export payload before writing to disk.
- * Ensures data integrity, localized translations, and required structure.
+ * Preserves EN/FR/AR translations and English fallback, allowing empty optional translations.
  */
 export function validateExportPayload(payload) {
   if (!payload || typeof payload !== 'object') {
@@ -171,6 +435,7 @@ export function validateExportPayload(payload) {
     throw new Error('Export validation failed: contentTypes must be an array.');
   }
 
+  const ctMap = new Map();
   for (const ct of payload.contentTypes) {
     if (!ct.id || typeof ct.id !== 'string') {
       throw new Error('Export validation failed: Content type missing string id.');
@@ -184,6 +449,7 @@ export function validateExportPayload(payload) {
     if (!Array.isArray(ct.fields)) {
       throw new Error(`Export validation failed: Content type '${ct.id}' fields must be an array.`);
     }
+    ctMap.set(ct.id, ct);
   }
 
   if (!Array.isArray(payload.entries)) {
@@ -209,16 +475,53 @@ export function validateExportPayload(payload) {
       throw new Error(`Export validation failed: Entry '${entry.id}' fields must be an object.`);
     }
 
-    // Validate that multilingual fields do not have empty translations across all locales
-    for (const [key, val] of Object.entries(entry.fields)) {
-      if (val && typeof val === 'object' && !Array.isArray(val)) {
-        const hasLangKeys = ['en', 'fr', 'ar'].some((lang) => lang in val);
-        if (hasLangKeys) {
-          const localized = val;
-          if (!localized.en && !localized.fr && !localized.ar) {
+    // Verify required fields according to schema (if schema is available)
+    const ct = ctMap.get(entry.contentTypeId);
+    if (ct && Array.isArray(ct.fields)) {
+      for (const fieldDef of ct.fields) {
+        if (fieldDef.required) {
+          const val = entry.fields[fieldDef.key];
+          if (val === undefined || val === null) {
             throw new Error(
-              `Export validation failed: Localized field '${key}' in entry '${entry.id}' has empty translations.`
+              `Export validation failed: Required field '${fieldDef.key}' is missing in entry '${entry.id}'.`
             );
+          }
+
+          if (fieldDef.localized) {
+            // Required localized field: must be a plain object (not array, not primitive)
+            if (typeof val !== 'object' || Array.isArray(val) || val === null) {
+              throw new Error(
+                `Export validation failed: Required localized field '${fieldDef.key}' in entry '${entry.id}' must be a plain object with language keys.`
+              );
+            }
+            // Each present language value must be a non-empty string (reject numbers, booleans, etc.)
+            const supportedLangs = ['en', 'fr', 'ar'];
+            let hasNonEmptyString = false;
+            for (const lang of supportedLangs) {
+              const translation = val[lang];
+              if (translation !== undefined && translation !== null && translation !== '') {
+                if (typeof translation !== 'string') {
+                  throw new Error(
+                    `Export validation failed: Required localized field '${fieldDef.key}' in entry '${entry.id}' has invalid non-string value for locale '${lang}'.`
+                  );
+                }
+                if (translation.trim().length > 0) {
+                  hasNonEmptyString = true;
+                }
+              }
+            }
+            if (!hasNonEmptyString) {
+              throw new Error(
+                `Export validation failed: Required localized field '${fieldDef.key}' in entry '${entry.id}' must have a non-empty string (after trim) in at least one of: en, fr, ar.`
+              );
+            }
+          } else {
+            // Non-localized required field: reject empty strings
+            if (typeof val === 'string' && val.trim().length === 0) {
+              throw new Error(
+                `Export validation failed: Required field '${fieldDef.key}' in entry '${entry.id}' cannot be blank.`
+              );
+            }
           }
         }
       }
@@ -252,7 +555,7 @@ export function validateExportPayload(payload) {
 /**
  * Core export logic: extracts published CMS data and filters out all non-public content.
  * Read failures are FATAL — network/permission errors reject and abort immediately.
- * Empty collections are valid.
+ * Fail-fast: Firestore or validation errors never overwrite or corrupt the last valid JSON.
  *
  * @param {object} options
  * @param {import('firebase-admin/firestore').Firestore} options.db - Firestore instance
@@ -266,14 +569,17 @@ export async function exportCmsData({ db, outputPath = DEFAULT_OUTPUT_PATH }) {
   console.log('[CMS Export] Querying contentTypes collection...');
   const contentTypesSnap = await db.collection('contentTypes').get();
   const contentTypes = [];
+  const contentTypesMap = new Map();
   for (const doc of contentTypesSnap.docs) {
     const data = doc.data();
     if (data.isArchived) continue;
-    contentTypes.push(sanitizeContentType(doc.id, data));
+    const sanitized = sanitizeContentType(doc.id, data);
+    contentTypes.push(sanitized);
+    contentTypesMap.set(sanitized.id, sanitized);
   }
   console.log(`[CMS Export] Exported ${contentTypes.length} active content types.`);
 
-  // 2. Export Entries: STRICTLY status === 'published'. Read failures are fatal.
+  // 2. Export Entries: STRICTLY status === 'published' and non-archived. Read failures are fatal.
   console.log('[CMS Export] Querying entries collection for status === "published"...');
   const entriesSnap = await db
     .collection('entries')
@@ -284,14 +590,24 @@ export async function exportCmsData({ db, outputPath = DEFAULT_OUTPUT_PATH }) {
   for (const doc of entriesSnap.docs) {
     const data = doc.data();
 
-    // Defense in depth: enforce status === 'published' and not archived
     if (data.status !== 'published') continue;
     if (data.isArchived === true) continue;
 
-    entries.push(sanitizeEntry(doc.id, data));
+    const ct = contentTypesMap.get(data.contentTypeId);
+    if (!ct) {
+      console.warn(
+        `[CMS Export] Warning: Skipping published entry '${doc.id}'; content type schema '${data.contentTypeId}' is missing.`
+      );
+      continue; // Safely skip entries with missing schemas; never allow all fields by default
+    }
+
+    const sanitized = sanitizeEntry(doc.id, data, ct);
+    if (sanitized) {
+      entries.push(sanitized);
+    }
   }
   console.log(
-    `[CMS Export] Exported ${entries.length} published entries (drafts and archived entries excluded).`
+    `[CMS Export] Exported ${entries.length} published entries (drafts, archived entries, and schemaless entries excluded).`
   );
 
   // 3. Export Templates. Read failures are fatal. Empty collection is valid.
@@ -300,11 +616,22 @@ export async function exportCmsData({ db, outputPath = DEFAULT_OUTPUT_PATH }) {
   const templates = templatesSnap.docs.map((doc) => sanitizeTemplate(doc.id, doc.data()));
   console.log(`[CMS Export] Exported ${templates.length} layout templates.`);
 
-  // 4. Export Media References. Read failures are fatal. Empty collection is valid.
+  // 4. Export Media: ONLY items where isAwaitingPublication === false and externalUrl is valid.
+  // Exclude true, undefined, null, or invalid values. Do not use isPublic.
   console.log('[CMS Export] Querying media collection...');
   const mediaSnap = await db.collection('media').get();
-  const media = mediaSnap.docs.map((doc) => sanitizeMediaItem(doc.id, doc.data()));
-  console.log(`[CMS Export] Exported ${media.length} media metadata records.`);
+  const media = [];
+  for (const doc of mediaSnap.docs) {
+    const data = doc.data();
+    // Strict publication approval: ONLY isAwaitingPublication === false
+    if (data.isAwaitingPublication !== false) continue;
+    if (data.isArchived === true) continue;
+    if (!data.externalUrl || typeof data.externalUrl !== 'string' || !data.externalUrl.trim()) {
+      continue;
+    }
+    media.push(sanitizeMediaItem(doc.id, data));
+  }
+  console.log(`[CMS Export] Exported ${media.length} public media metadata records.`);
 
   // 5. Export Site Settings. Read failures are fatal. Non-existent doc is valid (null).
   console.log('[CMS Export] Checking siteSettings/global...');
@@ -319,6 +646,8 @@ export async function exportCmsData({ db, outputPath = DEFAULT_OUTPUT_PATH }) {
   // EXCLUSIONS AUDIT (verified omitted from export):
   // - drafts: omitted by query + filter
   // - archived entries: omitted by filter
+  // - unapproved fields: stripped via explicit schema allowlist
+  // - unapproved media: omitted by strict isAwaitingPublication === false check
   // - adminUsers: NEVER queried
   // - revisions: NEVER queried
   // - activityLogs: NEVER queried
@@ -336,9 +665,22 @@ export async function exportCmsData({ db, outputPath = DEFAULT_OUTPUT_PATH }) {
   // Validate complete export before writing
   validateExportPayload(payload);
 
-  mkdirSync(dirname(outputPath), { recursive: true });
-  writeFileSync(outputPath, JSON.stringify(payload, null, 2), 'utf-8');
-  console.log(`[CMS Export] Wrote production content payload to: ${outputPath}`);
+  // Atomic write: write to temp file first, then replace existing file atomically
+  const outDir = dirname(outputPath);
+  mkdirSync(outDir, { recursive: true });
+  const tempPath = resolve(outDir, `.published-content.tmp.${Date.now()}`);
+  try {
+    writeFileSync(tempPath, JSON.stringify(payload, null, 2), 'utf-8');
+    renameSync(tempPath, outputPath);
+    console.log(`[CMS Export] Wrote production content payload to: ${outputPath}`);
+  } catch (writeErr) {
+    if (existsSync(tempPath)) {
+      try {
+        unlinkSync(tempPath);
+      } catch {}
+    }
+    throw writeErr;
+  }
 
   return payload;
 }
@@ -347,22 +689,16 @@ export async function exportCmsData({ db, outputPath = DEFAULT_OUTPUT_PATH }) {
  * CLI execution entry point
  */
 async function main() {
-  const credentials = resolveCredentials();
+  let credentials;
+  try {
+    credentials = resolveCredentials();
+  } catch (err) {
+    console.error(`[CMS Export Error] ${err instanceof Error ? err.message : String(err)}`);
+    process.exit(1);
+  }
 
   if (credentials === undefined) {
-    console.error(
-      '================================================================================'
-    );
     console.error('[CMS Export Error] Missing Firebase Service Account credentials.');
-    console.error(
-      'Please configure the FIREBASE_SERVICE_ACCOUNT secret in GitHub repository settings,'
-    );
-    console.error(
-      'or set FIREBASE_SERVICE_ACCOUNT / GOOGLE_APPLICATION_CREDENTIALS in your environment.'
-    );
-    console.error(
-      '================================================================================'
-    );
     process.exit(1);
   }
 
@@ -385,7 +721,7 @@ async function main() {
 // Run main if called directly from CLI
 if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
   main().catch((err) => {
-    console.error('[CMS Export Fatal Error]:', err.message);
+    console.error('[CMS Export Fatal Error]:', err instanceof Error ? err.message : String(err));
     process.exit(1);
   });
 }

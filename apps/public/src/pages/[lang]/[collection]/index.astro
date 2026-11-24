@@ -8,8 +8,10 @@ import { t } from '../../../i18n/utils.ts';
 import type { SupportedLocale } from '../../../i18n/types.ts';
 
 export async function getStaticPaths() {
-  const collections = getAllRegisteredCollections();
-  const languages: SupportedLocale[] = ['fr', 'ar'];
+  const collections = getAllRegisteredCollections().filter(
+    (item) => item.contentType.slug !== 'projects'
+  );
+  const languages: SupportedLocale[] = ['fr', 'ar', 'en'];
   const paths: Array<{
     params: { lang: string; collection: string };
     props: { collectionItem: ContentTypeRegistryEntry; locale: SupportedLocale };

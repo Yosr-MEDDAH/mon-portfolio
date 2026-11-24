@@ -22,6 +22,7 @@ import type {
   TemplateDefinition,
 } from '../shared/types.ts';
 import { validateContentType, validateEntry } from '../shared/validation.ts';
+import { getNormalizedFieldNames } from '../shared/labels.ts';
 
 /**
  * Strips all `undefined` values recursively from an object tree before writing to Firestore.
@@ -66,6 +67,18 @@ function setLocal<T>(key: string, value: T): void {
   }
 }
 
+// Normalizes a content type definition ensuring all field labels have clean, non-generic multilingual names
+export function normalizeContentType(ct: ContentTypeDefinition): ContentTypeDefinition {
+  if (!ct || !Array.isArray(ct.fields)) return ct;
+  return {
+    ...ct,
+    fields: ct.fields.map((f) => ({
+      ...f,
+      name: getNormalizedFieldNames(f),
+    })),
+  };
+}
+
 // Initial seed data for offline mode
 const DEFAULT_CONTENT_TYPES: ContentTypeDefinition[] = [
   {
@@ -107,19 +120,29 @@ const DEFAULT_CONTENT_TYPES: ContentTypeDefinition[] = [
     slug: 'projects',
     defaultVisibility: {
       title: true,
+      slug: true,
+      shortDescription: true,
       description: true,
-      date: true,
       coverImage: true,
-      tags: true,
-      externalLink: true,
+      technologies: true,
+      liveUrl: true,
+      githubUrl: true,
+      startDate: true,
+      endDate: true,
+      featured: true,
     },
     fields: [
       { key: 'title', name: { en: 'Title', fr: 'Titre', ar: 'العنوان' }, type: 'text', required: true, localized: true, defaultVisible: true },
-      { key: 'description', name: { en: 'Description', fr: 'Description', ar: 'الوصف' }, type: 'textarea', required: true, localized: true, defaultVisible: true },
-      { key: 'date', name: { en: 'Date', fr: 'Date', ar: 'التاريخ' }, type: 'date', required: true, localized: false, defaultVisible: true },
-      { key: 'coverImage', name: { en: 'Cover Image', fr: 'Image de couverture', ar: 'صورة الغلاف' }, type: 'image', required: true, localized: false, defaultVisible: true },
-      { key: 'tags', name: { en: 'Tags', fr: 'Mots-clés', ar: 'الوسوم' }, type: 'tags', required: true, localized: false, defaultVisible: true },
-      { key: 'externalLink', name: { en: 'External Link', fr: 'Lien externe', ar: 'الرابط الخارجي' }, type: 'url', required: false, localized: false, defaultVisible: true },
+      { key: 'slug', name: { en: 'URL Slug', fr: 'Identifiant URL', ar: 'معرّف الرابط' }, type: 'text', required: true, localized: false, defaultVisible: true },
+      { key: 'shortDescription', name: { en: 'Short Description', fr: 'Description courte', ar: 'وصف مختصر' }, type: 'textarea', required: true, localized: true, defaultVisible: true },
+      { key: 'description', name: { en: 'Description', fr: 'Description', ar: 'الوصف' }, type: 'textarea', required: false, localized: true, defaultVisible: true },
+      { key: 'coverImage', name: { en: 'Cover Image', fr: 'Image de couverture', ar: 'صورة الغلاف' }, type: 'image', required: false, localized: false, defaultVisible: true },
+      { key: 'technologies', name: { en: 'Technologies', fr: 'Technologies', ar: 'التقنيات' }, type: 'tags', required: false, localized: false, defaultVisible: true },
+      { key: 'liveUrl', name: { en: 'Live Demo URL', fr: 'Lien de démonstration', ar: 'رابط العرض' }, type: 'url', required: false, localized: false, defaultVisible: true },
+      { key: 'githubUrl', name: { en: 'GitHub URL', fr: 'Lien GitHub', ar: 'رابط GitHub' }, type: 'url', required: false, localized: false, defaultVisible: true },
+      { key: 'startDate', name: { en: 'Start Date', fr: 'Date de début', ar: 'تاريخ البداية' }, type: 'date', required: false, localized: false, defaultVisible: true },
+      { key: 'endDate', name: { en: 'End Date', fr: 'Date de fin', ar: 'تاريخ النهاية' }, type: 'date', required: false, localized: false, defaultVisible: true },
+      { key: 'featured', name: { en: 'Featured Project', fr: 'Projet mis en avant', ar: 'مشروع مميز' }, type: 'boolean', required: false, localized: false, defaultVisible: true },
     ],
     createdAt: '2026-04-15T10:00:00Z',
     updatedAt: '2026-04-15T10:00:00Z',
@@ -348,18 +371,18 @@ export async function getRevisionsForEntity(
 export async function fetchContentTypes(includeArchived = false): Promise<ContentTypeDefinition[]> {
   if (!isMockMode && db) {
     const snap = await getDocs(collection(db, 'contentTypes'));
-    const items = snap.docs.map((d) => d.data() as ContentTypeDefinition);
+    const items = snap.docs.map((d) => normalizeContentType(d.data() as ContentTypeDefinition));
     return includeArchived ? items : items.filter((i) => !i.isArchived);
   }
 
-  const items = getLocal<ContentTypeDefinition[]>('contentTypes', DEFAULT_CONTENT_TYPES);
+  const items = getLocal<ContentTypeDefinition[]>('contentTypes', DEFAULT_CONTENT_TYPES).map(normalizeContentType);
   return includeArchived ? items : items.filter((i) => !i.isArchived);
 }
 
 export async function fetchContentTypeById(id: string): Promise<ContentTypeDefinition | null> {
   if (!isMockMode && db) {
     const docSnap = await getDoc(doc(db, 'contentTypes', id));
-    return docSnap.exists() ? (docSnap.data() as ContentTypeDefinition) : null;
+    return docSnap.exists() ? normalizeContentType(docSnap.data() as ContentTypeDefinition) : null;
   }
   const all = await fetchContentTypes(true);
   return all.find((item) => item.id === id) || null;

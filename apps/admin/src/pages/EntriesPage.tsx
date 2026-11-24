@@ -17,12 +17,13 @@ import { useNotify } from '../context/NotificationContext.tsx';
 import { useAdminLang } from '../context/LanguageContext.tsx';
 import { DynamicFieldEditor } from '../components/DynamicFieldEditor.tsx';
 import { VisibilityManager } from '../components/VisibilityManager.tsx';
-import { validateEntry } from '../shared/validation.ts';
+import { validateEntry, normalizeEntryFields } from '../shared/validation.ts';
+import { getFieldLabel } from '../shared/labels.ts';
 
 export const EntriesPage: React.FC = () => {
   const { user } = useAuth();
   const { notify } = useNotify();
-  const { t } = useAdminLang();
+  const { t, locale } = useAdminLang();
 
   const [types, setTypes] = useState<ContentTypeDefinition[]>([]);
   const [entries, setEntries] = useState<ContentEntry[]>([]);
@@ -96,7 +97,11 @@ export const EntriesPage: React.FC = () => {
       return;
     }
     setEditingContentType(ct);
-    setEditingEntry(JSON.parse(JSON.stringify(entry)));
+    const cloned = JSON.parse(JSON.stringify(entry));
+    if (ct.fields.some((f) => f.key === 'slug') && !cloned.fields.slug) {
+      cloned.fields.slug = cloned.slug;
+    }
+    setEditingEntry(cloned);
     setIsNew(false);
     setValidationErrors({});
   };
@@ -110,10 +115,19 @@ export const EntriesPage: React.FC = () => {
       return;
     }
 
+    const sanitizedSlug = editingEntry.slug.trim().toLowerCase().replace(/[^a-z0-9_-]/g, '-');
+    const updatedFields = { ...editingEntry.fields };
+    if (editingContentType.fields.some((f) => f.key === 'slug')) {
+      updatedFields.slug = sanitizedSlug;
+    }
+
+    const normalizedFields = normalizeEntryFields(editingContentType, updatedFields);
+
     const toSave: ContentEntry = {
       ...editingEntry,
       status: targetStatus,
-      slug: editingEntry.slug.trim().toLowerCase().replace(/[^a-z0-9_-]/g, '-'),
+      slug: sanitizedSlug,
+      fields: normalizedFields,
     };
 
     try {
@@ -285,13 +299,20 @@ export const EntriesPage: React.FC = () => {
 
               <div>
                 <label className="block text-xs font-medium text-content mb-1">
-                  URL Slug * (Used for routing /projects/[slug].html)
+                  {getFieldLabel({ key: 'slug' }, locale)} * (Used for routing /projects/[slug].html)
                 </label>
                 <input
                   type="text"
                   required
                   value={editingEntry.slug}
-                  onChange={(e) => setEditingEntry({ ...editingEntry, slug: e.target.value })}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    const updatedFields = { ...editingEntry.fields };
+                    if (editingContentType.fields.some((f) => f.key === 'slug')) {
+                      updatedFields.slug = val;
+                    }
+                    setEditingEntry({ ...editingEntry, slug: val, fields: updatedFields });
+                  }}
                   placeholder="e.g. quantum-cryptography-ai"
                   className="w-full px-3 py-2 text-xs font-mono bg-surface border border-border rounded text-content placeholder-content-muted focus:border-mg transition-colors"
                 />
@@ -310,7 +331,16 @@ export const EntriesPage: React.FC = () => {
             <DynamicFieldEditor
               fields={editingContentType.fields}
               values={editingEntry.fields}
-              onChange={(newFields) => setEditingEntry({ ...editingEntry, fields: newFields })}
+              onChange={(newFields) => {
+                const newSlug = typeof newFields.slug === 'string' && newFields.slug.trim()
+                  ? newFields.slug.trim().toLowerCase().replace(/[^a-z0-9_-]/g, '-')
+                  : editingEntry.slug;
+                setEditingEntry({
+                  ...editingEntry,
+                  slug: newSlug,
+                  fields: newFields,
+                });
+              }}
               errors={validationErrors}
             />
           </div>
@@ -369,7 +399,7 @@ export const EntriesPage: React.FC = () => {
               {filteredEntries.map((e) => {
                 const ct = types.find((t) => t.id === e.contentTypeId);
                 const title = typeof e.fields.title === 'object'
-                  ? (e.fields.title as { en?: string })?.en || e.slug
+                  ? (e.fields.title as Record<string, string>)?.[locale] || (e.fields.title as Record<string, string>)?.['en'] || e.slug
                   : String(e.fields.title || e.slug);
 
                 return (
@@ -393,7 +423,7 @@ export const EntriesPage: React.FC = () => {
                         </span>
                       </div>
                       <div className="text-xs text-content-muted mt-1 flex items-center gap-4">
-                        <span>Collection: <strong className="text-content font-medium">{ct ? (typeof ct.name === 'string' ? ct.name : ct.name.en) : e.contentTypeId}</strong></span>
+                        <span>Collection: <strong className="text-content font-medium">{ct ? (typeof ct.name === 'string' ? ct.name : ct.name[locale] || ct.name.en) : e.contentTypeId}</strong></span>
                         {Boolean(e.fields.date) && <span>Date: {String(e.fields.date)}</span>}
                       </div>
                     </div>

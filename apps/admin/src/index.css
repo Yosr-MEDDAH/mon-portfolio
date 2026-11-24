@@ -4,6 +4,7 @@
 
 /* ── PORTFOLIO DESIGN SYSTEM TOKENS ───────────────────── */
 :root {
+  color-scheme: light;
   --cream: #f7f5f0;
   --surface: #ffffff;
   --text: #1c1c1c;
@@ -23,6 +24,7 @@
 }
 
 [data-theme="dark"] {
+  color-scheme: dark;
   --cream: #0f0f0f;
   --surface: #1a1a1a;
   --text: #f0f0f0;

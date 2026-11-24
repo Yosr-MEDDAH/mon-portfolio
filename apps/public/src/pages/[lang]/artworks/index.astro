@@ -1,0 +1,118 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import { PORTFOLIO_DATA } from '../../../data/portfolio.ts';
+import { withBase } from '../../../utils/url.ts';
+import { t } from '../../../i18n/utils.ts';
+import type { SupportedLocale } from '../../../i18n/types.ts';
+
+export async function getStaticPaths() {
+  return [
+    { params: { lang: 'en' } },
+    { params: { lang: 'fr' } },
+    { params: { lang: 'ar' } },
+  ];
+}
+
+const { lang } = Astro.params;
+const locale = lang as SupportedLocale;
+
+const n = PORTFOLIO_DATA.artworks.length;
+const countText = locale === 'ar'
+  ? `${n} أعمال فنية`
+  : locale === 'en'
+  ? `${n} artworks`
+  : `${n} créations`;
+
+const pageTitle = `${t('page.artworks', locale)} — ${PORTFOLIO_DATA.name}`;
+const pageDesc = `Créations artistiques, peintures et calligraphies de ${PORTFOLIO_DATA.name}.`;
+
+const backHref = withBase(`/${locale}/index.html`);
+---
+
+<BaseLayout
+  title={pageTitle}
+  description={pageDesc}
+  locale={locale}
+  currentPath={`/${locale}/artworks/index.html`}
+>
+  <div class="container page-header">
+    <a href={backHref} class="back-link">{t('back', locale)}</a>
+    <p class="section-label">{t('section.artworks', locale)}</p>
+    <h1 class="page-title" id="page-title">{t('page.artworks', locale)}</h1>
+    <p class="page-count" id="page-count">{countText}</p>
+  </div>
+
+  <section aria-labelledby="page-title" style="padding-top:0">
+    <div class="container">
+      <div
+        class="artworks-grid reveal visible"
+        id="artworks-grid"
+        role="list"
+        style="grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 1.25rem;"
+      >
+        {PORTFOLIO_DATA.artworks.map((aw) => {
+          const imgSrc = withBase(`/${aw.image.replace(/^\//, '')}`);
+          const isVid = aw.image.endsWith('.mp4');
+          return (
+            <figure class="artwork-item reveal visible" role="listitem">
+              {isVid ? (
+                <video
+                  src={imgSrc}
+                  autoplay
+                  loop
+                  muted
+                  playsinline
+                  style="width:100%; height:100%; object-fit:cover;"
+                />
+              ) : (
+                <img
+                  src={imgSrc}
+                  alt={aw.title}
+                  loading="lazy"
+                  decoding="async"
+                  style="width:100%; height:100%; object-fit:cover;"
+                  onload="this.classList.add('loaded'); this.parentElement?.classList.add('loaded');"
+                  class="loaded"
+                />
+              )}
+              {aw.title && (
+                <figcaption
+                  class="artwork-caption"
+                  style="display:flex; justify-content:space-between; align-items:center;"
+                >
+                  <span>{aw.title}</span>
+                  {(aw.youtube || aw.behance) && (
+                    <div style="display:flex; gap:8px;">
+                      {aw.youtube && (
+                        <a
+                          href={aw.youtube}
+                          target="_blank"
+                          rel="noopener"
+                          style="color:#ff4e4e; text-decoration:none; font-size:16px;"
+                          aria-label={`Voir ${aw.title} sur YouTube`}
+                        >
+                          ▶
+                        </a>
+                      )}
+                      {aw.behance && (
+                        <a
+                          href={aw.behance}
+                          target="_blank"
+                          rel="noopener"
+                          style="color:#5b8eff; text-decoration:none; font-size:16px; font-weight:bold; font-family:sans-serif;"
+                          aria-label={`Voir ${aw.title} sur Behance`}
+                        >
+                          Bē
+                        </a>
+                      )}
+                    </div>
+                  )}
+                </figcaption>
+              )}
+            </figure>
+          );
+        })}
+      </div>
+    </div>
+  </section>
+</BaseLayout>

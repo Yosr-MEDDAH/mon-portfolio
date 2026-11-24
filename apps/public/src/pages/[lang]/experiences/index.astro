@@ -1,0 +1,121 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import {
+  PORTFOLIO_DATA,
+  resolvePortfolioText,
+} from '../../../data/portfolio.ts';
+import { withBase } from '../../../utils/url.ts';
+import { t } from '../../../i18n/utils.ts';
+import type { SupportedLocale } from '../../../i18n/types.ts';
+
+export async function getStaticPaths() {
+  return [
+    { params: { lang: 'en' } },
+    { params: { lang: 'fr' } },
+    { params: { lang: 'ar' } },
+  ];
+}
+
+const { lang } = Astro.params;
+const locale = lang as SupportedLocale;
+
+const n = PORTFOLIO_DATA.experiences.length;
+const countText = locale === 'ar'
+  ? `${n} خبرة مهنية`
+  : locale === 'en'
+  ? `${n} positions`
+  : `${n} expériences`;
+
+const pageTitle = `${t('page.experience', locale)} — ${PORTFOLIO_DATA.name}`;
+const pageDesc = `Parcours professionnel et stages de ${PORTFOLIO_DATA.name} : développement web, frontend, accessibilité.`;
+
+const backHref = withBase(`/${locale}/index.html`);
+---
+
+<BaseLayout
+  title={pageTitle}
+  description={pageDesc}
+  locale={locale}
+  currentPath={`/${locale}/experiences/index.html`}
+>
+  <div class="container page-header">
+    <a href={backHref} class="back-link">{t('back', locale)}</a>
+    <p class="section-label">{t('section.experience', locale)}</p>
+    <h1 class="page-title" id="page-title">{t('page.experience', locale)}</h1>
+    <p class="page-count" id="page-count">{countText}</p>
+  </div>
+
+  <section aria-labelledby="page-title" style="padding-top:0">
+    <div class="container">
+      <div class="timeline" id="timeline" role="list">
+        {PORTFOLIO_DATA.experiences.map((e) => {
+          const role = resolvePortfolioText(e.role, locale);
+          const desc = resolvePortfolioText(e.description, locale);
+          return (
+            <article class="exp-card reveal visible" role="listitem">
+              <div>
+                <div class="exp-role">{role}</div>
+                <div class="exp-co">{e.company} · {e.location}</div>
+              </div>
+              <div class="exp-period">{e.period}</div>
+              <p class="exp-desc">{desc}</p>
+              {e.images && e.images.length > 0 && (
+                <div
+                  class="exp-gallery"
+                  style="display:flex; gap:10px; overflow-x:auto; margin-top:12px; padding-bottom:8px;"
+                >
+                  {e.images.map((img) => (
+                    <img
+                      src={withBase(`/${img.replace(/^\//, '')}`)}
+                      alt={role}
+                      loading="lazy"
+                      style="height:120px; width:auto; border-radius:6px; border:1px solid var(--border); object-fit:cover;"
+                    />
+                  ))}
+                </div>
+              )}
+              {e.tags && e.tags.length > 0 && (
+                <div class="exp-tags tags">
+                  {e.tags.map((tag) => (
+                    <span class="tag">{tag}</span>
+                  ))}
+                </div>
+              )}
+            </article>
+          );
+        })}
+      </div>
+
+      {PORTFOLIO_DATA.associative && PORTFOLIO_DATA.associative.length > 0 && (
+        <div style="margin-top: 3.5rem;">
+          <p class="section-label" style="margin-bottom: 1.5rem;">
+            {locale === 'ar' ? 'النشاط الجمعياتي' : locale === 'en' ? 'Community & Volunteering' : 'Vie associative'}
+          </p>
+          <div class="timeline" role="list">
+            {PORTFOLIO_DATA.associative.map((a) => {
+              const role = resolvePortfolioText(a.role, locale);
+              const desc = resolvePortfolioText(a.description, locale);
+              return (
+                <article class="exp-card reveal visible" role="listitem">
+                  <div>
+                    <div class="exp-role">{role}</div>
+                    <div class="exp-co">{a.company}</div>
+                  </div>
+                  <div class="exp-period">{a.period}</div>
+                  <p class="exp-desc">{desc}</p>
+                  {a.tags && a.tags.length > 0 && (
+                    <div class="exp-tags tags">
+                      {a.tags.map((tag) => (
+                        <span class="tag">{tag}</span>
+                      ))}
+                    </div>
+                  )}
+                </article>
+              );
+            })}
+          </div>
+        </div>
+      )}
+    </div>
+  </section>
+</BaseLayout>

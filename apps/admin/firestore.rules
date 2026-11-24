@@ -12,7 +12,8 @@ service cloud.firestore {
     function isAdmin() {
       return isAuthenticated() &&
         exists(/databases/$(database)/documents/adminUsers/$(request.auth.uid)) &&
-        get(/databases/$(database)/documents/adminUsers/$(request.auth.uid)).data.isActive == true;
+        get(/databases/$(database)/documents/adminUsers/$(request.auth.uid)).data.isActive == true &&
+        get(/databases/$(database)/documents/adminUsers/$(request.auth.uid)).data.role == 'admin';
     }
 
     // Default deny all access to everything unless explicitly authorized below

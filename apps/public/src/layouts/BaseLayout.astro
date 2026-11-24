@@ -2,7 +2,8 @@
 import { LOCALE_CONFIGS, DEFAULT_LOCALE, type SupportedLocale } from '../i18n/types.ts';
 import { t } from '../i18n/utils.ts';
 import { withBase } from '../utils/url.ts';
-import LanguageSelector from '../components/LanguageSelector.astro';
+import Navbar from '../components/Navbar.astro';
+import Footer from '../components/Footer.astro';
 
 interface Props {
   title?: string;
@@ -12,121 +13,86 @@ interface Props {
 }
 
 const {
-  title = 'Yosr Meddah - Portfolio',
-  description = 'Portfolio of Yosr Meddah',
+  title = 'Portfolio — Yosr Meddah',
+  description = 'Portfolio of Yosr Meddah — Software Engineering, Accessibility, Eco-design',
   locale = DEFAULT_LOCALE,
   currentPath = Astro.url.pathname,
 } = Astro.props;
 
 const localeConfig = LOCALE_CONFIGS[locale] || LOCALE_CONFIGS[DEFAULT_LOCALE];
-const isRtl = localeConfig.dir === 'rtl';
-
-// Localized Navigation Links
-const homeHref = locale === DEFAULT_LOCALE
-  ? withBase('/index.html')
-  : withBase(`/${locale}/index.html`);
-
-const projectsHref = locale === DEFAULT_LOCALE
-  ? withBase('/projects.html')
-  : withBase(`/${locale}/projects/index.html`);
-
-const researchHref = locale === DEFAULT_LOCALE
-  ? withBase('/research/index.html')
-  : withBase(`/${locale}/research/index.html`);
-
-const faviconHref = withBase('/favicon.svg');
+const styleHref = withBase('/style.css');
+const faviconHref = withBase('/assets/logo-noir.png');
 ---
 
 <!DOCTYPE html>
 <html lang={localeConfig.lang} dir={localeConfig.dir}>
   <head>
-    <meta charset="utf-8" />
+    <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="icon" type="image/svg+xml" href={faviconHref} />
-    <meta name="generator" content={Astro.generator} />
-    <meta name="description" content={description} />
     <title>{title}</title>
-    <style is:global>
-      *, *::before, *::after { box-sizing: border-box; }
-      body {
-        margin: 0;
-        font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-        color: #1a1a1a;
-        background-color: #fcfcfc;
-        line-height: 1.6;
-      }
-      a { color: inherit; text-decoration: none; }
-      img, video { max-width: 100%; height: auto; }
+    <meta name="description" content={description} />
+    <link rel="icon" type="image/png" href={faviconHref} />
 
-      /* RTL styling adjustments */
-      [dir="rtl"] {
-        text-align: right;
-      }
-      [dir="rtl"] .rtl-flip {
-        transform: scaleX(-1);
-      }
+    <!-- Google Fonts: Amiri, Instrument Serif, IBM Plex Sans, IBM Plex Sans Arabic -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Instrument+Serif:ital@0;1&family=IBM+Plex+Sans:wght@300;400;500&family=IBM+Plex+Sans+Arabic:wght@300;400;500&display=swap"
+      rel="stylesheet"
+    />
 
-      /* Accessible skip-link */
-      .skip-to-content {
-        position: absolute;
-        top: -100px;
-        left: 1rem;
-        background: #4f46e5;
-        color: #ffffff;
-        padding: 0.5rem 1rem;
-        z-index: 100;
-        border-radius: 0.375rem;
-        transition: top 0.2s ease;
-      }
-      .skip-to-content:focus {
-        top: 1rem;
-      }
-    </style>
+    <!-- Devicon icons for technologies -->
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/gh/devicons/devicon@v2.15.1/devicon.min.css"
+    />
+
+    <!-- Original Portfolio Design System CSS -->
+    <link rel="stylesheet" href={styleHref} />
+
+    <!-- Anti-flash theme initialization -->
+    <script is:inline>
+      (function(){
+        var t = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme:dark)').matches ? 'dark' : 'light');
+        document.documentElement.dataset.theme = t;
+      })();
+    </script>
   </head>
-  <body class="min-h-screen flex flex-col justify-between">
-    <!-- Mandatory accessible anchor for keyboard users and URL #main -->
-    <a href="#main" class="skip-to-content">
+  <body>
+    <!-- Skip to main content accessible link -->
+    <a class="skip-link" href="#main" id="skip-link">
       {t('nav.skipToContent', locale)}
     </a>
 
-    <!-- Global Header -->
-    <header class="border-b border-neutral-200 bg-white/95 backdrop-blur-xs sticky top-0 z-30">
-      <div class="max-w-6xl mx-auto px-4 sm:px-6 py-4 flex flex-wrap items-center justify-between gap-4">
-        <a href={homeHref} class="font-bold text-xl text-neutral-900 tracking-tight hover:text-indigo-600 transition-colors">
-          {t('hero.name', locale)}
-        </a>
+    <!-- Navbar -->
+    <Navbar locale={locale} currentPath={currentPath} />
 
-        <div class="flex items-center gap-6 sm:gap-8">
-          <nav aria-label="Main Navigation" class="flex items-center space-x-6 text-sm font-medium text-neutral-700">
-            <a href={homeHref} class="hover:text-indigo-600 transition-colors">
-              {t('nav.home', locale)}
-            </a>
-            <a href={projectsHref} class="hover:text-indigo-600 transition-colors">
-              {t('nav.projects', locale)}
-            </a>
-            <a href={researchHref} class="hover:text-indigo-600 transition-colors">
-              {t('nav.research', locale)}
-            </a>
-          </nav>
-
-          <!-- Language Selector -->
-          <div class="border-s border-neutral-200 ps-4">
-            <LanguageSelector currentLocale={locale} currentPath={currentPath} />
-          </div>
-        </div>
-      </div>
-    </header>
-
-    <!-- Main Content Section: EXACT ID 'main' MANDATORY FOR #main COMPATIBILITY -->
-    <main id="main" class="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 py-8">
+    <!-- Main Content Area -->
+    <main id="main">
       <slot />
     </main>
 
-    <!-- Global Footer -->
-    <footer class="border-t border-neutral-200 bg-neutral-50 py-10 mt-16 text-center text-sm text-neutral-500">
-      <div class="max-w-6xl mx-auto px-4">
-        <p>{t('ui.footerCopyright', locale)}</p>
-      </div>
-    </footer>
+    <!-- Footer -->
+    <Footer />
+
+    <!-- Reveal animation observer -->
+    <script is:inline>
+      function observe() {
+        const io = new IntersectionObserver((entries) => {
+          entries.forEach((e) => {
+            if (e.isIntersecting) {
+              e.target.classList.add('visible');
+              io.unobserve(e.target);
+            }
+          });
+        }, { threshold: 0.1 });
+        document.querySelectorAll('.reveal:not(.visible)').forEach((el) => io.observe(el));
+      }
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', observe);
+      } else {
+        observe();
+      }
+    </script>
   </body>
 </html>

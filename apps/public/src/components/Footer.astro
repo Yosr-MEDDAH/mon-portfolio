@@ -1,0 +1,10 @@
+---
+import { PORTFOLIO_DATA } from '../data/portfolio.ts';
+
+const currentYear = new Date().getFullYear();
+---
+
+<footer>
+  <span id="footer-name">{PORTFOLIO_DATA.name}</span>
+  <span id="footer-year">© {currentYear}</span>
+</footer>

@@ -10,7 +10,7 @@ import type { SupportedLocale } from '../../../i18n/types.ts';
 
 export async function getStaticPaths() {
   const collections = getAllRegisteredCollections();
-  const languages: SupportedLocale[] = ['fr', 'ar'];
+  const languages: SupportedLocale[] = ['fr', 'ar', 'en'];
   const paths: Array<{
     params: { lang: string; collection: string; slug: string };
     props: {
@@ -58,6 +58,7 @@ const pageTitle = `${entryTitle} | ${collectionName} | ${t('hero.name', locale)}
 
 <BaseLayout
   title={pageTitle}
+  description={resolveLocalizedValue(entry.fields.description, locale)}
   locale={locale}
   currentPath={`/${locale}/${collectionItem.contentType.slug}/${entry.slug}.html`}
 >

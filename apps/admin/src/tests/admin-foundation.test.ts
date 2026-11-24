@@ -15,7 +15,14 @@ import type {
   TemplateDefinition,
 } from '../shared/types.ts';
 import { checkIsAdmin } from '../firebase/auth.ts';
-import { cleanFirestoreData, DEFAULT_TEMPLATES } from '../firebase/firestore.ts';
+import { cleanFirestoreData, DEFAULT_TEMPLATES, normalizeContentType } from '../firebase/firestore.ts';
+import {
+  getFieldLabel,
+  getNormalizedFieldNames,
+  isGenericPlaceholder,
+  formatKeyToLabel,
+  KNOWN_FIELD_LABELS,
+} from '../shared/labels.ts';
 
 export async function runAdminFoundationTests() {
   console.log('=== Running Admin CMS Foundation Tests ===\n');
@@ -245,6 +252,299 @@ export async function runAdminFoundationTests() {
     throw new Error('Sanitization corrupted primitive or Date values');
   }
   console.log('✓ Error propagation and type safety verified.');
+
+  // 12. Multilingual Field Labels Resolution for Projects Schema (EN, FR, AR)
+  console.log('12. Testing Multilingual field labels resolution for Projects (EN, FR, AR)...');
+  const expectedProjectLabels: Record<string, { en: string; fr: string; ar: string }> = {
+    title: { en: 'Title', fr: 'Titre', ar: 'العنوان' },
+    slug: { en: 'URL Slug', fr: 'Identifiant URL', ar: 'معرّف الرابط' },
+    shortDescription: { en: 'Short Description', fr: 'Description courte', ar: 'وصف مختصر' },
+    description: { en: 'Description', fr: 'Description', ar: 'الوصف' },
+    coverImage: { en: 'Cover Image', fr: 'Image de couverture', ar: 'صورة الغلاف' },
+    technologies: { en: 'Technologies', fr: 'Technologies', ar: 'التقنيات' },
+    liveUrl: { en: 'Live Demo URL', fr: 'Lien de démonstration', ar: 'رابط العرض' },
+    githubUrl: { en: 'GitHub URL', fr: 'Lien GitHub', ar: 'رابط GitHub' },
+    startDate: { en: 'Start Date', fr: 'Date de début', ar: 'تاريخ البداية' },
+    endDate: { en: 'End Date', fr: 'Date de fin', ar: 'تاريخ النهاية' },
+    featured: { en: 'Featured Project', fr: 'Projet mis en avant', ar: 'مشروع مميز' },
+  };
+
+  for (const [key, expected] of Object.entries(expectedProjectLabels)) {
+    // Test resolution from field definition with missing or generic name
+    const dummyField = { key, name: { en: 'New Field', fr: 'Nouveau Champ', ar: 'حقل جديد' } };
+    const enLabel = getFieldLabel(dummyField, 'en');
+    const frLabel = getFieldLabel(dummyField, 'fr');
+    const arLabel = getFieldLabel(dummyField, 'ar');
+
+    if (enLabel !== expected.en) {
+      throw new Error('Project field ' + key + ' EN label expected ' + expected.en + ', got ' + enLabel);
+    }
+    if (frLabel !== expected.fr) {
+      throw new Error('Project field ' + key + ' FR label expected ' + expected.fr + ', got ' + frLabel);
+    }
+    if (arLabel !== expected.ar) {
+      throw new Error('Project field ' + key + ' AR label expected ' + expected.ar + ', got ' + arLabel);
+    }
+  }
+  console.log('✓ All 11 Projects schema field labels verified across EN, FR, and AR.');
+
+  // 13. Elimination of 'New Field' Placeholders and Technical Key Fallback
+  console.log('13. Testing elimination of \'New Field\' placeholders and technical key fallbacks...');
+  // A generic placeholder must NEVER be returned
+  if (!isGenericPlaceholder('New Field') || !isGenericPlaceholder('Nouveau Champ') || !isGenericPlaceholder('حقل جديد')) {
+    throw new Error('Generic placeholder detection failed');
+  }
+
+  // Custom unknown technical keys fallback to Title Case, not 'New Field'
+  const customField = { key: 'clientTestimonial', name: 'New Field' };
+  const customEn = getFieldLabel(customField, 'en');
+  if (customEn !== 'Client Testimonial') {
+    throw new Error('Custom field label fallback expected Client Testimonial, got ' + customEn);
+  }
+
+  const customSnakeField = { key: 'ai_model_version', name: '' };
+  const customSnake = getFieldLabel(customSnakeField, 'en');
+  if (customSnake !== 'AI Model Version') {
+    throw new Error('Custom snake_case label fallback expected AI Model Version, got ' + customSnake);
+  }
+
+  // Normalization of an existing content type with generic placeholders
+  const legacyCt: ContentTypeDefinition = {
+    id: 'projects',
+    slug: 'projects',
+    name: { en: 'Projects', fr: 'Projets', ar: 'المشاريع' },
+    fields: [
+      { key: 'slug', name: { en: 'New Field', fr: 'Nouveau Champ', ar: 'حقل جديد' }, type: 'text' },
+      { key: 'shortDescription', name: 'New Field', type: 'textarea', localized: true },
+    ],
+  };
+  const normalized = normalizeContentType(legacyCt);
+  if (typeof normalized.fields[0].name === 'string' || normalized.fields[0].name.en !== 'URL Slug') {
+    throw new Error('normalizeContentType failed to repair slug label');
+  }
+  if (typeof normalized.fields[1].name === 'string' || normalized.fields[1].name.fr !== 'Description courte') {
+    throw new Error('normalizeContentType failed to repair shortDescription label');
+  }
+  console.log('✓ \'New Field\' eliminated: automatic fallback and Content Type normalization verified.');
+
+  // 14. Independent Localized Field Values vs Shared Non-Localized Field Values
+  console.log('14. Testing independent localized values vs shared non-localized field values...');
+  const testEntryWithLocalizedAndNonLocalized: ContentEntry = {
+    id: 'proj-001',
+    contentTypeId: 'projects',
+    slug: 'test-project-alpha',
+    status: 'draft',
+    fields: {
+      title: { en: 'Alpha Project', fr: 'Projet Alpha', ar: 'مشروع ألفا' },
+      shortDescription: { en: 'English summary', fr: 'Résumé français', ar: 'ملخص عربي' },
+      slug: 'test-project-alpha',
+      startDate: '2026-01-01',
+      featured: true,
+      technologies: ['TypeScript', 'React'],
+    },
+  };
+
+  // Mutate one localized language: others must NOT be affected
+  const updatedEntry = {
+    ...testEntryWithLocalizedAndNonLocalized,
+    fields: {
+      ...testEntryWithLocalizedAndNonLocalized.fields,
+      shortDescription: {
+        ...(testEntryWithLocalizedAndNonLocalized.fields.shortDescription as Record<string, string>),
+        fr: 'Nouveau résumé en français',
+      },
+    },
+  };
+
+  const updatedShortDesc = updatedEntry.fields.shortDescription as Record<string, string>;
+  if (updatedShortDesc.en !== 'English summary' || updatedShortDesc.ar !== 'ملخص عربي' || updatedShortDesc.fr !== 'Nouveau résumé en français') {
+    throw new Error('Localized values did not remain independent after mutation!');
+  }
+
+  // Non-localized fields must remain single shared primitives
+  const entryFields = updatedEntry.fields as Record<string, unknown>;
+  if (typeof entryFields.slug !== 'string' || typeof entryFields.featured !== 'boolean') {
+    throw new Error('Non-localized fields must remain shared primitives and not objects');
+  }
+  console.log('✓ Localized fields maintain strict translation independence; non-localized fields maintain single values.');
+
+  // 15. Mandatory Projects Schema Validation & Optional Field Normalization Tests
+  console.log('15. Testing Projects schema validation and optional field empty/invalid handling...');
+  const projectsContentType: ContentTypeDefinition = {
+    id: 'projects',
+    slug: 'projects',
+    name: { en: 'Projects', fr: 'Projets', ar: 'المشاريع' },
+    fields: [
+      { key: 'title', name: 'Title', type: 'text', required: true, localized: true },
+      { key: 'slug', name: 'URL Slug', type: 'text', required: true, localized: false },
+      { key: 'shortDescription', name: 'Short Description', type: 'textarea', required: true, localized: true },
+      { key: 'description', name: 'Description', type: 'textarea', required: false, localized: true },
+      { key: 'coverImage', name: 'Cover Image', type: 'image', required: false, localized: false },
+      { key: 'technologies', name: 'Technologies', type: 'tags', required: false, localized: false },
+      { key: 'liveUrl', name: 'Live Demo URL', type: 'url', required: false, localized: false },
+      { key: 'githubUrl', name: 'GitHub URL', type: 'url', required: false, localized: false },
+      { key: 'startDate', name: 'Start Date', type: 'date', required: false, localized: false },
+      { key: 'endDate', name: 'End Date', type: 'date', required: false, localized: false },
+      { key: 'featured', name: 'Featured Project', type: 'boolean', required: false, localized: false },
+    ],
+  };
+
+  // 1. Entrée avec uniquement les trois champs obligatoires : acceptée
+  const minimalEntry: ContentEntry = {
+    id: 'proj-min',
+    contentTypeId: 'projects',
+    slug: 'minimal-project',
+    status: 'draft',
+    fields: {
+      title: { en: 'Minimal Title', fr: 'Titre minimal', ar: 'عنوان بسيط' },
+      slug: 'minimal-project',
+      shortDescription: { en: 'Short summary', fr: 'Résumé court', ar: 'ملخص قصير' },
+    },
+  };
+  const parsedMinimal = validateEntry(projectsContentType, minimalEntry);
+  if (!parsedMinimal || parsedMinimal.slug !== 'minimal-project') {
+    throw new Error('Minimal entry with only 3 required fields failed validation');
+  }
+
+  // 2. Image facultative vide : acceptée
+  const emptyImgEntry: ContentEntry = {
+    ...minimalEntry,
+    id: 'proj-img-empty',
+    fields: { ...minimalEntry.fields, coverImage: '' },
+  };
+  const parsedImg = validateEntry(projectsContentType, emptyImgEntry);
+  if (!parsedImg) throw new Error('Optional empty coverImage should be accepted');
+
+  // 3. GitHub URL facultative vide : acceptée
+  const emptyUrlEntry: ContentEntry = {
+    ...minimalEntry,
+    id: 'proj-url-empty',
+    fields: { ...minimalEntry.fields, githubUrl: '', liveUrl: '' },
+  };
+  const parsedUrl = validateEntry(projectsContentType, emptyUrlEntry);
+  if (!parsedUrl) throw new Error('Optional empty URLs should be accepted');
+
+  // 4. Date facultative vide : acceptée
+  const emptyDateEntry: ContentEntry = {
+    ...minimalEntry,
+    id: 'proj-date-empty',
+    fields: { ...minimalEntry.fields, startDate: '', endDate: '' },
+  };
+  const parsedDate = validateEntry(projectsContentType, emptyDateEntry);
+  if (!parsedDate) throw new Error('Optional empty dates should be accepted');
+
+  // 5. URL renseignée mais invalide : rejetée
+  let invalidUrlRejected = false;
+  try {
+    validateEntry(projectsContentType, {
+      ...minimalEntry,
+      id: 'proj-url-invalid',
+      fields: { ...minimalEntry.fields, githubUrl: 'not-a-valid-url' },
+    });
+  } catch {
+    invalidUrlRejected = true;
+  }
+  if (!invalidUrlRejected) throw new Error('Invalid URL should have been rejected');
+
+  // 6. Date renseignée mais invalide : rejetée
+  let invalidDateRejected = false;
+  try {
+    validateEntry(projectsContentType, {
+      ...minimalEntry,
+      id: 'proj-date-invalid',
+      fields: { ...minimalEntry.fields, startDate: 'not-a-date' },
+    });
+  } catch {
+    invalidDateRejected = true;
+  }
+  if (!invalidDateRejected) throw new Error('Invalid date should have been rejected');
+
+  // 7. Titre obligatoire vide : rejeté
+  let emptyTitleRejected = false;
+  try {
+    validateEntry(projectsContentType, {
+      ...minimalEntry,
+      id: 'proj-title-empty',
+      fields: {
+        ...minimalEntry.fields,
+        title: { en: '   ', fr: '', ar: '' },
+      },
+    });
+  } catch {
+    emptyTitleRejected = true;
+  }
+  if (!emptyTitleRejected) throw new Error('Empty required title should have been rejected');
+
+  // 8. Slug obligatoire vide : rejeté
+  let emptySlugRejected = false;
+  try {
+    validateEntry(projectsContentType, {
+      ...minimalEntry,
+      id: 'proj-slug-empty',
+      slug: '',
+      fields: { ...minimalEntry.fields, slug: '' },
+    });
+  } catch {
+    emptySlugRejected = true;
+  }
+  if (!emptySlugRejected) throw new Error('Empty required slug should have been rejected');
+
+  // 9. Short Description obligatoire vide : rejetée
+  let emptyShortDescRejected = false;
+  try {
+    validateEntry(projectsContentType, {
+      ...minimalEntry,
+      id: 'proj-desc-empty',
+      fields: {
+        ...minimalEntry.fields,
+        shortDescription: { en: '', fr: '', ar: '' },
+      },
+    });
+  } catch {
+    emptyShortDescRejected = true;
+  }
+  if (!emptyShortDescRejected) throw new Error('Empty required shortDescription should have been rejected');
+
+  // 10. Boolean false : accepté
+  const booleanFalseEntry: ContentEntry = {
+    ...minimalEntry,
+    id: 'proj-bool-false',
+    fields: { ...minimalEntry.fields, featured: false },
+  };
+  const parsedBool = validateEntry(projectsContentType, booleanFalseEntry);
+  if (parsedBool.fields.featured !== false) {
+    throw new Error('Expected boolean false to be preserved, got ' + parsedBool.fields.featured);
+  }
+  console.log('✓ All 10 Projects schema validation cases verified successfully.');
+
+  // 16. Theme Contrast & Textarea Styling Safety Verification
+  console.log('16. Testing theme contrast tokens and textarea background styling...');
+  // Verify DynamicFieldEditor.tsx uses theme-aware bg-surface on all textareas
+  const editorPath = 'src/components/DynamicFieldEditor.tsx';
+  // Check index.css tokens
+  const cssPath = 'src/index.css';
+  const fs = await import('node:fs');
+  const pathMod = await import('node:path');
+  const baseDir = fs.existsSync('src/components/DynamicFieldEditor.tsx') ? '.' : 'apps/admin';
+  const editorCode = fs.readFileSync(pathMod.join(baseDir, editorPath), 'utf-8');
+  const cssCode = fs.readFileSync(pathMod.join(baseDir, cssPath), 'utf-8');
+
+  // Verify no invalid opacity modifier on cream in form inputs
+  if (editorCode.includes('bg-cream/30')) {
+    throw new Error('DynamicFieldEditor still contains invalid bg-cream/30 on inputs/textareas');
+  }
+
+  // Verify richtext uses bg-surface
+  if (!editorCode.includes("field.type === 'richtext'") || !editorCode.includes('bg-surface font-mono') && !editorCode.includes('font-mono bg-surface')) {
+    throw new Error('DynamicFieldEditor richtext must use bg-surface with font-mono for proper theme adaptation');
+  }
+
+  // Verify color-scheme in index.css
+  if (!cssCode.includes('color-scheme: light;') || !cssCode.includes('color-scheme: dark;')) {
+    throw new Error('index.css must define color-scheme for native browser dark mode form styling');
+  }
+
+  console.log('✓ Theme contrast tokens and DynamicFieldEditor textarea background styles verified.');
 
   console.log('\n=== All Admin CMS Foundation Tests Passed Successfully ===');
 }

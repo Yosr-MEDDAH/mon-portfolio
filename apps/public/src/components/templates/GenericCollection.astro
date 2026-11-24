@@ -27,48 +27,35 @@ const {
   title = resolveLocalizedValue(contentType.name, locale),
   description = resolveLocalizedValue(contentType.description, locale),
 } = Astro.props;
-
-const isGridLayout = cardTemplate?.layout !== 'list';
 ---
 
-<section class="generic-collection py-6">
-  <div class="mb-8">
-    <h1 class="text-3xl font-extrabold text-neutral-900 tracking-tight sm:text-4xl mb-3">
-      {title}
-    </h1>
-    {description && (
-      <p class="text-lg text-neutral-600 max-w-3xl leading-relaxed">
-        {description}
-      </p>
+<div class="container page-header">
+  <p class="section-label">{title}</p>
+  <h1 class="page-title" id="page-title">{title}</h1>
+  {description && (
+    <p class="page-count" style="max-width: 65ch; line-height: 1.6;">
+      {description}
+    </p>
+  )}
+</div>
+
+<section aria-labelledby="page-title" style="padding-top:0">
+  <div class="container">
+    {entries.length > 0 ? (
+      <div class="projects-grid" role="list">
+        {entries.map((entry) => (
+          <GenericCard
+            contentType={contentType}
+            entry={entry}
+            template={cardTemplate}
+            locale={locale}
+          />
+        ))}
+      </div>
+    ) : (
+      <div style="padding: 2rem 0; color: var(--text-3);">
+        <p>{t('ui.emptyCollection', locale)}</p>
+      </div>
     )}
   </div>
-
-  {entries.length > 0 ? (
-    <div
-      class={
-        isGridLayout
-          ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'
-          : 'flex flex-col space-y-6 max-w-3xl'
-      }
-    >
-      {entries.map((entry) => (
-        <GenericCard
-          contentType={contentType}
-          entry={entry}
-          template={cardTemplate}
-          locale={locale}
-        />
-      ))}
-    </div>
-  ) : (
-    <div class="empty-collection-state p-12 text-center bg-neutral-50 rounded-xl border border-dashed border-neutral-300">
-      <div class="text-3xl mb-2">📁</div>
-      <h3 class="text-base font-semibold text-neutral-900 mb-1">
-        {t('ui.emptyCollection', locale)}
-      </h3>
-      <p class="text-sm text-neutral-500">
-        {t('ui.emptyCollectionDesc', locale)}
-      </p>
-    </div>
-  )}
 </section>

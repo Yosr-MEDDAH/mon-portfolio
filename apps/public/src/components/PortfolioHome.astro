@@ -1,0 +1,395 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import FiligranBackground from './FiligranBackground.astro';
+import TatreezDivider from './TatreezDivider.astro';
+import ProjectCard from './ProjectCard.astro';
+import {
+  PORTFOLIO_DATA,
+  DEVICON_MAP,
+  getPortfolioProjects,
+  resolvePortfolioText,
+} from '../data/portfolio.ts';
+import { withBase } from '../utils/url.ts';
+import { t } from '../i18n/utils.ts';
+import { DEFAULT_LOCALE, type SupportedLocale } from '../i18n/types.ts';
+
+interface Props {
+  locale?: SupportedLocale;
+  currentPath?: string;
+}
+
+const {
+  locale = DEFAULT_LOCALE,
+  currentPath = locale === DEFAULT_LOCALE ? '/index.html' : `/${locale}/index.html`,
+} = Astro.props;
+
+const title = `${PORTFOLIO_DATA.name} — ${resolvePortfolioText(PORTFOLIO_DATA.title, locale)}`;
+const description = resolvePortfolioText(PORTFOLIO_DATA.about, locale);
+
+const HIGHLIGHTS = { skills: 3, experience: 2, projects: 2, presentations: 3, artworks: 3 };
+
+const projects = getPortfolioProjects();
+
+const skillsHref = locale === DEFAULT_LOCALE
+  ? withBase('/skills.html')
+  : withBase(`/${locale}/skills/index.html`);
+
+const expHref = locale === DEFAULT_LOCALE
+  ? withBase('/experiences.html')
+  : withBase(`/${locale}/experiences/index.html`);
+
+const projectsHref = locale === DEFAULT_LOCALE
+  ? withBase('/projects.html')
+  : withBase(`/${locale}/projects/index.html`);
+
+const presHref = locale === DEFAULT_LOCALE
+  ? withBase('/presentations.html')
+  : withBase(`/${locale}/presentations/index.html`);
+
+const artworksHref = locale === DEFAULT_LOCALE
+  ? withBase('/artworks.html')
+  : withBase(`/${locale}/artworks/index.html`);
+
+const avatarSrc = withBase(`/${PORTFOLIO_DATA.avatar.replace(/^\//, '')}`);
+const cvSrc = withBase(`/${PORTFOLIO_DATA.cv_url.replace(/^\//, '')}`);
+---
+
+<BaseLayout
+  title={title}
+  description={description}
+  locale={locale}
+  currentPath={currentPath}
+>
+  <!-- HERO -->
+  <section id="hero" aria-labelledby="hero-heading">
+    <FiligranBackground />
+    <div class="container">
+      <div class="hero-inner">
+        <div>
+          <p class="section-label" id="hero-label">{t('hero.label', locale)}</p>
+          <h1 class="hero-name" id="hero-name">{PORTFOLIO_DATA.name}</h1>
+          <p class="hero-title" id="hero-title-el">{resolvePortfolioText(PORTFOLIO_DATA.title, locale)}</p>
+          <p class="hero-about" id="hero-about">{resolvePortfolioText(PORTFOLIO_DATA.about, locale)}</p>
+          <div class="hero-ctas" id="hero-ctas">
+            <a href={cvSrc} class="btn btn-primary" download="">{t('btn.cv', locale)}</a>
+            <a href={`mailto:${PORTFOLIO_DATA.email}`} class="btn btn-outline">{t('btn.contact', locale)}</a>
+          </div>
+        </div>
+        <div class="avatar-wrap" aria-hidden="true" id="avatar-wrap">
+          <img src={avatarSrc} alt={PORTFOLIO_DATA.name} loading="eager" />
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <TatreezDivider />
+
+  <!-- SKILLS HIGHLIGHT -->
+  <section
+    id="skills"
+    aria-labelledby="skills-heading"
+    style="background:var(--surface);border-top:1px solid var(--border);border-bottom:1px solid var(--border)"
+  >
+    <div class="container">
+      <p class="section-label">{t('section.skills', locale)}</p>
+      <h2 id="skills-heading">{t('heading.skills', locale)}</h2>
+      <div class="skills-grid reveal visible" id="skills-grid" role="list">
+        {PORTFOLIO_DATA.skills.slice(0, HIGHLIGHTS.skills).map((s) => (
+          <div role="listitem">
+            <p class="skill-cat">{s.category}</p>
+            <div class="tags">
+              {s.items.map((item) => {
+                const devicon = DEVICON_MAP[item];
+                return (
+                  <span class="tag">
+                    {devicon && (
+                      <i
+                        class={`devicon-${devicon} colored tag-icon`}
+                        aria-hidden="true"
+                      />
+                    )}
+                    {item}
+                  </span>
+                );
+              })}
+            </div>
+          </div>
+        ))}
+      </div>
+      <div class="section-footer">
+        <a href={skillsHref} class="see-all">{t('see.skills', locale)}</a>
+      </div>
+    </div>
+  </section>
+
+  <TatreezDivider />
+
+  <!-- EXPERIENCE HIGHLIGHT -->
+  <section id="experience" aria-labelledby="exp-heading">
+    <div class="container">
+      <p class="section-label">{t('section.experience', locale)}</p>
+      <h2 id="exp-heading">{t('heading.experience', locale)}</h2>
+      <div class="timeline" id="timeline" role="list">
+        {PORTFOLIO_DATA.experiences.slice(0, HIGHLIGHTS.experience).map((e) => {
+          const role = resolvePortfolioText(e.role, locale);
+          const desc = resolvePortfolioText(e.description, locale);
+          return (
+            <article class="exp-card reveal visible" role="listitem">
+              <div>
+                <div class="exp-role">{role}</div>
+                <div class="exp-co">{e.company} · {e.location}</div>
+              </div>
+              <div class="exp-period">{e.period}</div>
+              <p class="exp-desc">{desc}</p>
+              {e.images && e.images.length > 0 && (
+                <div
+                  class="exp-gallery"
+                  style="display:flex; gap:10px; overflow-x:auto; margin-top:12px; padding-bottom:8px;"
+                >
+                  {e.images.map((img) => (
+                    <img
+                      src={withBase(`/${img.replace(/^\//, '')}`)}
+                      alt={role}
+                      loading="lazy"
+                      style="height:120px; width:auto; border-radius:6px; border:1px solid var(--border); object-fit:cover;"
+                    />
+                  ))}
+                </div>
+              )}
+              {e.tags && e.tags.length > 0 && (
+                <div class="exp-tags tags">
+                  {e.tags.map((tag) => (
+                    <span class="tag">{tag}</span>
+                  ))}
+                </div>
+              )}
+            </article>
+          );
+        })}
+      </div>
+      <div class="section-footer">
+        <a href={expHref} class="see-all">{t('see.experience', locale)}</a>
+      </div>
+    </div>
+  </section>
+
+  <TatreezDivider />
+
+  <!-- PROJECTS HIGHLIGHT -->
+  <section
+    id="projects"
+    aria-labelledby="proj-heading"
+    style="background:var(--surface);border-top:1px solid var(--border);border-bottom:1px solid var(--border)"
+  >
+    <div class="container">
+      <p class="section-label">{t('section.projects', locale)}</p>
+      <h2 id="proj-heading">{t('heading.projects', locale)}</h2>
+      <div class="projects-grid" id="projects-grid" role="list">
+        {projects.slice(0, HIGHLIGHTS.projects).map((p) => (
+          <ProjectCard project={p} locale={locale} />
+        ))}
+      </div>
+      <div class="section-footer">
+        <a href={projectsHref} class="see-all">{t('see.projects', locale)}</a>
+      </div>
+    </div>
+  </section>
+
+  <TatreezDivider />
+
+  <!-- PRESENTATIONS HIGHLIGHT -->
+  <section id="presentations" aria-labelledby="pres-heading">
+    <div class="container">
+      <p class="section-label">{t('section.presentations', locale)}</p>
+      <h2 id="pres-heading">{t('heading.presentations', locale)}</h2>
+      <div class="pres-list" id="pres-list" role="list">
+        {PORTFOLIO_DATA.presentations.slice(0, HIGHLIGHTS.presentations).map((p) => {
+          const pTitle = resolvePortfolioText(p.title, locale);
+          const pDesc = resolvePortfolioText(p.description, locale);
+          const pContext = typeof p.context === 'object'
+            ? resolvePortfolioText(p.context, locale)
+            : (p.context || '');
+
+          const ytMatch = p.youtube ? p.youtube.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([^&?]+)/) : null;
+          const vidId = ytMatch ? ytMatch[1] : null;
+
+          return (
+            <article class="pres-card reveal visible" role="listitem">
+              {vidId && (
+                <a
+                  href={p.youtube}
+                  target="_blank"
+                  rel="noopener"
+                  style="display:block; width:100%; height:180px; overflow:hidden; border-radius:var(--radius); margin-bottom:1rem; position:relative; background:#000;"
+                >
+                  <img
+                    src={`https://img.youtube.com/vi/${vidId}/hqdefault.jpg`}
+                    alt={pTitle}
+                    loading="lazy"
+                    style="width:100%; height:100%; object-fit:cover; opacity:0.8; transition:opacity .3s;"
+                  />
+                  <div style="position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); width:48px; height:48px; background:rgba(255,0,0,0.9); border-radius:50%; display:flex; align-items:center; justify-content:center; color:white; font-size:18px; box-shadow:0 4px 12px rgba(0,0,0,0.3);">
+                    ▶
+                  </div>
+                </a>
+              )}
+              <div class="pres-header">
+                <span class="pres-title">{pTitle}</span>
+                <span class="pres-period">{p.period || ''}</span>
+              </div>
+              {pContext && <p class="pres-context">{pContext}</p>}
+              <p class="pres-desc">{pDesc}</p>
+              <div class="pres-footer">
+                <div class="tags pres-tag-wrap">
+                  {(p.tags || []).map((tag) => (
+                    <span class="tag">{tag}</span>
+                  ))}
+                </div>
+                {p.youtube && (
+                  <a
+                    class="pres-yt"
+                    href={p.youtube}
+                    target="_blank"
+                    rel="noopener"
+                    aria-label={`${pTitle} — YouTube`}
+                  >
+                    {locale === 'ar' ? 'مشاهدة' : locale === 'en' ? 'Watch' : 'Voir'}
+                  </a>
+                )}
+              </div>
+            </article>
+          );
+        })}
+      </div>
+      <div class="section-footer">
+        <a href={presHref} class="see-all">{t('see.presentations', locale)}</a>
+      </div>
+    </div>
+  </section>
+
+  <TatreezDivider />
+
+  <!-- ARTWORKS HIGHLIGHT -->
+  <section id="artworks" aria-labelledby="art-heading">
+    <div class="container">
+      <p class="section-label">{t('section.artworks', locale)}</p>
+      <h2 id="art-heading">{t('heading.artworks', locale)}</h2>
+      <div class="artworks-grid reveal visible" id="artworks-grid" role="list">
+        {PORTFOLIO_DATA.artworks.slice(0, HIGHLIGHTS.artworks).map((aw) => {
+          const imgSrc = withBase(`/${aw.image.replace(/^\//, '')}`);
+          const isVid = aw.image.endsWith('.mp4');
+          return (
+            <figure class="artwork-item reveal visible" role="listitem">
+              {isVid ? (
+                <video
+                  src={imgSrc}
+                  autoplay
+                  loop
+                  muted
+                  playsinline
+                  style="width:100%; height:100%; object-fit:cover;"
+                />
+              ) : (
+                <img
+                  src={imgSrc}
+                  alt={aw.title}
+                  loading="lazy"
+                  decoding="async"
+                  style="width:100%; height:100%; object-fit:cover;"
+                  onload="this.classList.add('loaded'); this.parentElement?.classList.add('loaded');"
+                  class="loaded"
+                />
+              )}
+              {aw.title && (
+                <figcaption
+                  class="artwork-caption"
+                  style="display:flex; justify-content:space-between; align-items:center;"
+                >
+                  <span>{aw.title}</span>
+                  {(aw.youtube || aw.behance) && (
+                    <div style="display:flex; gap:8px;">
+                      {aw.youtube && (
+                        <a
+                          href={aw.youtube}
+                          target="_blank"
+                          rel="noopener"
+                          style="color:#ff4e4e; text-decoration:none; font-size:16px;"
+                          aria-label={`Voir ${aw.title} sur YouTube`}
+                        >
+                          ▶
+                        </a>
+                      )}
+                      {aw.behance && (
+                        <a
+                          href={aw.behance}
+                          target="_blank"
+                          rel="noopener"
+                          style="color:#5b8eff; text-decoration:none; font-size:16px; font-weight:bold; font-family:sans-serif;"
+                          aria-label={`Voir ${aw.title} sur Behance`}
+                        >
+                          Bē
+                        </a>
+                      )}
+                    </div>
+                  )}
+                </figcaption>
+              )}
+            </figure>
+          );
+        })}
+      </div>
+      <div class="section-footer">
+        <a href={artworksHref} class="see-all">{t('see.artworks', locale)}</a>
+      </div>
+    </div>
+  </section>
+
+  <TatreezDivider />
+
+  <!-- EDUCATION -->
+  <section id="education" aria-labelledby="edu-heading">
+    <div class="container">
+      <p class="section-label">{t('section.education', locale)}</p>
+      <h2 id="edu-heading">{t('heading.education', locale)}</h2>
+      <div class="edu-list reveal visible" id="edu-list" role="list">
+        {PORTFOLIO_DATA.education.map((e) => (
+          <div class="edu-item reveal visible" role="listitem">
+            <div>
+              <div class="edu-degree">{resolvePortfolioText(e.degree, locale)}</div>
+              <div class="edu-school">{e.school}</div>
+            </div>
+            <div class="edu-period">{e.period} · {e.location}</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <TatreezDivider />
+
+  <!-- CONTACT -->
+  <section id="contact" aria-labelledby="contact-heading">
+    <div class="container">
+      <div class="contact-inner">
+        <p class="section-label">{t('section.contact', locale)}</p>
+        <h2 id="contact-heading">{t('heading.contact', locale)}</h2>
+        <p id="contact-sub" style="color:var(--text-2);font-size:.95rem">
+          {t('contact.sub', locale)}
+        </p>
+        <div class="contact-grid" id="contact-grid">
+          <a href={`mailto:${PORTFOLIO_DATA.email}`} class="contact-link">{PORTFOLIO_DATA.email}</a>
+          <a href={`tel:${PORTFOLIO_DATA.phone}`} class="contact-link">{PORTFOLIO_DATA.phone}</a>
+          <a href={PORTFOLIO_DATA.github} target="_blank" rel="noopener" class="contact-link">{t('link.github', locale)}</a>
+          <a href={PORTFOLIO_DATA.linkedin} target="_blank" rel="noopener" class="contact-link">{t('link.linkedin', locale)}</a>
+        </div>
+        <div class="lang-row" id="lang-row" aria-label="Langues">
+          {PORTFOLIO_DATA.languages.map((l) => (
+            <span class="lang-pill">
+              {l.lang} <em>{l.level}</em>
+            </span>
+          ))}
+        </div>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

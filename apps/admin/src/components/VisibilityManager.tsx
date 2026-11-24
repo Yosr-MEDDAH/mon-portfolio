@@ -8,6 +8,7 @@ import type {
   ContentEntry,
 } from '../shared/types.ts';
 import { isFieldVisible } from '../shared/visibility.ts';
+import { getFieldLabel } from '../shared/labels.ts';
 import { useAdminLang } from '../context/LanguageContext.tsx';
 
 interface VisibilityManagerProps {
@@ -43,7 +44,7 @@ export const VisibilityManager: React.FC<VisibilityManagerProps> = ({
   onChangeEntryVisibility,
   mode,
 }) => {
-  const { t } = useAdminLang();
+  const { t, locale } = useAdminLang();
   const contexts: RenderingContext[] = ['card', 'detail', 'section'];
 
   const getEffectiveState = (fieldKey: string, ctx: RenderingContext): boolean => {
@@ -132,14 +133,19 @@ export const VisibilityManager: React.FC<VisibilityManagerProps> = ({
             </tr>
           </thead>
           <tbody className="divide-y divide-border">
-            {fields.map((field) => (
-              <tr key={field.key} className="hover:bg-cream/40 transition-colors">
-                <td className="py-2.5 px-3 font-medium text-content">
-                  <div className="flex items-center gap-2">
-                    <span className="font-mono text-xs text-mg">{field.key}</span>
-                    <span className="text-[11px] text-content-muted">({field.type})</span>
-                  </div>
-                </td>
+            {fields.map((field) => {
+              const label = getFieldLabel(field, locale);
+              return (
+                <tr key={field.key} className="hover:bg-cream/40 transition-colors">
+                  <td className="py-2.5 px-3 font-medium text-content">
+                    <div className="flex flex-col">
+                      <span className="font-medium text-xs text-content">{label}</span>
+                      <div className="flex items-center gap-1.5 mt-0.5">
+                        <span className="font-mono text-[11px] text-mg">{field.key}</span>
+                        <span className="text-[10px] text-content-muted">({field.type})</span>
+                      </div>
+                    </div>
+                  </td>
 
                 {contexts.map((ctx) => {
                   const effective = getEffectiveState(field.key, ctx);
@@ -184,7 +190,8 @@ export const VisibilityManager: React.FC<VisibilityManagerProps> = ({
                   );
                 })}
               </tr>
-            ))}
+            );
+          })}
           </tbody>
         </table>
       </div>

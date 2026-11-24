@@ -1,0 +1,60 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import ProjectCard from '../../../components/ProjectCard.astro';
+import {
+  PORTFOLIO_DATA,
+  getPortfolioProjects,
+  resolvePortfolioText,
+} from '../../../data/portfolio.ts';
+import { withBase } from '../../../utils/url.ts';
+import { t } from '../../../i18n/utils.ts';
+import type { SupportedLocale } from '../../../i18n/types.ts';
+
+export async function getStaticPaths() {
+  return [
+    { params: { lang: 'en' } },
+    { params: { lang: 'fr' } },
+    { params: { lang: 'ar' } },
+  ];
+}
+
+const { lang } = Astro.params;
+const locale = lang as SupportedLocale;
+
+const projects = getPortfolioProjects();
+const n = projects.length;
+const countText = locale === 'ar'
+  ? `${n} مشروع`
+  : locale === 'en'
+  ? `${n} projects`
+  : `${n} projets`;
+
+const pageTitle = `${t('page.projects', locale)} — ${PORTFOLIO_DATA.name}`;
+const pageDesc = `Tous les projets de ${PORTFOLIO_DATA.name} : web, mobile, IoT, IA, accessibilité et plus.`;
+
+const backHref = withBase(`/${locale}/index.html`);
+---
+
+<BaseLayout
+  title={pageTitle}
+  description={pageDesc}
+  locale={locale}
+  currentPath={`/${locale}/projects/index.html`}
+>
+  <div class="container page-header">
+    <a href={backHref} class="back-link">{t('back', locale)}</a>
+    <p class="section-label">{t('section.projects', locale)}</p>
+    <h1 class="page-title" id="page-title">{t('page.projects', locale)}</h1>
+    <p class="page-count" id="page-count">{countText}</p>
+  </div>
+
+  <section aria-labelledby="page-title" style="padding-top:0">
+    <div class="container">
+      <div class="projects-grid" id="projects-grid" role="list">
+        {projects.map((p) => (
+          <ProjectCard project={p} locale={locale} />
+        ))}
+      </div>
+    </div>
+  </section>
+</BaseLayout>

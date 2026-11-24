@@ -74,7 +74,7 @@ export function getEquivalentRoute(currentPath: string, targetLocale: SupportedL
     path = path.slice(1);
   }
 
-  // Detect and strip existing language prefix (fr/ or ar/)
+  // Detect and strip existing language prefix (fr/ or ar/ or en/)
   if (path.startsWith('fr/')) {
     path = path.slice(3);
   } else if (path === 'fr') {
@@ -82,6 +82,10 @@ export function getEquivalentRoute(currentPath: string, targetLocale: SupportedL
   } else if (path.startsWith('ar/')) {
     path = path.slice(3);
   } else if (path === 'ar') {
+    path = '';
+  } else if (path.startsWith('en/')) {
+    path = path.slice(3);
+  } else if (path === 'en') {
     path = '';
   }
 
@@ -92,11 +96,14 @@ export function getEquivalentRoute(currentPath: string, targetLocale: SupportedL
       : withBase(`/${targetLocale}/index.html`);
   }
 
-  // Handle projects.html legacy URL preservation
-  if (path === 'projects.html') {
-    return targetLocale === DEFAULT_LOCALE
-      ? withBase('/projects.html')
-      : withBase(`/${targetLocale}/projects/index.html`);
+  // Handle legacy URLs preservation
+  const legacyPages = ['projects', 'skills', 'experiences', 'presentations', 'artworks'];
+  for (const page of legacyPages) {
+    if (path === `${page}.html` || path === `${page}/index.html` || path === page) {
+      return targetLocale === DEFAULT_LOCALE
+        ? withBase(`/${page}.html`)
+        : withBase(`/${targetLocale}/${page}/index.html`);
+    }
   }
 
   // General collection or detail paths (e.g. projects/index.html, research/slug.html)

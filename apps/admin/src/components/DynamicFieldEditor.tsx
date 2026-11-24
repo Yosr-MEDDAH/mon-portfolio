@@ -1,10 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Languages, AlertCircle } from 'lucide-react';
 import type {
   FieldDefinition,
   SupportedLocale,
   Localized,
 } from '../shared/types.ts';
+import { getFieldLabel } from '../shared/labels.ts';
+import { useAdminLang } from '../context/LanguageContext.tsx';
 
 interface DynamicFieldEditorProps {
   fields: FieldDefinition[];
@@ -19,7 +21,15 @@ export const DynamicFieldEditor: React.FC<DynamicFieldEditorProps> = ({
   onChange,
   errors = {},
 }) => {
-  const [activeLangTab, setActiveLangTab] = useState<SupportedLocale>('en');
+  const { locale } = useAdminLang();
+  const [activeLangTab, setActiveLangTab] = useState<SupportedLocale>(locale || 'en');
+
+  // Keep in sync if the global admin interface language changes
+  useEffect(() => {
+    if (locale) {
+      setActiveLangTab(locale);
+    }
+  }, [locale]);
 
   const handleFieldChange = (key: string, val: unknown) => {
     onChange({
@@ -39,14 +49,9 @@ export const DynamicFieldEditor: React.FC<DynamicFieldEditorProps> = ({
     });
   };
 
-  const getLabel = (field: FieldDefinition, lang: SupportedLocale): string => {
-    if (typeof field.name === 'string') return field.name;
-    return field.name[lang] || field.name['en'] || field.key;
-  };
-
   return (
     <div className="space-y-5 font-sans">
-      {/* Global language tab switcher for localized fields */}
+      {/* Global language tab switcher for localized fields and labels */}
       <div className="flex items-center justify-between p-3 bg-cream/70 border border-border rounded">
         <div className="text-xs font-medium text-content flex items-center gap-2">
           <Languages size={14} strokeWidth={1.5} className="text-content-secondary" />
@@ -74,7 +79,7 @@ export const DynamicFieldEditor: React.FC<DynamicFieldEditorProps> = ({
       {fields.map((field) => {
         const value = values[field.key];
         const error = errors[field.key];
-        const label = getLabel(field, activeLangTab);
+        const label = getFieldLabel(field, activeLangTab);
         const isLoc = field.localized ?? false;
 
         return (
@@ -125,7 +130,7 @@ export const DynamicFieldEditor: React.FC<DynamicFieldEditorProps> = ({
                   value={((value as Localized<string>)?.[activeLangTab] as string) || ''}
                   onChange={(e) => handleLocalizedChange(field.key, activeLangTab, e.target.value)}
                   dir={activeLangTab === 'ar' ? 'rtl' : 'ltr'}
-                  placeholder={`Enter description in ${activeLangTab.toUpperCase()}...`}
+                  placeholder={`Enter ${label} in ${activeLangTab.toUpperCase()}...`}
                   className="w-full px-3 py-2 text-sm bg-surface border border-border rounded text-content placeholder-content-muted focus:border-mg focus:outline-hidden font-sans transition-colors"
                 />
               ) : (
@@ -146,16 +151,16 @@ export const DynamicFieldEditor: React.FC<DynamicFieldEditorProps> = ({
                   value={((value as Localized<string>)?.[activeLangTab] as string) || ''}
                   onChange={(e) => handleLocalizedChange(field.key, activeLangTab, e.target.value)}
                   dir={activeLangTab === 'ar' ? 'rtl' : 'ltr'}
-                  placeholder="Enter HTML or Markdown rich text..."
-                  className="w-full px-3 py-2 text-sm font-mono bg-cream/30 border border-border rounded text-content placeholder-content-muted focus:border-mg focus:outline-hidden"
+                  placeholder={`Enter ${label} rich text in ${activeLangTab.toUpperCase()}...`}
+                  className="w-full px-3 py-2 text-sm font-mono bg-surface border border-border rounded text-content placeholder-content-muted focus:border-mg focus:outline-hidden transition-colors"
                 />
               ) : (
                 <textarea
                   rows={6}
                   value={(value as string) || ''}
                   onChange={(e) => handleFieldChange(field.key, e.target.value)}
-                  placeholder="Enter HTML or Markdown rich text..."
-                  className="w-full px-3 py-2 text-sm font-mono bg-cream/30 border border-border rounded text-content placeholder-content-muted focus:border-mg focus:outline-hidden"
+                  placeholder={`Enter ${label} rich text...`}
+                  className="w-full px-3 py-2 text-sm font-mono bg-surface border border-border rounded text-content placeholder-content-muted focus:border-mg focus:outline-hidden transition-colors"
                 />
               )
             )}
@@ -177,7 +182,7 @@ export const DynamicFieldEditor: React.FC<DynamicFieldEditorProps> = ({
                   onChange={(e) => handleFieldChange(field.key, e.target.checked)}
                   className="w-4 h-4 rounded border-border text-mg accent-mg focus:ring-0"
                 />
-                <span className="text-sm text-content">Enable / True</span>
+                <span className="text-sm text-content">{label}</span>
               </label>
             )}
 

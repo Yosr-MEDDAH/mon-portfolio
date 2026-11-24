@@ -1,0 +1,75 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import {
+  PORTFOLIO_DATA,
+  DEVICON_MAP,
+} from '../../../data/portfolio.ts';
+import { withBase } from '../../../utils/url.ts';
+import { t } from '../../../i18n/utils.ts';
+import type { SupportedLocale } from '../../../i18n/types.ts';
+
+export async function getStaticPaths() {
+  return [
+    { params: { lang: 'en' } },
+    { params: { lang: 'fr' } },
+    { params: { lang: 'ar' } },
+  ];
+}
+
+const { lang } = Astro.params;
+const locale = lang as SupportedLocale;
+
+const n = PORTFOLIO_DATA.skills.length;
+const countText = locale === 'ar'
+  ? `${n} فئات مهارات`
+  : locale === 'en'
+  ? `${n} skill categories`
+  : `${n} catégories`;
+
+const pageTitle = `${t('page.skills', locale)} — ${PORTFOLIO_DATA.name}`;
+const pageDesc = `Compétences techniques de ${PORTFOLIO_DATA.name} : frontend, backend, accessibilité, éco-conception, cloud.`;
+
+const backHref = withBase(`/${locale}/index.html`);
+---
+
+<BaseLayout
+  title={pageTitle}
+  description={pageDesc}
+  locale={locale}
+  currentPath={`/${locale}/skills/index.html`}
+>
+  <div class="container page-header">
+    <a href={backHref} class="back-link">{t('back', locale)}</a>
+    <p class="section-label">{t('section.skills', locale)}</p>
+    <h1 class="page-title" id="page-title">{t('page.skills', locale)}</h1>
+    <p class="page-count" id="page-count">{countText}</p>
+  </div>
+
+  <section aria-labelledby="page-title" style="padding-top:0">
+    <div class="container">
+      <div class="skills-grid reveal visible" id="skills-grid" role="list">
+        {PORTFOLIO_DATA.skills.map((s) => (
+          <div role="listitem">
+            <p class="skill-cat">{s.category}</p>
+            <div class="tags">
+              {s.items.map((item) => {
+                const devicon = DEVICON_MAP[item];
+                return (
+                  <span class="tag">
+                    {devicon && (
+                      <i
+                        class={`devicon-${devicon} colored tag-icon`}
+                        aria-hidden="true"
+                      />
+                    )}
+                    {item}
+                  </span>
+                );
+              })}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+</BaseLayout>

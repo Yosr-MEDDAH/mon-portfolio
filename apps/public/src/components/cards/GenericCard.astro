@@ -6,10 +6,9 @@ import type {
 } from '../../content-model/types.ts';
 import type { CardTemplateConfig } from '../../templates/types.ts';
 import { isFieldVisible } from '../../content-model/visibility.ts';
-import FieldRenderer from '../fields/FieldRenderer.astro';
 import { withBase, resolveLocalizedValue } from '../../utils/url.ts';
-import { t } from '../../i18n/utils.ts';
 import { DEFAULT_LOCALE } from '../../i18n/types.ts';
+import { DEVICON_MAP, getProjGrad, getProjEmoji } from '../../data/portfolio.ts';
 
 interface Props {
   contentType: ContentTypeDefinition;
@@ -27,86 +26,96 @@ const {
   class: className = '',
 } = Astro.props;
 
-// Determine ordered list of field keys
-const allFields = contentType.fields;
-const fieldOrder = template?.fieldOrder || allFields.map((f) => f.key);
+const fields = entry.fields || {};
+const title = resolveLocalizedValue(fields.title, locale) || entry.slug;
+const desc = resolveLocalizedValue(fields.description, locale) || '';
+const context = fields.context ? resolveLocalizedValue(fields.context, locale) : '';
+const tags: string[] = Array.isArray(fields.tags) ? fields.tags : (fields.technologies ? (Array.isArray(fields.technologies) ? fields.technologies : [fields.technologies]) : []);
 
-// Filter fields by visibility in 'card' context using configured template settings
-const visibleFields = fieldOrder
-  .map((key) => allFields.find((f) => f.key === key))
-  .filter((field): field is NonNullable<typeof field> => {
-    if (!field) return false;
-    return isFieldVisible(contentType, entry, field.key, 'card', template?.templateSettings);
-  });
+const coverImage = fields.coverImage || '';
+const hasRealImage = coverImage && coverImage !== 'placeholder.png' && coverImage.trim() !== '';
 
-// Extract common card roles if present and visible
-const coverField = visibleFields.find((f) => f.type === 'image' || f.key === 'coverImage');
-const titleField = visibleFields.find((f) => f.key === 'title' || f.type === 'text');
-const dateField = visibleFields.find((f) => f.type === 'date');
-const otherFields = visibleFields.filter(
-  (f) => f !== coverField && f !== titleField && f !== dateField
-);
+const imageSrc = hasRealImage
+  ? (coverImage.startsWith('http') ? coverImage : withBase(`/${coverImage.replace(/^\//, '')}`))
+  : '';
+
+const isVideo = hasRealImage && coverImage.endsWith('.mp4');
 
 const detailHref = locale === DEFAULT_LOCALE
   ? withBase(`/${contentType.slug}/${entry.slug}.html`)
   : withBase(`/${locale}/${contentType.slug}/${entry.slug}.html`);
 
-const entryTitle = titleField ? resolveLocalizedValue(entry.fields[titleField.key], locale) : entry.slug;
-const isRtl = locale === 'ar';
+const gradStyle = `background: linear-gradient(135deg, ${getProjGrad(tags)});`;
+const emoji = getProjEmoji(tags);
 ---
 
-<article class={`generic-card bg-white border border-neutral-200 rounded-xl overflow-hidden shadow-xs hover:shadow-md transition-shadow flex flex-col ${className}`}>
-  {coverField && entry.fields[coverField.key] && (
-    <a href={detailHref} class="block overflow-hidden bg-neutral-100 aspect-video">
-      <FieldRenderer
-        field={coverField}
-        value={entry.fields[coverField.key]}
-        locale={locale}
-        aspectRatio={template?.imageAspectRatio || '16/9'}
-        class="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
-      />
-    </a>
-  )}
-
-  <div class="p-5 flex-1 flex flex-col justify-between">
-    <div>
-      {dateField && entry.fields[dateField.key] && (
-        <div class="mb-2">
-          <FieldRenderer field={dateField} value={entry.fields[dateField.key]} locale={locale} />
-        </div>
-      )}
-
-      {titleField && (
-        <h3 class="text-xl font-bold text-neutral-900 mb-2 leading-snug">
-          <a href={detailHref} class="hover:text-indigo-600 transition-colors">
-            {entryTitle}
-          </a>
-        </h3>
-      )}
-
-      <div class="space-y-3">
-        {otherFields.map((field) => (
-          <div class={`card-field card-field-${field.key}`}>
-            <FieldRenderer
-              field={field}
-              value={entry.fields[field.key]}
-              locale={locale}
-              as={field.type === 'textarea' ? 'p' : 'div'}
-              class={field.type === 'textarea' ? 'text-sm text-neutral-600 line-clamp-3' : ''}
-            />
-          </div>
-        ))}
+<article class={`proj-card reveal visible ${className}`} role="listitem">
+  <div class="proj-media">
+    {hasRealImage ? (
+      isVideo ? (
+        <video
+          src={imageSrc}
+          autoplay
+          loop
+          muted
+          playsinline
+          style="width:100%; height:100%; object-fit:cover;"
+        />
+      ) : (
+        <img
+          src={imageSrc}
+          alt={title}
+          loading="lazy"
+          decoding="async"
+          onload="this.classList.add('loaded'); this.parentElement?.classList.add('loaded');"
+          class="loaded"
+        />
+      )
+    ) : (
+      <div class="proj-media-bg" style={gradStyle}>
+        <span class="proj-media-emoji" aria-hidden="true">{emoji}</span>
       </div>
-    </div>
+    )}
+  </div>
 
-    <div class="mt-4 pt-4 border-t border-neutral-100 flex items-center justify-between">
-      <a
-        href={detailHref}
-        class="text-sm font-medium text-indigo-600 hover:text-indigo-800 inline-flex items-center gap-1"
-      >
-        <span>{t('ui.learnMore', locale)}</span>
-        <span class={isRtl ? 'rotate-180 inline-block' : ''}>→</span>
-      </a>
-    </div>
+  <div class="proj-body">
+    <p class="proj-title">
+      <a href={detailHref} style="color:inherit; text-decoration:none;">{title}</a>
+    </p>
+    {context && <p class="proj-context">{context}</p>}
+    <p class="proj-desc">{desc}</p>
+
+    {tags.length > 0 && (
+      <div class="tags">
+        {tags.map((tag) => {
+          const devicon = DEVICON_MAP[tag];
+          return (
+            <span class="tag">
+              {devicon && (
+                <i
+                  class={`devicon-${devicon} colored tag-icon`}
+                  aria-hidden="true"
+                />
+              )}
+              {tag}
+            </span>
+          );
+        })}
+      </div>
+    )}
+
+    {fields.externalLink && (
+      <div class="proj-actions">
+        <a
+          href={fields.externalLink}
+          target="_blank"
+          rel="noopener"
+          class="proj-btn"
+          aria-label={`${title} — Lien`}
+        >
+          ↗ Lien
+        </a>
+      </div>
+    )}
   </div>
 </article>

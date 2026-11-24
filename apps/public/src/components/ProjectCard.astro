@@ -1,0 +1,151 @@
+---
+import type { ProjectItem } from '../data/portfolio.ts';
+import {
+  DEVICON_MAP,
+  getProjGrad,
+  getProjEmoji,
+  resolvePortfolioText,
+} from '../data/portfolio.ts';
+import { withBase } from '../utils/url.ts';
+import type { SupportedLocale } from '../i18n/types.ts';
+
+interface Props {
+  project: ProjectItem;
+  locale?: SupportedLocale;
+}
+
+const { project, locale = 'fr' } = Astro.props;
+
+const title = resolvePortfolioText(project.title, locale);
+const desc = resolvePortfolioText(project.description, locale);
+const context = typeof project.context === 'object'
+  ? resolvePortfolioText(project.context, locale)
+  : (project.context || '');
+
+const tags = project.tags || [];
+
+const hasRealImage = project.image && project.image !== 'placeholder.png' && project.image.trim() !== '';
+const isVideo = hasRealImage && project.image!.endsWith('.mp4');
+
+const imageSrc = hasRealImage
+  ? (project.image!.startsWith('http') ? project.image! : withBase(`/${project.image!.replace(/^\//, '')}`))
+  : '';
+
+const resolveLink = (link?: string) => {
+  if (!link) return '';
+  if (link.startsWith('http') || link.startsWith('mailto:')) return link;
+  return withBase(`/${link.replace(/^\//, '')}`);
+};
+
+const githubUrl = resolveLink(project.github);
+const demoUrl = resolveLink(project.demo);
+const pdfUrl = resolveLink(project.pdf);
+const notebookUrl = resolveLink(project.notebook);
+
+const gradStyle = `background: linear-gradient(135deg, ${getProjGrad(tags)});`;
+const emoji = getProjEmoji(tags);
+---
+
+<article class="proj-card reveal visible" role="listitem">
+  <div class="proj-media">
+    {hasRealImage ? (
+      isVideo ? (
+        <video
+          src={imageSrc}
+          autoplay
+          loop
+          muted
+          playsinline
+          style="width:100%; height:100%; object-fit:cover; transition:transform .4s ease;"
+        />
+      ) : (
+        <img
+          src={imageSrc}
+          alt={title}
+          loading="lazy"
+          decoding="async"
+          onload="this.classList.add('loaded'); this.parentElement?.classList.add('loaded');"
+          class="loaded"
+        />
+      )
+    ) : (
+      <div class="proj-media-bg" style={gradStyle}>
+        <span class="proj-media-emoji" aria-hidden="true">{emoji}</span>
+      </div>
+    )}
+  </div>
+
+  <div class="proj-body">
+    <p class="proj-title">{title}</p>
+    {context && <p class="proj-context">{context}</p>}
+    <p class="proj-desc">{desc}</p>
+
+    {tags.length > 0 && (
+      <div class="tags">
+        {tags.map((tag) => {
+          const devicon = DEVICON_MAP[tag];
+          return (
+            <span class="tag">
+              {devicon && (
+                <i
+                  class={`devicon-${devicon} colored tag-icon`}
+                  aria-hidden="true"
+                />
+              )}
+              {tag}
+            </span>
+          );
+        })}
+      </div>
+    )}
+
+    {(githubUrl || demoUrl || pdfUrl || notebookUrl) && (
+      <div class="proj-actions">
+        {githubUrl && (
+          <a
+            href={githubUrl}
+            target="_blank"
+            rel="noopener"
+            class="proj-btn"
+            aria-label={`${title} — GitHub`}
+          >
+            ⌥ GitHub
+          </a>
+        )}
+        {demoUrl && (
+          <a
+            href={demoUrl}
+            target="_blank"
+            rel="noopener"
+            class="proj-btn"
+            aria-label={`${title} — Demo`}
+          >
+            ↗ Demo
+          </a>
+        )}
+        {pdfUrl && (
+          <a
+            href={pdfUrl}
+            target="_blank"
+            rel="noopener"
+            class="proj-btn"
+            aria-label={`${title} — Rapport PDF`}
+          >
+            📄 PDF
+          </a>
+        )}
+        {notebookUrl && (
+          <a
+            href={notebookUrl}
+            target="_blank"
+            rel="noopener"
+            class="proj-btn"
+            aria-label={`${title} — Jupyter Notebook`}
+          >
+            📓 Notebook
+          </a>
+        )}
+      </div>
+    )}
+  </div>
+</article>

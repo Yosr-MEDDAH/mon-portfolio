@@ -15,6 +15,12 @@ import { useAuth } from '../context/AuthContext.tsx';
 import { useNotify } from '../context/NotificationContext.tsx';
 import { useAdminLang } from '../context/LanguageContext.tsx';
 import { VisibilityManager } from '../components/VisibilityManager.tsx';
+import {
+  KNOWN_FIELD_LABELS,
+  formatKeyToLabel,
+  getNormalizedFieldNames,
+  isGenericPlaceholder,
+} from '../shared/labels.ts';
 
 export const ContentTypesPage: React.FC = () => {
   const { user } = useAuth();
@@ -72,9 +78,14 @@ export const ContentTypesPage: React.FC = () => {
   const handleAddField = () => {
     if (!editingType) return;
     const newKey = `field_${editingType.fields.length + 1}`;
+    const defaultLabels = KNOWN_FIELD_LABELS[newKey] || {
+      en: formatKeyToLabel(newKey),
+      fr: formatKeyToLabel(newKey),
+      ar: formatKeyToLabel(newKey),
+    };
     const newField: FieldDefinition = {
       key: newKey,
-      name: { en: 'New Field', fr: 'Nouveau Champ', ar: 'حقل جديد' },
+      name: defaultLabels,
       type: 'text',
       required: false,
       localized: false,
@@ -113,10 +124,15 @@ export const ContentTypesPage: React.FC = () => {
     }
 
     const finalId = editingType.id || editingType.slug.trim().toLowerCase().replace(/[^a-z0-9_-]/g, '-');
+    const normalizedFields = editingType.fields.map((f) => ({
+      ...f,
+      name: getNormalizedFieldNames(f),
+    }));
     const toSave: ContentTypeDefinition = {
       ...editingType,
       id: finalId,
       slug: editingType.slug.trim().toLowerCase(),
+      fields: normalizedFields,
     };
 
     try {
@@ -292,8 +308,18 @@ export const ContentTypesPage: React.FC = () => {
                         type="text"
                         value={f.key}
                         onChange={(e) => {
+                          const newKeyVal = e.target.value;
                           const updated = [...editingType.fields];
-                          updated[idx].key = e.target.value;
+                          updated[idx].key = newKeyVal;
+                          const currentNameEn = typeof f.name === 'object' ? f.name.en : f.name;
+                          if (isGenericPlaceholder(currentNameEn) || KNOWN_FIELD_LABELS[newKeyVal]) {
+                            if (KNOWN_FIELD_LABELS[newKeyVal]) {
+                              updated[idx].name = { ...KNOWN_FIELD_LABELS[newKeyVal] };
+                            } else if (isGenericPlaceholder(currentNameEn)) {
+                              const autoLabel = formatKeyToLabel(newKeyVal);
+                              updated[idx].name = { en: autoLabel, fr: autoLabel, ar: autoLabel };
+                            }
+                          }
                           setEditingType({ ...editingType, fields: updated });
                         }}
                         className="w-full px-2 py-1 text-xs font-mono bg-surface border border-border rounded text-content focus:border-mg"
@@ -345,6 +371,55 @@ export const ContentTypesPage: React.FC = () => {
                         />
                         <span>Localized</span>
                       </label>
+                    </div>
+
+                    <div className="sm:col-span-3 grid grid-cols-1 sm:grid-cols-3 gap-2 pt-2 border-t border-border/50">
+                      <div>
+                        <span className="text-[10px] uppercase font-mono text-content-muted">Label (EN)</span>
+                        <input
+                          type="text"
+                          placeholder="e.g. Short Description"
+                          value={typeof f.name === 'object' ? (f.name.en || '') : (f.name || '')}
+                          onChange={(e) => {
+                            const updated = [...editingType.fields];
+                            const cur = typeof f.name === 'object' ? f.name : { en: f.name || '', fr: '', ar: '' };
+                            updated[idx].name = { ...cur, en: e.target.value };
+                            setEditingType({ ...editingType, fields: updated });
+                          }}
+                          className="w-full px-2 py-1 text-xs bg-surface border border-border rounded text-content focus:border-mg"
+                        />
+                      </div>
+                      <div>
+                        <span className="text-[10px] uppercase font-mono text-content-muted">Label (FR)</span>
+                        <input
+                          type="text"
+                          placeholder="ex. Description courte"
+                          value={typeof f.name === 'object' ? (f.name.fr || '') : ''}
+                          onChange={(e) => {
+                            const updated = [...editingType.fields];
+                            const cur = typeof f.name === 'object' ? f.name : { en: f.name || '', fr: '', ar: '' };
+                            updated[idx].name = { ...cur, fr: e.target.value };
+                            setEditingType({ ...editingType, fields: updated });
+                          }}
+                          className="w-full px-2 py-1 text-xs bg-surface border border-border rounded text-content focus:border-mg"
+                        />
+                      </div>
+                      <div>
+                        <span className="text-[10px] uppercase font-mono text-content-muted">Label (AR)</span>
+                        <input
+                          type="text"
+                          dir="rtl"
+                          placeholder="مثال: وصف مختصر"
+                          value={typeof f.name === 'object' ? (f.name.ar || '') : ''}
+                          onChange={(e) => {
+                            const updated = [...editingType.fields];
+                            const cur = typeof f.name === 'object' ? f.name : { en: f.name || '', fr: '', ar: '' };
+                            updated[idx].name = { ...cur, ar: e.target.value };
+                            setEditingType({ ...editingType, fields: updated });
+                          }}
+                          className="w-full px-2 py-1 text-xs bg-surface border border-border rounded text-content focus:border-mg text-right"
+                        />
+                      </div>
                     </div>
                   </div>
 

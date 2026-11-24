@@ -61,7 +61,7 @@ const backHref = withBase(`/${locale}/index.html`);
           const vidId = ytMatch ? ytMatch[1] : null;
 
           return (
-            <article class="pres-card reveal visible" role="listitem">
+            <article class="pres-card reveal visible" role="listitem" data-href={p.slug ? withBase(`/${locale}/presentations/${p.slug}/index.html`) : ''} style="cursor: pointer;">
               {vidId && (
                 <a
                   href={p.youtube}
@@ -110,4 +110,14 @@ const backHref = withBase(`/${locale}/index.html`);
       </div>
     </div>
   </section>
+<script is:inline>
+  document.querySelectorAll('.pres-card[data-href]').forEach((card) => {
+    const href = card.getAttribute('data-href');
+    if (!href) return;
+    card.addEventListener('click', (e) => {
+      if (e.target.closest('a')) return;
+      window.location.href = href;
+    });
+  });
+</script>
 </BaseLayout>

@@ -52,7 +52,7 @@ const backHref = locale === DEFAULT_LOCALE
           const imgSrc = withBase(`/${aw.image.replace(/^\//, '')}`);
           const isVid = aw.image.endsWith('.mp4');
           return (
-            <figure class="artwork-item reveal visible" role="listitem">
+            <figure class="artwork-item reveal visible" role="listitem" data-href={aw.slug ? (locale === 'en' ? withBase(`/artworks/${aw.slug}.html`) : withBase(`/${locale}/artworks/${aw.slug}/index.html`)) : ''} style="cursor: pointer;">
               {isVid ? (
                 <video
                   src={imgSrc}
@@ -113,4 +113,24 @@ const backHref = locale === DEFAULT_LOCALE
       </div>
     </div>
   </section>
+<script is:inline>
+  document.querySelectorAll('.artwork-item[data-href]').forEach((card) => {
+    const href = card.getAttribute('data-href');
+    if (!href) return;
+    card.addEventListener('click', (e) => {
+      if (e.target.closest('a')) return;
+      window.location.href = href;
+    });
+  });
+</script>
+<script is:inline>
+  document.querySelectorAll('.artwork-item[data-href]').forEach((card) => {
+    const href = card.getAttribute('data-href');
+    if (!href) return;
+    card.addEventListener('click', (e) => {
+      if (e.target.closest('a')) return;
+      window.location.href = href;
+    });
+  });
+</script>
 </BaseLayout>

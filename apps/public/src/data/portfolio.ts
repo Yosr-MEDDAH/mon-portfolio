@@ -15,6 +15,7 @@ export interface SkillCategory {
 }
 
 export interface Experience {
+  slug?: string;
   role: LocalizedString;
   company: string;
   period: string;
@@ -49,6 +50,7 @@ export interface ProjectItem {
 }
 
 export interface PresentationItem {
+  slug?: string;
   title: LocalizedString;
   period?: string;
   context?: string | LocalizedString;
@@ -58,6 +60,7 @@ export interface PresentationItem {
 }
 
 export interface ArtworkItem {
+  slug?: string;
   title: string;
   image: string;
   youtube?: string;

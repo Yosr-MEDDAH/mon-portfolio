@@ -58,7 +58,7 @@ const backHref = locale === DEFAULT_LOCALE
           const vidId = ytMatch ? ytMatch[1] : null;
 
           return (
-            <article class="pres-card reveal visible" role="listitem">
+            <article class="pres-card reveal visible" role="listitem" data-href={p.slug ? (locale === 'en' ? withBase(`/presentations/${p.slug}.html`) : withBase(`/${locale}/presentations/${p.slug}/index.html`)) : ''} style="cursor: pointer;">
               {vidId && (
                 <a
                   href={p.youtube}
@@ -107,4 +107,30 @@ const backHref = locale === DEFAULT_LOCALE
       </div>
     </div>
   </section>
+<script is:inline>
+  document.querySelectorAll('.pres-card[data-href]').forEach((card) => {
+    const href = card.getAttribute('data-href');
+    if (!href) return;
+    card.addEventListener('click', (e) => {
+      if (e.target.closest('a')) return;
+      window.location.href = href;
+    });
+    card.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        window.location.href = href;
+      }
+    });
+  });
+</script>
+<script is:inline>
+  document.querySelectorAll('.pres-card[data-href]').forEach((card) => {
+    const href = card.getAttribute('data-href');
+    if (!href) return;
+    card.addEventListener('click', (e) => {
+      if (e.target.closest('a')) return;
+      window.location.href = href;
+    });
+  });
+</script>
 </BaseLayout>

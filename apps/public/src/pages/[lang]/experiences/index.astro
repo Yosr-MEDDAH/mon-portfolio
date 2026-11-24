@@ -54,7 +54,7 @@ const backHref = withBase(`/${locale}/index.html`);
           const role = resolvePortfolioText(e.role, locale);
           const desc = resolvePortfolioText(e.description, locale);
           return (
-            <article class="exp-card reveal visible" role="listitem">
+            <article class="exp-card reveal visible" role="listitem" data-href={e.slug ? withBase(`/${locale}/experiences/${e.slug}/index.html`) : ''} style="cursor: pointer;">
               <div>
                 <div class="exp-role">{role}</div>
                 <div class="exp-co">{e.company} · {e.location}</div>
@@ -120,4 +120,14 @@ const backHref = withBase(`/${locale}/index.html`);
       )}
     </div>
   </section>
+<script is:inline>
+  document.querySelectorAll('.exp-card[data-href]').forEach((card) => {
+    const href = card.getAttribute('data-href');
+    if (!href) return;
+    card.addEventListener('click', (e) => {
+      if (e.target.closest('a')) return;
+      window.location.href = href;
+    });
+  });
+</script>
 </BaseLayout>

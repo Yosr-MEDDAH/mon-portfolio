@@ -10,19 +10,100 @@ const { value, label, class: className = '' } = Astro.props;
 let href = '';
 if (typeof value === 'string') {
   href = value.trim();
+} else if (value && typeof value === 'object') {
+  const o = value as Record<string, unknown>;
+  if (typeof o.url === 'string') href = o.url.trim();
 }
+
+function parseYouTube(url: string): string | null {
+  try {
+    const u = new URL(url);
+    if (u.hostname.includes('youtu.be')) {
+      return u.pathname.split('/').filter(Boolean)[0] || null;
+    }
+    if (u.hostname.includes('youtube.com')) {
+      if (u.pathname.startsWith('/shorts/')) {
+        return u.pathname.split('/')[2] || null;
+      }
+      const v = u.searchParams.get('v');
+      if (v) return v;
+      const m = u.pathname.match(/\/embed\/([^/?]+)/);
+      if (m) return m[1];
+    }
+  } catch {}
+  return null;
+}
+
+function parseDriveFileId(url: string): string | null {
+  const m = url.match(/\/file\/d\/([^/?]+)/);
+  if (m) return m[1];
+  try {
+    const u = new URL(url);
+    return u.searchParams.get('id');
+  } catch {}
+  return null;
+}
+
+const ytId = href ? parseYouTube(href) : null;
+const driveId = href && !ytId ? parseDriveFileId(href) : null;
+const isDrive = !!driveId && /drive\.google\.com/.test(href);
 ---
 
 {href ? (
-  <a
-    href={href}
-    target="_blank"
-    rel="noopener noreferrer"
-    class={`field-url inline-flex items-center gap-1.5 text-blue-600 hover:text-blue-800 underline text-sm ${className}`}
-  >
-    <span>{label || href}</span>
-    <svg class="w-3.5 h-3.5 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-    </svg>
-  </a>
+  ytId ? (
+    <div class={`field-url field-url-youtube ${className}`} style="max-width: 480px;">
+      <a href={href} target="_blank" rel="noopener noreferrer" style="display: block; position: relative; border-radius: 0.5rem; overflow: hidden; border: 1px solid var(--border);">
+        <img
+          src={`https://img.youtube.com/vi/${ytId}/hqdefault.jpg`}
+          alt={label || 'YouTube video'}
+          loading="lazy"
+          style="width: 100%; height: auto; display: block;"
+        />
+        <span style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.25);">
+          <span style="width: 56px; height: 56px; border-radius: 50%; background: rgba(255,255,255,0.9); display: flex; align-items: center; justify-content: center; font-size: 1.5rem; color: #dc2626;">▶</span>
+        </span>
+      </a>
+      <p style="margin-top: 0.5rem; font-size: 0.8rem; color: var(--text-2);">
+        <a href={href} target="_blank" rel="noopener noreferrer" style="color: var(--mg); text-decoration: underline;">{label || 'Watch on YouTube'}</a>
+      </p>
+    </div>
+  ) : isDrive ? (
+    <div class={`field-url field-url-drive ${className}`} style="max-width: 480px;">
+      <div style="border: 1px solid var(--border); border-radius: 0.5rem; overflow: hidden; background: var(--surface);">
+        <img
+          src={`https://drive.google.com/thumbnail?id=${driveId}&sz=w400`}
+          alt={label || 'Google Drive document'}
+          loading="lazy"
+          style="width: 100%; height: auto; display: block;"
+          onerror="this.style.display='none'; this.parentElement.querySelector('.drive-fallback').style.display='flex';"
+        />
+        <div class="drive-fallback" style="display: none; padding: 1.5rem; align-items: center; justify-content: center; flex-direction: column; gap: 0.5rem; color: var(--text-2);">
+          <span style="font-size: 2rem;">📄</span>
+          <span style="font-size: 0.875rem;">{label || 'Document'}</span>
+        </div>
+      </div>
+      <p style="margin-top: 0.5rem;">
+        <a href={href} target="_blank" rel="noopener noreferrer" style="display: inline-flex; align-items: center; gap: 0.375rem; font-size: 0.875rem; color: var(--mg); text-decoration: underline;">
+          Open document
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true" style="flex-shrink: 0;">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+          </svg>
+        </a>
+      </p>
+    </div>
+  ) : (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      class={`field-url ${className}`}
+      style="display: inline-flex; align-items: center; gap: 0.375rem; font-size: 0.875rem; color: var(--mg); text-decoration: underline;"
+    >
+      <span>{label || href}</span>
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true" style="flex-shrink: 0;">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+      </svg>
+    </a>
+  )
 ) : null}
+---

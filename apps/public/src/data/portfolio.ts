@@ -1,5 +1,4 @@
 import { getCollectionBySlug } from '../content-store/index.ts';
-import { withBase } from '../utils/url.ts';
 import publishedData from '../content-store/data/published-content.json';
 import type { SupportedLocale } from '../i18n/types.ts';
 
@@ -277,7 +276,7 @@ export function getPortfolioProjects(): ProjectItem[] {
       tags: Array.isArray(f.tags) ? f.tags : (f.technologies ? (Array.isArray(f.technologies) ? f.technologies : [f.technologies]) : []),
       github: f.githubUrl || (f.externalLink?.includes('github') ? f.externalLink : ''),
       demo: f.liveUrl || (f.externalLink && !f.externalLink.includes('github') ? f.externalLink : ''),
-      image: toAssetUrl(f.coverImage || ''),
+      image: f.coverImage || '',
       featured: Boolean(f.featured),
     };
   });
@@ -354,12 +353,6 @@ function asArray(v) {
   return [];
 }
 
-function toAssetUrl(p) {
-  if (typeof p !== 'string' || !p.trim()) return '';
-  if (/^https?:\/\//i.test(p)) return p;
-  return withBase(p.startsWith('/') ? p : '/' + p);
-}
-
 export function getCmsSkills() {
   const groups = new Map();
   for (const e of cmsEntries('skills')) {
@@ -394,7 +387,7 @@ export function getCmsExperiences() {
       location: String(f.location || ''),
       description: (typeof f.description === 'object' ? f.description : { en: String(f.description || '') }),
       tags: asArray(f.tags),
-      images: asArray(f.images).map(toAssetUrl),
+      images: asArray(f.images),
     };
   });
 }
@@ -418,7 +411,7 @@ export function getCmsArtworks() {
     const f = e.fields || {};
     return {
       title: cmsLocalized(f.title, 'en') || String(f.title || ''),
-      image: toAssetUrl(f.image || f.url || ''),
+      image: String(f.image || f.url || ''),
       youtube: String(f.youtube || ''),
       behance: String(f.behance || ''),
     };

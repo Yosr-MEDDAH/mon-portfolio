@@ -3,18 +3,73 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <!-- GitHub Pages-safe paths: %BASE_URL% resolves to "./" for the /admin/ build. -->
+    <link
+      id="favicon"
+      rel="icon"
+      type="image/png"
+      href="%BASE_URL%assets/logo-noir.png"
+      data-light-href="%BASE_URL%assets/logo-noir.png"
+      data-dark-href="%BASE_URL%assets/logo-blanc.png"
+    />
     <title>Portfolio CMS Admin — Yosr Meddah</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Instrument+Serif:ital@0;1&family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Sans+Arabic:wght@300;400;500;600&display=swap" rel="stylesheet" />
     <script>
-      (function() {
-        try {
-          var t = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-          document.documentElement.dataset.theme = t;
-        } catch (e) {
-          document.documentElement.dataset.theme = 'light';
+      (function () {
+        var root = document.documentElement;
+        var media = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : null;
+
+        function getStoredTheme() {
+          try {
+            var saved = localStorage.getItem('theme');
+            return saved === 'light' || saved === 'dark' ? saved : null;
+          } catch (err) {
+            return null;
+          }
+        }
+
+        function getSystemTheme() {
+          return media && media.matches ? 'dark' : 'light';
+        }
+
+        function updateFavicon(theme) {
+          var link = document.getElementById('favicon');
+          if (!link) return;
+
+          var href = theme === 'dark'
+            ? link.getAttribute('data-dark-href')
+            : link.getAttribute('data-light-href');
+          if (href && link.getAttribute('href') !== href) {
+            link.setAttribute('href', href);
+          }
+        }
+
+        function applyTheme(theme) {
+          root.dataset.theme = theme;
+          updateFavicon(theme);
+        }
+
+        applyTheme(getStoredTheme() || getSystemTheme());
+
+        // Keep the favicon in sync with the React Light/Dark toggle.
+        new MutationObserver(function () {
+          updateFavicon(root.dataset.theme === 'dark' ? 'dark' : 'light');
+        }).observe(root, { attributes: true, attributeFilter: ['data-theme'] });
+
+        // Follow the OS preference as long as the user has not chosen a theme.
+        if (media) {
+          var onSystemThemeChange = function (event) {
+            if (!getStoredTheme()) {
+              applyTheme(event.matches ? 'dark' : 'light');
+            }
+          };
+          if (media.addEventListener) {
+            media.addEventListener('change', onSystemThemeChange);
+          } else if (media.addListener) {
+            media.addListener(onSystemThemeChange);
+          }
         }
       })();
     </script>

@@ -79,6 +79,13 @@ export const LoginPage: React.FC = () => {
           <span className="font-mono text-content font-medium">{fbStatus.projectId}</span>
         </div>
 
+        {fbStatus.initError && (
+          <div className="mb-5 p-3 rounded bg-red-500/10 border border-red-700/30 text-red-700 dark:text-red-400 text-xs font-medium leading-relaxed flex items-center gap-2">
+            <AlertCircle size={14} strokeWidth={1.5} className="shrink-0" />
+            <span>{fbStatus.initError}</span>
+          </div>
+        )}
+
         {/* Error banner */}
         {(error || authError) && (
           <div className="mb-5 p-3 rounded bg-red-500/10 border border-red-700/30 text-red-700 dark:text-red-400 text-xs font-medium leading-relaxed flex items-center gap-2">
@@ -129,13 +136,9 @@ export const LoginPage: React.FC = () => {
         <div className="mt-8 pt-6 border-t border-border text-[11px] text-content-muted leading-relaxed">
           <div className="font-semibold text-content mb-1">First-time Administrator Access:</div>
           <p>
-            Public registration is disabled. To grant access, create an authentication account in Firebase Authentication, then insert an authorization record into Firestore at <code className="text-mg font-mono">/adminUsers/{'{uid}'}</code> with <code className="text-content font-mono">isActive: true</code>.
+            Public registration is disabled. To grant access, create an authentication account in Firebase Authentication, then insert an authorization record into Firestore at <code className="text-mg font-mono">/adminUsers/{'{uid}'}</code> with <code className="text-content font-mono">isActive: true</code> and <code className="text-content font-mono">role: "admin"</code>.
           </p>
-          {fbStatus.isMockMode && (
-            <div className="mt-2 text-content-secondary bg-mg-pale/60 p-2 rounded border border-mg-border">
-              Offline mode active: Log in with <code className="text-mg font-mono">admin@yosr-meddah.dev</code> / <code className="text-mg font-mono">Admin1234!</code>
-            </div>
-          )}
+
         </div>
       </div>
     </div>

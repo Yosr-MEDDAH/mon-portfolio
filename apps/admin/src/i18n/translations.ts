@@ -19,7 +19,7 @@ export const adminTranslations: Record<string, Record<SupportedLocale, string>> 
   'header.lightMode': { en: 'Switch to light mode', fr: 'Activer le mode clair', ar: 'تفعيل الوضع النهاري' },
   'header.darkMode': { en: 'Switch to dark mode', fr: 'Activer le mode sombre', ar: 'تفعيل الوضع الليلي' },
   'status.connected': { en: 'Firestore Spark Connected', fr: 'Connecté Firestore Spark', ar: 'متصل بـ Firestore' },
-  'status.mock': { en: 'Simulated Local Storage', fr: 'Stockage local simulé', ar: 'وضع التخزين المحلي التجريبي' },
+  'status.error': { en: 'Firebase configuration error', fr: 'Erreur de configuration Firebase', ar: 'خطأ في إعداد Firebase' },
 
   // Auth & Login
   'login.title': { en: 'Admin CMS Login', fr: 'Connexion Admin CMS', ar: 'تسجيل دخول المسؤول' },

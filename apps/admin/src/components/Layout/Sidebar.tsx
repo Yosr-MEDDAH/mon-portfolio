@@ -124,7 +124,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             <span>Firebase Spark:</span>
             <span
               className={`inline-block w-2 h-2 rounded-full ${
-                fbStatus.isMockMode ? 'bg-amber-600' : 'bg-mg'
+                fbStatus.isConfigured ? 'bg-mg' : 'bg-red-600'
               }`}
             />
           </div>
@@ -132,7 +132,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             {fbStatus.projectId}
           </div>
           <div className="mt-1 text-[11px] text-content-muted">
-            {fbStatus.isMockMode ? t('status.mock') : t('status.connected')}
+            {fbStatus.isConfigured ? t('status.connected') : t('status.error')}
           </div>
         </div>
       </aside>

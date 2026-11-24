@@ -21,7 +21,8 @@ const {
 
 const localeConfig = LOCALE_CONFIGS[locale] || LOCALE_CONFIGS[DEFAULT_LOCALE];
 const styleHref = withBase('/style.css');
-const faviconHref = withBase('/assets/logo-noir.png');
+const faviconNoir = withBase('/assets/logo-noir.png');
+const faviconBlanc = withBase('/assets/logo-blanc.png');
 ---
 
 <!DOCTYPE html>
@@ -31,7 +32,15 @@ const faviconHref = withBase('/assets/logo-noir.png');
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{title}</title>
     <meta name="description" content={description} />
-    <link rel="icon" type="image/png" href={faviconHref} />
+    <!-- Adaptive favicon: black logo in light mode, white logo in dark mode -->
+    <link
+      id="favicon"
+      rel="icon"
+      type="image/png"
+      href={faviconNoir}
+      data-light-href={faviconNoir}
+      data-dark-href={faviconBlanc}
+    />
 
     <!-- Google Fonts: Amiri, Instrument Serif, IBM Plex Sans, IBM Plex Sans Arabic -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -50,11 +59,62 @@ const faviconHref = withBase('/assets/logo-noir.png');
     <!-- Original Portfolio Design System CSS -->
     <link rel="stylesheet" href={styleHref} />
 
-    <!-- Anti-flash theme initialization -->
+    <!-- Anti-flash theme initialization + adaptive favicon -->
     <script is:inline>
-      (function(){
-        var t = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme:dark)').matches ? 'dark' : 'light');
-        document.documentElement.dataset.theme = t;
+      (function () {
+        var root = document.documentElement;
+        var media = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : null;
+
+        function getStoredTheme() {
+          try {
+            var saved = localStorage.getItem('theme');
+            return saved === 'light' || saved === 'dark' ? saved : null;
+          } catch (err) {
+            return null;
+          }
+        }
+
+        function getSystemTheme() {
+          return media && media.matches ? 'dark' : 'light';
+        }
+
+        function updateFavicon(theme) {
+          var link = document.getElementById('favicon');
+          if (!link) return;
+
+          var href = theme === 'dark'
+            ? link.getAttribute('data-dark-href')
+            : link.getAttribute('data-light-href');
+          if (href && link.getAttribute('href') !== href) {
+            link.setAttribute('href', href);
+          }
+        }
+
+        function applyTheme(theme) {
+          root.dataset.theme = theme;
+          updateFavicon(theme);
+        }
+
+        applyTheme(getStoredTheme() || getSystemTheme());
+
+        // Keep the favicon in sync with the manual Light/Dark selector.
+        new MutationObserver(function () {
+          updateFavicon(root.dataset.theme === 'dark' ? 'dark' : 'light');
+        }).observe(root, { attributes: true, attributeFilter: ['data-theme'] });
+
+        // Follow the OS preference as long as the user has not chosen a theme.
+        if (media) {
+          var onSystemThemeChange = function (event) {
+            if (!getStoredTheme()) {
+              applyTheme(event.matches ? 'dark' : 'light');
+            }
+          };
+          if (media.addEventListener) {
+            media.addEventListener('change', onSystemThemeChange);
+          } else if (media.addListener) {
+            media.addListener(onSystemThemeChange);
+          }
+        }
       })();
     </script>
   </head>

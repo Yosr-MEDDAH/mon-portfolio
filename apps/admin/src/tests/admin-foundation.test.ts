@@ -34,11 +34,11 @@ export async function runAdminFoundationTests() {
     throw new Error('Unauthorized user was incorrectly granted admin access!');
   }
 
-  const authorizedCheck = await checkIsAdmin('mock-admin-uid-yosr');
-  if (authorizedCheck.isAdmin !== true || authorizedCheck.adminData?.role !== 'admin') {
-    throw new Error('Authorized admin check failed');
+  const removedFallback = await checkIsAdmin('offline-fallback-uid');
+  if (removedFallback.isAdmin !== false || removedFallback.adminData !== null) {
+    throw new Error('The removed offline administrator fallback must never grant access');
   }
-  console.log('✓ Unauthorized access successfully denied; Admin authorization verified.');
+  console.log('✓ Unauthorized access denied; no offline administrator fallback exists.');
 
   // 2. Content Type Validation & Dynamic Field Definitions
   console.log('2. Testing Content Type schema validation and dynamic field definitions...');
@@ -186,7 +186,7 @@ export async function runAdminFoundationTests() {
     entityId: validEntry.id,
     revisionNumber: 1,
     authorUid: 'admin-123',
-    authorEmail: 'admin@yosr-meddah.dev',
+    authorEmail: 'test@example.com',
     timestamp: new Date().toISOString(),
     snapshot: JSON.parse(JSON.stringify(validEntry)),
   };

@@ -49,12 +49,12 @@ export const VisibilityManager: React.FC<VisibilityManagerProps> = ({
 
   const getEffectiveState = (fieldKey: string, ctx: RenderingContext): boolean => {
     if (mode === 'entry' && entry) {
-      const mockEntry: ContentEntry = {
+      const previewEntry: ContentEntry = {
         ...entry,
         visibilityOverrides,
         contextVisibilityOverrides,
       };
-      return isFieldVisible(contentType, mockEntry, fieldKey, ctx);
+      return isFieldVisible(contentType, previewEntry, fieldKey, ctx);
     }
     // At content type level
     if (contextDefaultVisibility[ctx] && typeof contextDefaultVisibility[ctx]![fieldKey] === 'boolean') {

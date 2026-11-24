@@ -68,7 +68,9 @@ export const SettingsPage: React.FC = () => {
           <div className="p-3 bg-cream/50 rounded border border-border space-y-1">
             <div className="text-content-muted uppercase tracking-wider text-[10px]">Connection Mode</div>
             <div className="font-mono text-content font-medium">
-              {fbStatus.isMockMode ? 'Simulated Local Storage (Offline)' : 'Live Cloud Firestore (Spark)'}
+              {fbStatus.isConfigured
+                ? 'Live Cloud Firestore (Spark)'
+                : t('status.error')}
             </div>
           </div>
         </div>

@@ -197,21 +197,64 @@ export const DynamicFieldEditor: React.FC<DynamicFieldEditorProps> = ({
             )}
 
             {field.type === 'image' && (
-              <div className="space-y-2">
-                <input
-                  type="text"
-                  value={typeof value === 'string' ? value : (value as { url?: string })?.url || ''}
-                  onChange={(e) => handleFieldChange(field.key, e.target.value)}
-                  placeholder="/assets/images/... or https://..."
-                  className="w-full px-3 py-2 text-sm bg-surface border border-border rounded text-content placeholder-content-muted focus:border-mg focus:outline-hidden font-mono transition-colors"
-                />
-                {Boolean(value) && (
-                  <div className="text-xs text-content-muted">
-                    Preview link: <code className="text-mg font-mono">{String(value)}</code>
-                  </div>
-                )}
-              </div>
-            )}
+  <div className="space-y-2">
+    <div className="flex gap-2">
+      <input
+        type="text"
+        value={typeof value === 'string' ? value : (value as { url?: string })?.url || ''}
+        onChange={(e) => handleFieldChange(field.key, e.target.value)}
+        placeholder="/assets/images/... or https://..."
+        className="flex-1 px-3 py-2 text-sm bg-surface border border-border rounded text-content placeholder-content-muted focus:border-mg focus:outline-hidden font-mono transition-colors"
+      />
+      <label className="px-3 py-2 text-xs font-medium border border-border rounded bg-surface text-content hover:border-mg cursor-pointer">
+        Upload
+        <input
+          type="file"
+          accept="image/*,application/pdf"
+          className="hidden"
+          onChange={async (e) => {
+            const file = e.target.files?.[0];
+            if (!file) return;
+            try {
+              const { getAuth } = await import('firebase/auth');
+              const auth = getAuth();
+              const user = auth.currentUser;
+              if (!user) throw new Error('Not authenticated');
+              const token = await user.getIdToken();
+              const workerUrl = (import.meta as any).env?.VITE_UPLOAD_WORKER_URL || 'https://portfolio-upload-worker.yosr-meddah92.workers.dev';
+              const fd = new FormData();
+              fd.append('file', file);
+              const res = await fetch(`${workerUrl}/upload`, {
+                method: 'POST',
+                headers: { Authorization: `Bearer ${token}` },
+                body: fd,
+              });
+              const data = await res.json();
+              if (!res.ok) throw new Error(data?.error || 'Upload failed');
+              handleFieldChange(field.key, data.path);
+            } catch (err) {
+              console.error(err);
+              alert(err instanceof Error ? err.message : 'Upload failed');
+            }
+            e.target.value = '';
+          }}
+        />
+      </label>
+    </div>
+    {Boolean(value) && (
+      <div className="text-xs text-content-muted">
+        Preview link: <code className="text-mg font-mono">{String(value)}</code>
+      </div>
+    )}
+    {Boolean(value) && /\.(png|jpe?g|webp|gif|svg)$/i.test(String(value)) && (
+      <img
+        src={String(value).startsWith('http') ? String(value) : (String(value))}
+        alt="preview"
+        className="max-h-32 rounded border border-border"
+      />
+    )}
+  </div>
+)}
 
             {field.type === 'tags' && (
               <div className="space-y-2">

@@ -11,6 +11,7 @@ import {
   archiveContentType,
   restoreContentType,
 } from '../firebase/firestore.ts';
+import { DEFAULT_CONTENT_TYPES } from '../firebase/defaultContentTypes.ts';
 import { useAuth } from '../context/AuthContext.tsx';
 import { useNotify } from '../context/NotificationContext.tsx';
 import { useAdminLang } from '../context/LanguageContext.tsx';
@@ -48,7 +49,15 @@ export const ContentTypesPage: React.FC = () => {
   const loadTypes = async () => {
     setLoading(true);
     try {
-      const data = await fetchContentTypes(true);
+      let data = await fetchContentTypes(true);
+      const existingIds = new Set(data.map((t) => t.id));
+      const missing = DEFAULT_CONTENT_TYPES.filter((dt) => !existingIds.has(dt.id));
+      if (missing.length > 0 && user) {
+        for (const dt of missing) {
+          await saveContentType(dt, user.uid, user.email || '', 'Seeded default content type');
+        }
+        data = await fetchContentTypes(true);
+      }
       setTypes(data);
     } catch (err) {
       notify('error', 'Failed to load content types: ' + (err instanceof Error ? err.message : ''));

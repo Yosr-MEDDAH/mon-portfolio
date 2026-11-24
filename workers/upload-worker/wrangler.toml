@@ -1,0 +1,12 @@
+name = "portfolio-upload-worker"
+main = "src/index.ts"
+compatibility_date = "2026-01-01"
+
+[vars]
+FIREBASE_PROJECT_ID = "portfolio-yosr-v2"
+GITHUB_OWNER = "Yosr-MEDDAH"
+GITHUB_REPO = "mon-portfolio"
+GITHUB_BRANCH = "main"
+UPLOAD_PATH_PREFIX = "apps/public/public/assets"
+MAX_FILE_SIZE = "2097152"
+ALLOWED_MIME = "image/png,image/jpeg,image/webp,image/gif,image/svg+xml,application/pdf"

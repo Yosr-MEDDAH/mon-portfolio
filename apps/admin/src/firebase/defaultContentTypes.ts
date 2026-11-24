@@ -1,0 +1,73 @@
+import type { ContentTypeDefinition } from '../shared/types.ts';
+
+export const DEFAULT_CONTENT_TYPES: ContentTypeDefinition[] = [
+  {
+    id: 'skills',
+    name: { en: 'Skills', fr: 'Compétences', ar: 'المهارات' },
+    description: { en: 'Skill categories and items', fr: 'Catégories et éléments de compétences', ar: 'فئات وعناصر المهارات' },
+    slug: 'skills',
+    fields: [
+      { key: 'category', name: { en: 'Category', fr: 'Catégorie', ar: 'الفئة' }, type: 'text', required: true, localized: true, defaultVisible: true },
+      { key: 'items', name: { en: 'Items', fr: 'Éléments', ar: 'العناصر' }, type: 'tags', required: true, localized: false, defaultVisible: true },
+    ],
+    defaultVisibility: { category: true, items: true },
+  },
+  {
+    id: 'experience',
+    name: { en: 'Experience', fr: 'Expérience', ar: 'الخبرة' },
+    description: { en: 'Professional experience and internships', fr: 'Expérience professionnelle et stages', ar: 'الخبرة المهنية والتدريب' },
+    slug: 'experience',
+    fields: [
+      { key: 'role', name: { en: 'Role', fr: 'Poste', ar: 'المنصب' }, type: 'text', required: true, localized: true, defaultVisible: true },
+      { key: 'company', name: { en: 'Company', fr: 'Entreprise', ar: 'الشركة' }, type: 'text', required: true, localized: false, defaultVisible: true },
+      { key: 'period', name: { en: 'Period', fr: 'Période', ar: 'الفترة' }, type: 'text', required: false, localized: false, defaultVisible: true },
+      { key: 'location', name: { en: 'Location', fr: 'Lieu', ar: 'الموقع' }, type: 'text', required: false, localized: false, defaultVisible: true },
+      { key: 'description', name: { en: 'Description', fr: 'Description', ar: 'الوصف' }, type: 'textarea', required: false, localized: true, defaultVisible: true },
+      { key: 'tags', name: { en: 'Tags', fr: 'Tags', ar: 'الوسوم' }, type: 'tags', required: false, localized: false, defaultVisible: true },
+      { key: 'images', name: { en: 'Images', fr: 'Images', ar: 'الصور' }, type: 'tags', required: false, localized: false, defaultVisible: true },
+      { key: 'github', name: { en: 'GitHub', fr: 'GitHub', ar: 'GitHub' }, type: 'url', required: false, localized: false, defaultVisible: true },
+    ],
+    defaultVisibility: { role: true, company: true, period: true, location: true, description: true, tags: true },
+  },
+  {
+    id: 'presentations',
+    name: { en: 'Presentations', fr: 'Présentations', ar: 'العروض' },
+    description: { en: 'Talks and presentations', fr: 'Conférences et présentations', ar: 'المحاضرات والعروض' },
+    slug: 'presentations',
+    fields: [
+      { key: 'title', name: { en: 'Title', fr: 'Titre', ar: 'العنوان' }, type: 'text', required: true, localized: true, defaultVisible: true },
+      { key: 'period', name: { en: 'Period', fr: 'Période', ar: 'الفترة' }, type: 'text', required: false, localized: false, defaultVisible: true },
+      { key: 'context', name: { en: 'Context', fr: 'Contexte', ar: 'السياق' }, type: 'text', required: false, localized: true, defaultVisible: true },
+      { key: 'description', name: { en: 'Description', fr: 'Description', ar: 'الوصف' }, type: 'textarea', required: false, localized: true, defaultVisible: true },
+      { key: 'tags', name: { en: 'Tags', fr: 'Tags', ar: 'الوسوم' }, type: 'tags', required: false, localized: false, defaultVisible: true },
+      { key: 'youtube', name: { en: 'YouTube URL', fr: 'URL YouTube', ar: 'رابط YouTube' }, type: 'url', required: false, localized: false, defaultVisible: true },
+    ],
+    defaultVisibility: { title: true, period: true, context: true, description: true, tags: true, youtube: true },
+  },
+  {
+    id: 'artworks',
+    name: { en: 'Artworks', fr: 'Œuvres', ar: 'الأعمال الفنية' },
+    description: { en: 'Illustrations and artworks', fr: 'Illustrations et œuvres', ar: 'الرسوم والأعمال الفنية' },
+    slug: 'artworks',
+    fields: [
+      { key: 'title', name: { en: 'Title', fr: 'Titre', ar: 'العنوان' }, type: 'text', required: true, localized: true, defaultVisible: true },
+      { key: 'image', name: { en: 'Image', fr: 'Image', ar: 'الصورة' }, type: 'image', required: false, localized: false, defaultVisible: true },
+      { key: 'youtube', name: { en: 'YouTube URL', fr: 'URL YouTube', ar: 'رابط YouTube' }, type: 'url', required: false, localized: false, defaultVisible: true },
+      { key: 'behance', name: { en: 'Behance URL', fr: 'URL Behance', ar: 'رابط Behance' }, type: 'url', required: false, localized: false, defaultVisible: true },
+    ],
+    defaultVisibility: { title: true, image: true, youtube: true, behance: true },
+  },
+  {
+    id: 'education',
+    name: { en: 'Education', fr: 'Formation', ar: 'التعليم' },
+    description: { en: 'Degrees and education', fr: 'Diplômes et formation', ar: 'الشهادات والتعليم' },
+    slug: 'education',
+    fields: [
+      { key: 'degree', name: { en: 'Degree', fr: 'Diplôme', ar: 'الشهادة' }, type: 'text', required: true, localized: true, defaultVisible: true },
+      { key: 'school', name: { en: 'School', fr: 'Établissement', ar: 'المؤسسة' }, type: 'text', required: true, localized: false, defaultVisible: true },
+      { key: 'period', name: { en: 'Period', fr: 'Période', ar: 'الفترة' }, type: 'text', required: false, localized: false, defaultVisible: true },
+      { key: 'location', name: { en: 'Location', fr: 'Lieu', ar: 'الموقع' }, type: 'text', required: false, localized: false, defaultVisible: true },
+    ],
+    defaultVisibility: { degree: true, school: true, period: true, location: true },
+  },
+];

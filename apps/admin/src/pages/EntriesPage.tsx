@@ -299,7 +299,7 @@ export const EntriesPage: React.FC = () => {
 
               <div>
                 <label className="block text-xs font-medium text-content mb-1">
-                  {getFieldLabel({ key: 'slug' }, locale)} * (Used for routing /projects/[slug].html)
+                  {getFieldLabel({ key: 'slug' }, locale)} * (Used for routing /{editingContentType.slug || editingContentType.id}/[slug])
                 </label>
                 <input
                   type="text"

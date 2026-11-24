@@ -75,7 +75,17 @@ const arRoute = pageName === 'index'
   </a>
 
   <div class="nav-right">
-    <ul class="nav-links" role="list">
+    <button
+  class="nav-hamburger"
+  id="nav-hamburger"
+  aria-label={locale === 'ar' ? 'القائمة' : locale === 'en' ? 'Menu' : 'Menu'}
+  aria-expanded="false"
+  aria-controls="nav-links"
+>
+  ☰
+</button>
+
+<ul class="nav-links" id="nav-links" role="list">
       <li><a href={skillsHref} class={currentPath.includes('skills') ? 'active' : ''}>{t('nav.skills', locale)}</a></li>
       <li><a href={expHref} class={currentPath.includes('experiences') ? 'active' : ''}>{t('nav.experience', locale)}</a></li>
       <li><a href={projectsHref} class={currentPath.includes('projects') ? 'active' : ''}>{t('nav.projects', locale)}</a></li>
@@ -138,5 +148,23 @@ const arRoute = pageName === 'index'
     const next = current === 'dark' ? 'light' : 'dark';
     localStorage.setItem('theme', next);
     applyTheme();
+  }
+
+  // Mobile navigation toggle
+  const navHamburger = document.getElementById('nav-hamburger');
+  const navLinks = document.getElementById('nav-links');
+  function closeMobileMenu() {
+    if (navLinks) navLinks.classList.remove('open');
+    if (navHamburger) navHamburger.setAttribute('aria-expanded', 'false');
+  }
+  if (navHamburger && navLinks) {
+    navHamburger.addEventListener('click', () => {
+      const isOpen = navLinks.classList.toggle('open');
+      navHamburger.setAttribute('aria-expanded', String(isOpen));
+    });
+    navLinks.querySelectorAll('a').forEach((a) => a.addEventListener('click', closeMobileMenu));
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeMobileMenu();
+    });
   }
 </script>

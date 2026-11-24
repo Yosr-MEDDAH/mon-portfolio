@@ -1,6 +1,6 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import { PORTFOLIO_DATA } from '../data/portfolio.ts';
+import { PORTFOLIO_DATA, getCmsArtworks } from '../data/portfolio.ts';
 import { withBase } from '../utils/url.ts';
 import { t } from '../i18n/utils.ts';
 import { DEFAULT_LOCALE, type SupportedLocale } from '../i18n/types.ts';
@@ -11,7 +11,8 @@ interface Props {
 
 const locale: SupportedLocale = Astro.props.locale || DEFAULT_LOCALE;
 
-const n = PORTFOLIO_DATA.artworks.length;
+const artworks = getCmsArtworks();
+const n = artworks.length;
 const countText = locale === 'ar'
   ? `${n} أعمال فنية`
   : locale === 'en'
@@ -47,7 +48,7 @@ const backHref = locale === DEFAULT_LOCALE
         role="list"
         style="grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 1.25rem;"
       >
-        {PORTFOLIO_DATA.artworks.map((aw) => {
+        {artworks.map((aw) => {
           const imgSrc = withBase(`/${aw.image.replace(/^\//, '')}`);
           const isVid = aw.image.endsWith('.mp4');
           return (

@@ -8,6 +8,11 @@ import {
   DEVICON_MAP,
   getPortfolioProjects,
   resolvePortfolioText,
+  getCmsSkills,
+  getCmsExperiences,
+  getCmsPresentations,
+  getCmsArtworks,
+  getCmsEducation,
 } from '../data/portfolio.ts';
 import { withBase } from '../utils/url.ts';
 import { t } from '../i18n/utils.ts';
@@ -29,6 +34,11 @@ const description = resolvePortfolioText(PORTFOLIO_DATA.about, locale);
 const HIGHLIGHTS = { skills: 3, experience: 2, projects: 2, presentations: 3, artworks: 3 };
 
 const projects = getPortfolioProjects();
+const skills = getCmsSkills();
+const experiences = getCmsExperiences();
+const presentations = getCmsPresentations();
+const artworks = getCmsArtworks();
+const education = getCmsEducation();
 
 const skillsHref = locale === DEFAULT_LOCALE
   ? withBase('/skills.html')
@@ -107,7 +117,7 @@ const cvSrc = isExternalCv ? rawCv : withBase(`/${rawCv.replace(/^\//, '')}`);
       <p class="section-label">{t('section.skills', locale)}</p>
       <h2 id="skills-heading">{t('heading.skills', locale)}</h2>
       <div class="skills-grid reveal visible" id="skills-grid" role="list">
-        {PORTFOLIO_DATA.skills.slice(0, HIGHLIGHTS.skills).map((s) => (
+        {skills.slice(0, HIGHLIGHTS.skills).map((s) => (
           <div role="listitem">
             <p class="skill-cat">{s.category}</p>
             <div class="tags">
@@ -143,7 +153,7 @@ const cvSrc = isExternalCv ? rawCv : withBase(`/${rawCv.replace(/^\//, '')}`);
       <p class="section-label">{t('section.experience', locale)}</p>
       <h2 id="exp-heading">{t('heading.experience', locale)}</h2>
       <div class="timeline" id="timeline" role="list">
-        {PORTFOLIO_DATA.experiences.slice(0, HIGHLIGHTS.experience).map((e) => {
+        {experiences.slice(0, HIGHLIGHTS.experience).map((e) => {
           const role = resolvePortfolioText(e.role, locale);
           const desc = resolvePortfolioText(e.description, locale);
           return (
@@ -216,7 +226,7 @@ const cvSrc = isExternalCv ? rawCv : withBase(`/${rawCv.replace(/^\//, '')}`);
       <p class="section-label">{t('section.presentations', locale)}</p>
       <h2 id="pres-heading">{t('heading.presentations', locale)}</h2>
       <div class="pres-list" id="pres-list" role="list">
-        {PORTFOLIO_DATA.presentations.slice(0, HIGHLIGHTS.presentations).map((p) => {
+        {presentations.slice(0, HIGHLIGHTS.presentations).map((p) => {
           const pTitle = resolvePortfolioText(p.title, locale);
           const pDesc = resolvePortfolioText(p.description, locale);
           const pContext = typeof p.context === 'object'
@@ -288,7 +298,7 @@ const cvSrc = isExternalCv ? rawCv : withBase(`/${rawCv.replace(/^\//, '')}`);
       <p class="section-label">{t('section.artworks', locale)}</p>
       <h2 id="art-heading">{t('heading.artworks', locale)}</h2>
       <div class="artworks-grid reveal visible" id="artworks-grid" role="list">
-        {PORTFOLIO_DATA.artworks.slice(0, HIGHLIGHTS.artworks).map((aw) => {
+        {artworks.slice(0, HIGHLIGHTS.artworks).map((aw) => {
           const imgSrc = withBase(`/${aw.image.replace(/^\//, '')}`);
           const isVid = aw.image.endsWith('.mp4');
           return (
@@ -365,7 +375,7 @@ const cvSrc = isExternalCv ? rawCv : withBase(`/${rawCv.replace(/^\//, '')}`);
       <p class="section-label">{t('section.education', locale)}</p>
       <h2 id="edu-heading">{t('heading.education', locale)}</h2>
       <div class="edu-list reveal visible" id="edu-list" role="list">
-        {PORTFOLIO_DATA.education.map((e) => (
+        {education.map((e) => (
           <div class="edu-item reveal visible" role="listitem">
             <div>
               <div class="edu-degree">{resolvePortfolioText(e.degree, locale)}</div>

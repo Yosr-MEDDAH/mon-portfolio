@@ -581,7 +581,13 @@ img.loaded { opacity: 1 !important; }
 [dir="rtl"] .pres-yt::after{content:'▶';font-size:.7em}
 [dir="rtl"] .award-prize{min-width:auto}
 
-/* ── RESPONSIVE ──────────────────────────────────────── */
+.nav-hamburger{display:none;font-size:1.25rem;line-height:1;padding:.25rem .5rem;border:1px solid var(--border);border-radius:.375rem;background:var(--surface);color:var(--text-1);cursor:pointer}
+@media(max-width:600px){
+  .nav-hamburger{display:inline-flex}
+  .nav-links{display:none;flex-direction:column;gap:.25rem;position:absolute;top:100%;left:0;right:0;background:var(--surface);border-bottom:1px solid var(--border);padding:.5rem 1rem;z-index:50}
+  .nav-links.open{display:flex}
+  [dir="rtl"] .nav-links{left:auto;right:0}
+}
 @media(max-width:600px){
   .hero-inner{grid-template-columns:1fr}
   .avatar-wrap{display:none}

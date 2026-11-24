@@ -1,0 +1,44 @@
+---
+import { LOCALES, LOCALE_CONFIGS, type SupportedLocale } from '../i18n/types.ts';
+import { getEquivalentRoute } from '../i18n/utils.ts';
+
+interface Props {
+  currentLocale: SupportedLocale;
+  currentPath?: string;
+  class?: string;
+}
+
+const {
+  currentLocale,
+  currentPath = Astro.url.pathname,
+  class: className = '',
+} = Astro.props;
+---
+
+<nav aria-label="Language selection" class={`language-selector flex items-center gap-1.5 text-xs font-medium ${className}`}>
+  {LOCALES.map((loc) => {
+    const config = LOCALE_CONFIGS[loc];
+    const isCurrent = loc === currentLocale;
+    const targetUrl = getEquivalentRoute(currentPath, loc);
+
+    return isCurrent ? (
+      <span
+        aria-current="true"
+        class="px-2.5 py-1 rounded bg-indigo-600 text-white font-semibold shadow-xs"
+        dir={config.dir}
+        lang={config.lang}
+      >
+        {config.nativeName}
+      </span>
+    ) : (
+      <a
+        href={targetUrl}
+        class="px-2.5 py-1 rounded text-neutral-600 hover:text-indigo-600 hover:bg-neutral-100 transition-colors"
+        dir={config.dir}
+        lang={config.lang}
+      >
+        {config.nativeName}
+      </a>
+    );
+  })}
+</nav>

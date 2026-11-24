@@ -1,0 +1,51 @@
+---
+import { withBase } from '../../utils/url.ts';
+
+interface Props {
+  value: unknown;
+  altText?: string;
+  aspectRatio?: '16/9' | '4/3' | '1/1' | 'auto';
+  class?: string;
+  loading?: 'lazy' | 'eager';
+}
+
+const {
+  value,
+  altText = '',
+  aspectRatio = 'auto',
+  class: className = '',
+  loading = 'lazy',
+} = Astro.props;
+
+let src = '';
+let alt = altText;
+let caption: string | undefined;
+
+if (typeof value === 'string') {
+  src = value;
+} else if (typeof value === 'object' && value !== null) {
+  const imgObj = value as Record<string, unknown>;
+  src = typeof imgObj.url === 'string' ? imgObj.url : '';
+  if (!alt && typeof imgObj.alt === 'string') {
+    alt = imgObj.alt;
+  }
+  if (typeof imgObj.caption === 'string') {
+    caption = imgObj.caption;
+  }
+}
+
+const resolvedSrc = src ? withBase(src) : '';
+---
+
+{resolvedSrc ? (
+  <figure class={`field-image overflow-hidden ${className}`}>
+    <img
+      src={resolvedSrc}
+      alt={alt}
+      loading={loading}
+      style={aspectRatio !== 'auto' ? `aspect-ratio: ${aspectRatio}; object-fit: cover; width: 100%;` : undefined}
+      class="w-full h-auto rounded"
+    />
+    {caption && <figcaption class="text-xs text-neutral-400 mt-1">{caption}</figcaption>}
+  </figure>
+) : null}

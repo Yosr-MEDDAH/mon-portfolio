@@ -1,0 +1,73 @@
+---
+import type { FieldDefinition, SupportedLocale } from '../../content-model/types.ts';
+import TextField from './TextField.astro';
+import DateField from './DateField.astro';
+import ImageField from './ImageField.astro';
+import MediaField from './MediaField.astro';
+import TagsField from './TagsField.astro';
+import UrlField from './UrlField.astro';
+import RichTextField from './RichTextField.astro';
+import { resolveLocalizedValue } from '../../utils/url.ts';
+
+interface Props {
+  field: FieldDefinition;
+  value: unknown;
+  locale?: SupportedLocale;
+  as?: 'h1' | 'h2' | 'h3' | 'h4' | 'p' | 'span' | 'div';
+  aspectRatio?: '16/9' | '4/3' | '1/1' | 'auto';
+  class?: string;
+}
+
+const {
+  field,
+  value,
+  locale = 'fr',
+  as,
+  aspectRatio,
+  class: className = '',
+} = Astro.props;
+
+if (value === undefined || value === null) {
+  return;
+}
+
+const fieldLabel = resolveLocalizedValue(field.name, locale);
+---
+
+{field.type === 'text' && (
+  <TextField value={value} type="text" locale={locale} as={as} class={className} />
+)}
+
+{field.type === 'textarea' && (
+  <TextField value={value} type="textarea" locale={locale} as={as} class={className} />
+)}
+
+{field.type === 'date' && (
+  <DateField value={value} locale={locale} class={className} />
+)}
+
+{field.type === 'image' && (
+  <ImageField value={value} altText={fieldLabel} aspectRatio={aspectRatio} class={className} />
+)}
+
+{field.type === 'media' && (
+  <MediaField value={value} class={className} />
+)}
+
+{field.type === 'tags' && (
+  <TagsField value={value} class={className} />
+)}
+
+{field.type === 'url' && (
+  <UrlField value={value} label={fieldLabel} class={className} />
+)}
+
+{field.type === 'richtext' && (
+  <RichTextField value={value} locale={locale} class={className} />
+)}
+
+{field.type === 'boolean' && (
+  <span class={`field-boolean text-sm ${className}`}>
+    {value ? '✓' : '✗'}
+  </span>
+)}

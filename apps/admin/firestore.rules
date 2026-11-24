@@ -1,0 +1,84 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    // Check if the authenticated user has an active record in the adminUsers collection
+    function isAdmin() {
+      return isAuthenticated() &&
+        exists(/databases/$(database)/documents/adminUsers/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/adminUsers/$(request.auth.uid)).data.isActive == true;
+    }
+
+    // Default deny all access to everything unless explicitly authorized below
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Admin users collection
+    // Crucial rule: Admin authorization records CANNOT be created or modified by normal users or self-granted.
+    // Initial admin record must be created via Firebase Console or Admin SDK with service account.
+    match /adminUsers/{userId} {
+      allow read: if isAuthenticated() && (request.auth.uid == userId || isAdmin());
+      allow create, update, delete: if isAdmin() && request.auth.uid != userId; // Admins can manage other admins, but cannot self-escalate or self-delete
+    }
+
+    // Private CMS collections
+    // The public portfolio uses generated static HTML files (SSG) and requires NO public Firestore read access.
+    // All CMS data, draft entries, schemas, media metadata, templates, and settings are strictly private to active administrators.
+    match /contentTypes/{typeId} {
+      allow read, write: if isAdmin();
+    }
+
+    match /entries/{entryId} {
+      allow read, write: if isAdmin();
+    }
+
+    match /media/{mediaId} {
+      allow read, write: if isAdmin();
+    }
+
+    match /pages/{pageId} {
+      allow read, write: if isAdmin();
+    }
+
+    match /templates/{templateId} {
+      allow read, write: if isAdmin();
+    }
+
+    match /siteSettings/{settingId} {
+      allow read, write: if isAdmin();
+    }
+
+    // Immutable historical snapshots: Append-only for active admins
+    match /revisions/{revisionId} {
+      allow read: if isAdmin();
+      allow create: if isAdmin();
+      allow update, delete: if false; // Snapshots are strictly immutable
+    }
+
+    // Append-only audit logs: No modification or deletion permitted
+    match /activityLogs/{logId} {
+      allow read: if isAdmin();
+      allow create: if isAdmin();
+      allow update, delete: if false; // Append-only audit log
+    }
+
+    match /relationships/{relId} {
+      allow read, write: if isAdmin();
+    }
+
+    match /taxonomies/{taxId} {
+      allow read, write: if isAdmin();
+    }
+
+    match /taxonomyTerms/{termId} {
+      allow read, write: if isAdmin();
+    }
+  }
+}

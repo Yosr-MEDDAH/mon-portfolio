@@ -1,0 +1,49 @@
+---
+import type { SupportedLocale } from '../../content-model/types.ts';
+
+interface Props {
+  value: unknown;
+  locale?: SupportedLocale;
+  format?: 'short' | 'medium' | 'long';
+  class?: string;
+}
+
+const {
+  value,
+  locale = 'fr',
+  format = 'medium',
+  class: className = '',
+} = Astro.props;
+
+let formattedDate = '';
+let isoString = '';
+
+if (typeof value === 'string' && value.trim()) {
+  const timestamp = Date.parse(value);
+  if (!isNaN(timestamp)) {
+    const d = new Date(timestamp);
+    isoString = d.toISOString();
+    try {
+      const options: Intl.DateTimeFormatOptions =
+        format === 'short'
+          ? { year: 'numeric', month: 'numeric', day: 'numeric' }
+          : format === 'long'
+          ? { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' }
+          : { year: 'numeric', month: 'short', day: 'numeric' };
+
+      const intlLocale = locale === 'ar' ? 'ar-TN' : locale === 'en' ? 'en-US' : 'fr-FR';
+      formattedDate = new Intl.DateTimeFormat(intlLocale, options).format(d);
+    } catch {
+      formattedDate = value;
+    }
+  } else {
+    formattedDate = value;
+  }
+}
+---
+
+{formattedDate ? (
+  <time datetime={isoString} class={`field-date inline-flex items-center text-sm text-neutral-500 ${className}`}>
+    {formattedDate}
+  </time>
+) : null}

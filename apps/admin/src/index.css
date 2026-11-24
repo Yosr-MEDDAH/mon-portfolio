@@ -1,0 +1,79 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── PORTFOLIO DESIGN SYSTEM TOKENS ───────────────────── */
+:root {
+  --cream: #f7f5f0;
+  --surface: #ffffff;
+  --text: #1c1c1c;
+  --text-2: #4a4a4a;
+  --text-3: #767676;
+  --border: #dddbd5;
+  --mg: #3d5229;
+  --mg-light: #6a7f55;
+  --mg-pale: #eef1ea;
+  --mg-border: #c8d4be;
+  --mg-text: #3d5229;
+  --radius: 4px;
+  --transition: 0.22s ease;
+  --font-body: 'IBM Plex Sans', system-ui, sans-serif;
+  --font-serif: 'Instrument Serif', Georgia, serif;
+  --font-ar: 'IBM Plex Sans Arabic', system-ui, sans-serif;
+}
+
+[data-theme="dark"] {
+  --cream: #0f0f0f;
+  --surface: #1a1a1a;
+  --text: #f0f0f0;
+  --text-2: #d0d0d0;
+  --text-3: #9a9a9a;
+  --border: #333333;
+  --mg: #4a7030;
+  --mg-light: #5a8840;
+  --mg-pale: #1e2d14;
+  --mg-border: #4a6e32;
+  --mg-text: #8fcf5a;
+}
+
+/* ── BASE STYLES ──────────────────────────────────────── */
+body {
+  background-color: var(--cream);
+  color: var(--text);
+  font-family: var(--font-body);
+  transition: background-color var(--transition), color var(--transition);
+  -webkit-font-smoothing: antialiased;
+}
+
+html[lang="ar"],
+html[dir="rtl"] body {
+  font-family: var(--font-ar);
+}
+
+h1, h2, h3, .font-serif {
+  font-family: var(--font-serif);
+  font-weight: 400;
+  letter-spacing: 0.01em;
+}
+
+/* ── FOCUS VISIBLE ────────────────────────────────────── */
+:focus-visible {
+  outline: 2px solid var(--mg);
+  outline-offset: 2px;
+}
+
+/* ── SCROLLBAR ────────────────────────────────────────── */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--cream);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: var(--radius);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--mg-light);
+}

@@ -1,0 +1,130 @@
+---
+import type {
+  ContentTypeDefinition,
+  ContentEntry,
+  SupportedLocale,
+} from '../../content-model/types.ts';
+import type { DetailTemplateConfig } from '../../templates/types.ts';
+import { isFieldVisible } from '../../content-model/visibility.ts';
+import FieldRenderer from '../fields/FieldRenderer.astro';
+import { withBase, resolveLocalizedValue } from '../../utils/url.ts';
+import { t } from '../../i18n/utils.ts';
+import { DEFAULT_LOCALE } from '../../i18n/types.ts';
+
+interface Props {
+  contentType: ContentTypeDefinition;
+  entry: ContentEntry;
+  detailTemplate?: DetailTemplateConfig;
+  locale?: SupportedLocale;
+  class?: string;
+}
+
+const {
+  contentType,
+  entry,
+  detailTemplate,
+  locale = DEFAULT_LOCALE,
+  class: className = '',
+} = Astro.props;
+
+// Determine ordered list of field keys
+const allFields = contentType.fields;
+const fieldOrder = detailTemplate?.fieldOrder || allFields.map((f) => f.key);
+
+// Filter fields by visibility in 'detail' context using configured template settings
+const visibleFields = fieldOrder
+  .map((key) => allFields.find((f) => f.key === key))
+  .filter((field): field is NonNullable<typeof field> => {
+    if (!field) return false;
+    return isFieldVisible(contentType, entry, field.key, 'detail', detailTemplate?.templateSettings);
+  });
+
+const coverField = visibleFields.find((f) => f.type === 'image' || f.key === 'coverImage');
+const titleField = visibleFields.find((f) => f.key === 'title' || f.type === 'text');
+const dateField = visibleFields.find((f) => f.type === 'date');
+const tagsField = visibleFields.find((f) => f.type === 'tags');
+const otherFields = visibleFields.filter(
+  (f) => f !== coverField && f !== titleField && f !== dateField && f !== tagsField
+);
+
+const backHref = locale === DEFAULT_LOCALE
+  ? withBase(`/${contentType.slug}/index.html`)
+  : withBase(`/${locale}/${contentType.slug}/index.html`);
+
+const entryTitle = titleField ? resolveLocalizedValue(entry.fields[titleField.key], locale) : entry.slug;
+const collectionName = resolveLocalizedValue(contentType.name, locale);
+const isRtl = locale === 'ar';
+---
+
+<article class={`generic-detail max-w-4xl mx-auto py-6 px-4 sm:px-6 ${className}`}>
+  <!-- Breadcrumb / Back button -->
+  <nav class="mb-6 flex items-center text-sm text-neutral-500">
+    <a href={backHref} class="hover:text-indigo-600 transition-colors inline-flex items-center gap-1.5 font-medium">
+      <span class={isRtl ? 'rotate-180 inline-block' : ''}>←</span>
+      <span>{t('ui.backTo', locale, { name: collectionName })}</span>
+    </a>
+  </nav>
+
+  <!-- Header Section -->
+  <header class="mb-8">
+    {tagsField && entry.fields[tagsField.key] && (
+      <div class="mb-4">
+        <FieldRenderer field={tagsField} value={entry.fields[tagsField.key]} locale={locale} />
+      </div>
+    )}
+
+    {titleField && (
+      <h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-neutral-900 tracking-tight leading-tight mb-4">
+        {entryTitle}
+      </h1>
+    )}
+
+    {dateField && entry.fields[dateField.key] && (
+      <div class="text-neutral-500 text-sm flex items-center gap-2">
+        <span>{t('ui.publishedOn', locale)}</span>
+        <FieldRenderer field={dateField} value={entry.fields[dateField.key]} locale={locale} />
+      </div>
+    )}
+  </header>
+
+  <!-- Cover Image -->
+  {coverField && entry.fields[coverField.key] && (
+    <div class="mb-10 rounded-2xl overflow-hidden shadow-xs border border-neutral-200">
+      <FieldRenderer
+        field={coverField}
+        value={entry.fields[coverField.key]}
+        locale={locale}
+        aspectRatio="16/9"
+        class="w-full h-auto"
+      />
+    </div>
+  )}
+
+  <!-- Detail Content / Remaining Fields -->
+  <div class="detail-body space-y-6">
+    {otherFields.map((field) => {
+      const val = entry.fields[field.key];
+      if (val === undefined || val === null) return null;
+      const fieldName = resolveLocalizedValue(field.name, locale);
+
+      return (
+        <section class={`detail-field detail-field-${field.key}`}>
+          {field.type !== 'textarea' && field.type !== 'richtext' && (
+            <h2 class="text-sm uppercase tracking-wider font-semibold text-neutral-400 mb-1.5">
+              {fieldName}
+            </h2>
+          )}
+          <div class="text-neutral-800 text-base leading-relaxed">
+            <FieldRenderer
+              field={field}
+              value={val}
+              locale={locale}
+              as={field.type === 'textarea' ? 'p' : 'div'}
+              class={field.type === 'textarea' ? 'text-lg text-neutral-700 leading-relaxed' : ''}
+            />
+          </div>
+        </section>
+      );
+    })}
+  </div>
+</article>

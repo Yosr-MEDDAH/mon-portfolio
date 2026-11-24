@@ -1,0 +1,69 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getAllRegisteredCollections } from '../../content-store/index.ts';
+import { withBase, resolveLocalizedValue } from '../../utils/url.ts';
+import { t } from '../../i18n/utils.ts';
+import type { SupportedLocale } from '../../i18n/types.ts';
+
+export async function getStaticPaths() {
+  return [
+    { params: { lang: 'fr' } },
+    { params: { lang: 'ar' } },
+  ];
+}
+
+const { lang } = Astro.params;
+const locale = lang as SupportedLocale;
+const collections = getAllRegisteredCollections();
+---
+
+<BaseLayout
+  title={`${t('hero.name', locale)} | ${t('hero.tagline', locale)}`}
+  description={t('hero.bio', locale)}
+  locale={locale}
+  currentPath={`/${locale}/index.html`}
+>
+  <div class="py-8">
+    <div class="max-w-3xl mb-12">
+      <h1 class="text-4xl sm:text-5xl font-extrabold text-neutral-900 tracking-tight mb-4">
+        {t('hero.name', locale)}
+      </h1>
+      <p class="text-xl text-neutral-700 font-medium leading-relaxed mb-4">
+        {t('hero.tagline', locale)}
+      </p>
+      <p class="text-base text-neutral-600 leading-relaxed">
+        {t('hero.bio', locale)}
+      </p>
+    </div>
+
+    <section class="border-t border-neutral-200 pt-10">
+      <h2 class="text-2xl font-bold text-neutral-900 mb-6">
+        {t('ui.collections', locale)}
+      </h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+        {collections.map((col) => {
+          const name = resolveLocalizedValue(col.contentType.name, locale);
+          const desc = resolveLocalizedValue(col.contentType.description, locale);
+          const href = withBase(`/${locale}/${col.contentType.slug}/index.html`);
+
+          return (
+            <a
+              href={href}
+              class="block p-6 bg-white rounded-xl border border-neutral-200 hover:border-indigo-500 hover:shadow-md transition-all group"
+            >
+              <h3 class="text-xl font-bold text-neutral-900 group-hover:text-indigo-600 transition-colors mb-2">
+                {name} {locale === 'ar' ? '←' : '→'}
+              </h3>
+              <p class="text-sm text-neutral-600 mb-4 leading-relaxed">
+                {desc}
+              </p>
+              <div class="text-xs font-semibold text-neutral-400">
+                {t('ui.itemsCount', locale, { count: col.entries.length })}
+              </div>
+            </a>
+          );
+        })}
+      </div>
+    </section>
+  </div>
+</BaseLayout>

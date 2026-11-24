@@ -1,0 +1,33 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import GenericCollection from '../components/templates/GenericCollection.astro';
+import { getCollectionBySlug } from '../content-store/index.ts';
+import { resolveLocalizedValue } from '../utils/url.ts';
+import { t } from '../i18n/utils.ts';
+
+const locale = 'en';
+const projectsCollection = getCollectionBySlug('projects');
+
+if (!projectsCollection) {
+  throw new Error('Projects collection not found in registry');
+}
+
+const pageTitle = `${resolveLocalizedValue(projectsCollection.contentType.name, locale)} | ${t('hero.name', locale)}`;
+const pageDescription = resolveLocalizedValue(projectsCollection.contentType.description, locale);
+---
+
+<BaseLayout
+  title={pageTitle}
+  description={pageDescription}
+  locale={locale}
+  currentPath="/projects.html"
+>
+  <GenericCollection
+    contentType={projectsCollection.contentType}
+    entries={projectsCollection.entries}
+    cardTemplate={projectsCollection.cardTemplate}
+    title={projectsCollection.title}
+    description={projectsCollection.description}
+    locale={locale}
+  />
+</BaseLayout>

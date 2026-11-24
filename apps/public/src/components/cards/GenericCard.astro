@@ -1,0 +1,112 @@
+---
+import type {
+  ContentTypeDefinition,
+  ContentEntry,
+  SupportedLocale,
+} from '../../content-model/types.ts';
+import type { CardTemplateConfig } from '../../templates/types.ts';
+import { isFieldVisible } from '../../content-model/visibility.ts';
+import FieldRenderer from '../fields/FieldRenderer.astro';
+import { withBase, resolveLocalizedValue } from '../../utils/url.ts';
+import { t } from '../../i18n/utils.ts';
+import { DEFAULT_LOCALE } from '../../i18n/types.ts';
+
+interface Props {
+  contentType: ContentTypeDefinition;
+  entry: ContentEntry;
+  template?: CardTemplateConfig;
+  locale?: SupportedLocale;
+  class?: string;
+}
+
+const {
+  contentType,
+  entry,
+  template,
+  locale = DEFAULT_LOCALE,
+  class: className = '',
+} = Astro.props;
+
+// Determine ordered list of field keys
+const allFields = contentType.fields;
+const fieldOrder = template?.fieldOrder || allFields.map((f) => f.key);
+
+// Filter fields by visibility in 'card' context using configured template settings
+const visibleFields = fieldOrder
+  .map((key) => allFields.find((f) => f.key === key))
+  .filter((field): field is NonNullable<typeof field> => {
+    if (!field) return false;
+    return isFieldVisible(contentType, entry, field.key, 'card', template?.templateSettings);
+  });
+
+// Extract common card roles if present and visible
+const coverField = visibleFields.find((f) => f.type === 'image' || f.key === 'coverImage');
+const titleField = visibleFields.find((f) => f.key === 'title' || f.type === 'text');
+const dateField = visibleFields.find((f) => f.type === 'date');
+const otherFields = visibleFields.filter(
+  (f) => f !== coverField && f !== titleField && f !== dateField
+);
+
+const detailHref = locale === DEFAULT_LOCALE
+  ? withBase(`/${contentType.slug}/${entry.slug}.html`)
+  : withBase(`/${locale}/${contentType.slug}/${entry.slug}.html`);
+
+const entryTitle = titleField ? resolveLocalizedValue(entry.fields[titleField.key], locale) : entry.slug;
+const isRtl = locale === 'ar';
+---
+
+<article class={`generic-card bg-white border border-neutral-200 rounded-xl overflow-hidden shadow-xs hover:shadow-md transition-shadow flex flex-col ${className}`}>
+  {coverField && entry.fields[coverField.key] && (
+    <a href={detailHref} class="block overflow-hidden bg-neutral-100 aspect-video">
+      <FieldRenderer
+        field={coverField}
+        value={entry.fields[coverField.key]}
+        locale={locale}
+        aspectRatio={template?.imageAspectRatio || '16/9'}
+        class="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
+      />
+    </a>
+  )}
+
+  <div class="p-5 flex-1 flex flex-col justify-between">
+    <div>
+      {dateField && entry.fields[dateField.key] && (
+        <div class="mb-2">
+          <FieldRenderer field={dateField} value={entry.fields[dateField.key]} locale={locale} />
+        </div>
+      )}
+
+      {titleField && (
+        <h3 class="text-xl font-bold text-neutral-900 mb-2 leading-snug">
+          <a href={detailHref} class="hover:text-indigo-600 transition-colors">
+            {entryTitle}
+          </a>
+        </h3>
+      )}
+
+      <div class="space-y-3">
+        {otherFields.map((field) => (
+          <div class={`card-field card-field-${field.key}`}>
+            <FieldRenderer
+              field={field}
+              value={entry.fields[field.key]}
+              locale={locale}
+              as={field.type === 'textarea' ? 'p' : 'div'}
+              class={field.type === 'textarea' ? 'text-sm text-neutral-600 line-clamp-3' : ''}
+            />
+          </div>
+        ))}
+      </div>
+    </div>
+
+    <div class="mt-4 pt-4 border-t border-neutral-100 flex items-center justify-between">
+      <a
+        href={detailHref}
+        class="text-sm font-medium text-indigo-600 hover:text-indigo-800 inline-flex items-center gap-1"
+      >
+        <span>{t('ui.learnMore', locale)}</span>
+        <span class={isRtl ? 'rotate-180 inline-block' : ''}>→</span>
+      </a>
+    </div>
+  </div>
+</article>

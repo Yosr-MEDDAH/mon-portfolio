@@ -1,0 +1,51 @@
+---
+import { withBase } from '../../utils/url.ts';
+
+interface Props {
+  value: unknown;
+  class?: string;
+}
+
+const { value, class: className = '' } = Astro.props;
+
+let url = '';
+let mediaType = 'image';
+let title = '';
+
+if (typeof value === 'string') {
+  url = value;
+  if (/\.(mp4|webm|ogg)$/i.test(url)) mediaType = 'video';
+  else if (/\.(mp3|wav|ogg)$/i.test(url)) mediaType = 'audio';
+  else if (/\.(pdf|docx?|zip)$/i.test(url)) mediaType = 'document';
+  else mediaType = 'image';
+} else if (typeof value === 'object' && value !== null) {
+  const m = value as Record<string, unknown>;
+  url = typeof m.url === 'string' ? m.url : '';
+  mediaType = typeof m.type === 'string' ? m.type : 'image';
+  title = typeof m.title === 'string' ? m.title : '';
+}
+
+const resolvedUrl = url ? withBase(url) : '';
+---
+
+{resolvedUrl ? (
+  <div class={`field-media ${className}`}>
+    {mediaType === 'video' ? (
+      <video src={resolvedUrl} controls class="w-full rounded"></video>
+    ) : mediaType === 'audio' ? (
+      <audio src={resolvedUrl} controls class="w-full"></audio>
+    ) : mediaType === 'document' ? (
+      <a
+        href={resolvedUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        class="inline-flex items-center gap-2 text-indigo-600 hover:underline"
+      >
+        <span>📄</span>
+        <span>{title || 'Document'}</span>
+      </a>
+    ) : (
+      <img src={resolvedUrl} alt={title} class="w-full h-auto rounded" />
+    )}
+  </div>
+) : null}

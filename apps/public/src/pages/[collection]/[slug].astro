@@ -1,0 +1,60 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import GenericDetail from '../../components/templates/GenericDetail.astro';
+import { getAllRegisteredCollections } from '../../content-store/index.ts';
+import type { ContentTypeRegistryEntry } from '../../templates/types.ts';
+import type { ContentEntry } from '../../content-model/types.ts';
+import { resolveLocalizedValue } from '../../utils/url.ts';
+import { t } from '../../i18n/utils.ts';
+
+export async function getStaticPaths() {
+  const collections = getAllRegisteredCollections();
+  const paths: Array<{
+    params: { collection: string; slug: string };
+    props: { collectionItem: ContentTypeRegistryEntry; entry: ContentEntry };
+  }> = [];
+
+  for (const item of collections) {
+    for (const entry of item.entries) {
+      paths.push({
+        params: {
+          collection: item.contentType.slug,
+          slug: entry.slug,
+        },
+        props: {
+          collectionItem: item,
+          entry,
+        },
+      });
+    }
+  }
+
+  return paths;
+}
+
+interface Props {
+  collectionItem: ContentTypeRegistryEntry;
+  entry: ContentEntry;
+}
+
+const locale = 'en';
+const { collectionItem, entry } = Astro.props;
+
+const titleField = collectionItem.contentType.fields.find((f) => f.key === 'title');
+const entryTitle = titleField ? resolveLocalizedValue(entry.fields[titleField.key], locale) : entry.slug;
+const collectionName = resolveLocalizedValue(collectionItem.contentType.name, locale);
+const pageTitle = `${entryTitle} | ${collectionName} | ${t('hero.name', locale)}`;
+---
+
+<BaseLayout
+  title={pageTitle}
+  locale={locale}
+  currentPath={`/${collectionItem.contentType.slug}/${entry.slug}.html`}
+>
+  <GenericDetail
+    contentType={collectionItem.contentType}
+    entry={entry}
+    detailTemplate={collectionItem.detailTemplate}
+    locale={locale}
+  />
+</BaseLayout>

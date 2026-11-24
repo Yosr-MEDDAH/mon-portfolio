@@ -1,0 +1,70 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import GenericDetail from '../../../components/templates/GenericDetail.astro';
+import { getAllRegisteredCollections } from '../../../content-store/index.ts';
+import type { ContentTypeRegistryEntry } from '../../../templates/types.ts';
+import type { ContentEntry } from '../../../content-model/types.ts';
+import { resolveLocalizedValue } from '../../../utils/url.ts';
+import { t } from '../../../i18n/utils.ts';
+import type { SupportedLocale } from '../../../i18n/types.ts';
+
+export async function getStaticPaths() {
+  const collections = getAllRegisteredCollections();
+  const languages: SupportedLocale[] = ['fr', 'ar'];
+  const paths: Array<{
+    params: { lang: string; collection: string; slug: string };
+    props: {
+      collectionItem: ContentTypeRegistryEntry;
+      entry: ContentEntry;
+      locale: SupportedLocale;
+    };
+  }> = [];
+
+  for (const lang of languages) {
+    for (const item of collections) {
+      for (const entry of item.entries) {
+        paths.push({
+          params: {
+            lang,
+            collection: item.contentType.slug,
+            slug: entry.slug,
+          },
+          props: {
+            collectionItem: item,
+            entry,
+            locale: lang,
+          },
+        });
+      }
+    }
+  }
+
+  return paths;
+}
+
+interface Props {
+  collectionItem: ContentTypeRegistryEntry;
+  entry: ContentEntry;
+  locale: SupportedLocale;
+}
+
+const { collectionItem, entry, locale } = Astro.props;
+
+const titleField = collectionItem.contentType.fields.find((f) => f.key === 'title');
+const entryTitle = titleField ? resolveLocalizedValue(entry.fields[titleField.key], locale) : entry.slug;
+const collectionName = resolveLocalizedValue(collectionItem.contentType.name, locale);
+const pageTitle = `${entryTitle} | ${collectionName} | ${t('hero.name', locale)}`;
+---
+
+<BaseLayout
+  title={pageTitle}
+  locale={locale}
+  currentPath={`/${locale}/${collectionItem.contentType.slug}/${entry.slug}.html`}
+>
+  <GenericDetail
+    contentType={collectionItem.contentType}
+    entry={entry}
+    detailTemplate={collectionItem.detailTemplate}
+    locale={locale}
+  />
+</BaseLayout>

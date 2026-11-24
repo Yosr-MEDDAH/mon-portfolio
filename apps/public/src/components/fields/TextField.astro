@@ -1,0 +1,28 @@
+---
+import { resolveLocalizedValue } from '../../utils/url.ts';
+import type { SupportedLocale } from '../../content-model/types.ts';
+
+interface Props {
+  value: unknown;
+  type?: 'text' | 'textarea';
+  locale?: SupportedLocale;
+  as?: 'h1' | 'h2' | 'h3' | 'h4' | 'p' | 'span' | 'div';
+  class?: string;
+}
+
+const {
+  value,
+  type = 'text',
+  locale = 'fr',
+  as: Component = type === 'textarea' ? 'p' : 'span',
+  class: className = '',
+} = Astro.props;
+
+const displayValue = resolveLocalizedValue(value, locale);
+---
+
+{displayValue ? (
+  <Component class={`field-text ${type === 'textarea' ? 'field-textarea whitespace-pre-line' : ''} ${className}`}>
+    {displayValue}
+  </Component>
+) : null}

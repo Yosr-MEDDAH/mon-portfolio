@@ -1,0 +1,18 @@
+---
+import { resolveLocalizedValue } from '../../utils/url.ts';
+import type { SupportedLocale } from '../../content-model/types.ts';
+
+interface Props {
+  value: unknown;
+  locale?: SupportedLocale;
+  class?: string;
+}
+
+const { value, locale = 'fr', class: className = '' } = Astro.props;
+
+const htmlContent = resolveLocalizedValue(value, locale);
+---
+
+{htmlContent ? (
+  <div class={`field-richtext prose prose-neutral max-w-none ${className}`} set:html={htmlContent} />
+) : null}

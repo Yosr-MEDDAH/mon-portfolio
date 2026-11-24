@@ -1,0 +1,21 @@
+{
+  "name": "public",
+  "type": "module",
+  "version": "0.0.1",
+  "scripts": {
+    "dev": "astro dev",
+    "start": "astro dev",
+    "export:content": "node scripts/export-cms-content.mjs",
+    "build": "astro build && node -e \"import('node:fs').then(fs => { if (fs.existsSync('dist/projects.html')) { fs.mkdirSync('dist/projects', { recursive: true }); fs.copyFileSync('dist/projects.html', 'dist/projects/index.html'); } })\"",
+    "preview": "astro preview",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "astro": "^7.4.13",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "firebase-admin": "^14.5.1",
+    "typescript": "^5.0.0"
+  }
+}

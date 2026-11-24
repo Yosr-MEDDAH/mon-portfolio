@@ -1,0 +1,45 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import GenericCollection from '../../components/templates/GenericCollection.astro';
+import { getAllRegisteredCollections } from '../../content-store/index.ts';
+import type { ContentTypeRegistryEntry } from '../../templates/types.ts';
+import { resolveLocalizedValue } from '../../utils/url.ts';
+import { t } from '../../i18n/utils.ts';
+
+export async function getStaticPaths() {
+  // 'projects' is served directly at /projects.html to guarantee legacy URL compatibility
+  const collections = getAllRegisteredCollections().filter(
+    (item) => item.contentType.slug !== 'projects'
+  );
+  return collections.map((item) => ({
+    params: { collection: item.contentType.slug },
+    props: { collectionItem: item },
+  }));
+}
+
+interface Props {
+  collectionItem: ContentTypeRegistryEntry;
+}
+
+const locale = 'en';
+const { collectionItem } = Astro.props;
+const colName = resolveLocalizedValue(collectionItem.contentType.name, locale);
+const pageTitle = `${colName} | ${t('hero.name', locale)}`;
+const pageDescription = resolveLocalizedValue(collectionItem.contentType.description, locale);
+---
+
+<BaseLayout
+  title={pageTitle}
+  description={pageDescription}
+  locale={locale}
+  currentPath={`/${collectionItem.contentType.slug}/index.html`}
+>
+  <GenericCollection
+    contentType={collectionItem.contentType}
+    entries={collectionItem.entries}
+    cardTemplate={collectionItem.cardTemplate}
+    title={resolveLocalizedValue(collectionItem.contentType.name, locale)}
+    description={resolveLocalizedValue(collectionItem.contentType.description, locale)}
+    locale={locale}
+  />
+</BaseLayout>

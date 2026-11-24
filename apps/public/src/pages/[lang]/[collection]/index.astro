@@ -1,0 +1,61 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import GenericCollection from '../../../components/templates/GenericCollection.astro';
+import { getAllRegisteredCollections } from '../../../content-store/index.ts';
+import type { ContentTypeRegistryEntry } from '../../../templates/types.ts';
+import { resolveLocalizedValue } from '../../../utils/url.ts';
+import { t } from '../../../i18n/utils.ts';
+import type { SupportedLocale } from '../../../i18n/types.ts';
+
+export async function getStaticPaths() {
+  const collections = getAllRegisteredCollections();
+  const languages: SupportedLocale[] = ['fr', 'ar'];
+  const paths: Array<{
+    params: { lang: string; collection: string };
+    props: { collectionItem: ContentTypeRegistryEntry; locale: SupportedLocale };
+  }> = [];
+
+  for (const lang of languages) {
+    for (const item of collections) {
+      paths.push({
+        params: {
+          lang,
+          collection: item.contentType.slug,
+        },
+        props: {
+          collectionItem: item,
+          locale: lang,
+        },
+      });
+    }
+  }
+
+  return paths;
+}
+
+interface Props {
+  collectionItem: ContentTypeRegistryEntry;
+  locale: SupportedLocale;
+}
+
+const { collectionItem, locale } = Astro.props;
+const colName = resolveLocalizedValue(collectionItem.contentType.name, locale);
+const pageTitle = `${colName} | ${t('hero.name', locale)}`;
+const pageDescription = resolveLocalizedValue(collectionItem.contentType.description, locale);
+---
+
+<BaseLayout
+  title={pageTitle}
+  description={pageDescription}
+  locale={locale}
+  currentPath={`/${locale}/${collectionItem.contentType.slug}/index.html`}
+>
+  <GenericCollection
+    contentType={collectionItem.contentType}
+    entries={collectionItem.entries}
+    cardTemplate={collectionItem.cardTemplate}
+    title={resolveLocalizedValue(collectionItem.contentType.name, locale)}
+    description={resolveLocalizedValue(collectionItem.contentType.description, locale)}
+    locale={locale}
+  />
+</BaseLayout>

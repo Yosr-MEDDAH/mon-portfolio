@@ -1,0 +1,26 @@
+---
+interface Props {
+  value: unknown;
+  class?: string;
+}
+
+const { value, class: className = '' } = Astro.props;
+
+let tags: string[] = [];
+
+if (Array.isArray(value)) {
+  tags = value.map((item) => String(item).trim()).filter(Boolean);
+} else if (typeof value === 'string' && value.trim()) {
+  tags = value.split(',').map((t) => t.trim()).filter(Boolean);
+}
+---
+
+{tags.length > 0 ? (
+  <div class={`field-tags flex flex-wrap gap-1.5 ${className}`}>
+    {tags.map((tag) => (
+      <span class="inline-block px-2.5 py-0.5 text-xs font-medium rounded-full bg-neutral-100 text-neutral-800 border border-neutral-200">
+        #{tag}
+      </span>
+    ))}
+  </div>
+) : null}

@@ -81,12 +81,13 @@ const collectionName = resolveLocalizedValue(contentType.name, locale);
   </header>
 
   {coverField && entry.fields[coverField.key] && (
-    <div style="margin-bottom: 2rem; border-radius: var(--radius); overflow: hidden; border: 1px solid var(--border);">
+    <div style="margin-bottom: 2rem; border-radius: var(--radius); overflow: hidden; border: 1px solid var(--border); max-width: 720px; max-height: 400px; display: flex; align-items: center; justify-content: center; background: var(--surface);">
       <FieldRenderer
         field={coverField}
         value={entry.fields[coverField.key]}
         locale={locale}
-        aspectRatio="16/9"
+        aspectRatio="auto"
+        class="max-h-96 w-auto object-contain"
       />
     </div>
   )}

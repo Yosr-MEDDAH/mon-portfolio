@@ -198,9 +198,39 @@ export function sanitizeVisibilitySettings(rawVisibility, rawContextVisibility, 
   return { defaultVisibility, contextDefaultVisibility };
 }
 
-/**
- * Deep-sanitizes content types to approved public fields only.
- */
+function normalizeFieldLabel(name, key) {
+  const known = {
+    title: 'Title', slug: 'Slug', shortDescription: 'Short Description',
+    description: 'Description', coverImage: 'Cover Image', technologies: 'Technologies',
+    liveUrl: 'Live URL', githubUrl: 'GitHub URL', startDate: 'Start Date',
+    endDate: 'End Date', featured: 'Featured', date: 'Date', tags: 'Tags',
+    externalLink: 'External Link', category: 'Category', items: 'Items',
+    role: 'Role', company: 'Company', period: 'Period', location: 'Location',
+    context: 'Context', youtube: 'YouTube URL', image: 'Image', degree: 'Degree',
+    school: 'School',
+  };
+  const isPlaceholder = (v) => {
+    if (typeof v !== 'string') return false;
+    const t = v.trim().toLowerCase();
+    return t === '' || t === 'new field' || t === 'newfield' || t === 'field';
+  };
+  if (typeof name === 'string') {
+    return isPlaceholder(name) ? (known[key] || key) : name;
+  }
+  if (name && typeof name === 'object') {
+    const out = { ...name };
+    let changed = false;
+    for (const lang of ['en', 'fr', 'ar']) {
+      if (isPlaceholder(out[lang])) {
+        out[lang] = known[key] || key;
+        changed = true;
+      }
+    }
+    if (changed && !out.en) out.en = known[key] || key;
+    return out;
+  }
+  return known[key] || key;
+}
 export function sanitizeContentType(id, data) {
   const fields = Array.isArray(data.fields) ? data.fields : [];
   const sanitizedFields = fields
@@ -208,10 +238,12 @@ export function sanitizeContentType(id, data) {
     .map((f) => {
       const fieldDef = {
         key: String(f.key),
-        name:
+        name: normalizeFieldLabel(
           typeof f.name === 'object' && f.name !== null
             ? sanitizeLocalizedString(f.name, String(f.key))
             : String(f.name || f.key),
+          String(f.key)
+        ),
         description: f.description
           ? typeof f.description === 'object'
             ? sanitizeLocalizedString(f.description, '')

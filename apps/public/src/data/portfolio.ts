@@ -384,6 +384,7 @@ export function getCmsExperiences() {
   return cmsEntries('experience').concat(cmsEntries('experiences')).map((e) => {
     const f = e.fields || {};
     return {
+      slug: e.slug || e.id,
       role: (typeof f.role === 'object' ? f.role : { en: String(f.role || '') }),
       company: String(f.company || ''),
       period: String(f.period || f.dates || ''),
@@ -399,6 +400,7 @@ export function getCmsPresentations() {
   return cmsEntries('presentations').concat(cmsEntries('presentation')).map((e) => {
     const f = e.fields || {};
     return {
+      slug: e.slug || e.id,
       title: (typeof f.title === 'object' ? f.title : { en: String(f.title || '') }),
       period: String(f.period || f.date || ''),
       context: typeof f.context === 'object' ? f.context : String(f.context || ''),
@@ -413,6 +415,7 @@ export function getCmsArtworks() {
   return cmsEntries('artworks').concat(cmsEntries('artwork')).map((e) => {
     const f = e.fields || {};
     return {
+      slug: e.slug || e.id,
       title: cmsLocalized(f.title, 'en') || String(f.title || ''),
       image: String(f.image || f.url || ''),
       youtube: String(f.youtube || ''),

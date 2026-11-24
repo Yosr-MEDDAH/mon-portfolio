@@ -2,7 +2,7 @@
 name: Publish Portfolio to GitHub Pages
 
 on:
-  workflow_dispatch:
+  workflow_dispatch: {}
   schedule:
     # Automated periodic sync (every 6 hours) at 0€ on GitHub Actions + Firebase Spark
     - cron: '0 */6 * * *'

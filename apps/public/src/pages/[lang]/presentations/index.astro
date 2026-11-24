@@ -4,6 +4,7 @@ import {
   PORTFOLIO_DATA,
   resolvePortfolioText,
   getCmsPresentations,
+  getCollectionSlug,
 } from '../../../data/portfolio.ts';
 import { withBase } from '../../../utils/url.ts';
 import { t } from '../../../i18n/utils.ts';
@@ -21,6 +22,7 @@ const { lang } = Astro.params;
 const locale = lang as SupportedLocale;
 
 const presentations = getCmsPresentations();
+const collectionSlug = getCollectionSlug('presentations', 'presentation', 'presentations');
 const n = presentations.length;
 const countText = locale === 'ar'
   ? `${n} عرض تقديمي`
@@ -61,7 +63,7 @@ const backHref = withBase(`/${locale}/index.html`);
           const vidId = ytMatch ? ytMatch[1] : null;
 
           return (
-            <article class="pres-card reveal visible" role="listitem" data-href={p.slug ? withBase(`/${locale}/presentations/${p.slug}/index.html`) : ''} style="cursor: pointer;">
+            <article class="pres-card reveal visible" role="listitem" data-href={p.slug ? withBase(`/${locale}/${collectionSlug}/${p.slug}.html`) : ''} style="cursor: pointer;">
               {vidId && (
                 <a
                   href={p.youtube}

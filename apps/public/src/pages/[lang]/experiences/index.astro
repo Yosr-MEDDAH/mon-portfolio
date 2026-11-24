@@ -4,6 +4,7 @@ import {
   PORTFOLIO_DATA,
   resolvePortfolioText,
   getCmsExperiences,
+  getCollectionSlug,
 } from '../../../data/portfolio.ts';
 import { withBase } from '../../../utils/url.ts';
 import { t } from '../../../i18n/utils.ts';
@@ -21,6 +22,7 @@ const { lang } = Astro.params;
 const locale = lang as SupportedLocale;
 
 const experiences = getCmsExperiences();
+const collectionSlug = getCollectionSlug('experience', 'experiences');
 const n = experiences.length;
 const countText = locale === 'ar'
   ? `${n} خبرة مهنية`
@@ -54,7 +56,7 @@ const backHref = withBase(`/${locale}/index.html`);
           const role = resolvePortfolioText(e.role, locale);
           const desc = resolvePortfolioText(e.description, locale);
           return (
-            <article class="exp-card reveal visible" role="listitem" data-href={e.slug ? withBase(`/${locale}/experiences/${e.slug}/index.html`) : ''} style="cursor: pointer;">
+            <article class="exp-card reveal visible" role="listitem" data-href={e.slug ? withBase(`/${locale}/${collectionSlug}/${e.slug}.html`) : ''} style="cursor: pointer;">
               <div>
                 <div class="exp-role">{role}</div>
                 <div class="exp-co">{e.company} · {e.location}</div>

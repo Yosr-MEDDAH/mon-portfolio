@@ -34,7 +34,9 @@ const description = resolvePortfolioText(PORTFOLIO_DATA.about, locale);
 const HIGHLIGHTS = { skills: 3, experience: 2, projects: 2, presentations: 3, artworks: 3 };
 
 const projects = getPortfolioProjects();
-const skills = getCmsSkills();
+const skills = getCmsSkills(locale);
+const allSkillItems = Array.from(new Set(skills.flatMap((s) => s.items)));
+const highlightSkills = allSkillItems.slice(0, 10);
 const experiences = getCmsExperiences();
 const presentations = getCmsPresentations();
 const artworks = getCmsArtworks();
@@ -116,29 +118,26 @@ const cvSrc = isExternalCv ? rawCv : withBase(`/${rawCv.replace(/^\//, '')}`);
     <div class="container">
       <p class="section-label">{t('section.skills', locale)}</p>
       <h2 id="skills-heading">{t('heading.skills', locale)}</h2>
-      <div class="skills-grid reveal visible" id="skills-grid" role="list">
-        {skills.slice(0, HIGHLIGHTS.skills).map((s) => (
-          <div role="listitem">
-            <p class="skill-cat">{s.category}</p>
-            <div class="tags">
-              {s.items.map((item) => {
-                const devicon = DEVICON_MAP[item];
-                return (
-                  <span class="tag">
-                    {devicon && (
-                      <i
-                        class={`devicon-${devicon} colored tag-icon`}
-                        aria-hidden="true"
-                      />
-                    )}
-                    {item}
-                  </span>
-                );
-              })}
-            </div>
-          </div>
-        ))}
+      <div class="skills-grid reveal visible" id="skills-grid" role="list" style="grid-template-columns: 1fr;">
+      <div role="listitem">
+        <div class="tags" style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
+          {highlightSkills.map((item) => {
+            const devicon = DEVICON_MAP[item];
+            return (
+              <span class="tag">
+                {devicon && (
+                  <i
+                    class={`devicon-${devicon} colored tag-icon`}
+                    aria-hidden="true"
+                  />
+                )}
+                {item}
+              </span>
+            );
+          })}
+        </div>
       </div>
+    </div>
       <div class="section-footer">
         <a href={skillsHref} class="see-all">{t('see.skills', locale)}</a>
       </div>

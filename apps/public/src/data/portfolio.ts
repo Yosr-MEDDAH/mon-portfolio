@@ -356,28 +356,38 @@ function asArray(v) {
   return [];
 }
 
-export function getCmsSkills() {
-  const groups = new Map();
+export function getCmsSkills(locale = 'en') {
+  const groups = new Map<string, string[]>();
+  const seen = new Set<string>();
   for (const e of cmsEntries('skills')) {
     const f = e.fields || {};
-    const cat = cmsLocalized(f.category, 'en') || 'Skills';
+    const cat = cmsLocalized(f.category, locale) || 'Skills';
     const items = asArray(f.items || f.skills);
     if (!groups.has(cat)) groups.set(cat, []);
-    for (const it of items) if (!groups.get(cat).includes(it)) groups.get(cat).push(it);
+    for (const it of items) {
+      const norm = it.trim().toLowerCase();
+      if (!norm || seen.has(norm)) continue;
+      seen.add(norm);
+      groups.get(cat)!.push(it);
+    }
   }
-  const techSet = new Set();
+  const projectTechs: string[] = [];
   for (const e of cmsEntries('projects')) {
     const f = e.fields || {};
     for (const key of ['technologies', 'tags', 'tech', 'stack']) {
-      for (const t of asArray(f[key])) techSet.add(t);
+      for (const t of asArray(f[key])) {
+        const norm = t.trim().toLowerCase();
+        if (!norm || seen.has(norm)) continue;
+        seen.add(norm);
+        projectTechs.push(t);
+      }
     }
   }
-  if (techSet.size) {
-    const key = 'Project Technologies';
-    if (!groups.has(key)) groups.set(key, []);
-    for (const t of techSet) if (!groups.get(key).includes(t)) groups.get(key).push(t);
+  if (projectTechs.length) {
+    const key = locale === 'ar' ? 'تقنيات المشاريع' : locale === 'fr' ? 'Technologies des projets' : 'Project Technologies';
+    groups.set(key, projectTechs);
   }
-  return Array.from(groups, ([category, items]) => ({ category, items }));
+  return Array.from(groups, ([category, items]) => ({ category, items })).filter((g) => g.items.length > 0);
 }
 
 export function getCmsExperiences() {
@@ -424,6 +434,13 @@ export function getCmsArtworks() {
   });
 }
 
+export function getCollectionSlug(...names: string[]): string {
+  for (const name of names) {
+    const col = getCollectionBySlug(name);
+    if (col) return col.contentType?.slug || col.contentType?.id || name;
+  }
+  return names[names.length - 1] || '';
+}
 export function getCmsEducation() {
   return cmsEntries('education').map((e) => {
     const f = e.fields || {};

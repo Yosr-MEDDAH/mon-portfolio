@@ -22,12 +22,16 @@ export async function getStaticPaths() {
 
   for (const lang of languages) {
     for (const item of collections) {
+      const collectionSlug = item.contentType.slug || item.contentType.id;
+      if (!collectionSlug) continue;
       for (const entry of item.entries) {
+        const entrySlug = entry.slug || entry.id;
+        if (!entrySlug) continue;
         paths.push({
           params: {
             lang,
-            collection: item.contentType.slug,
-            slug: entry.slug,
+            collection: collectionSlug,
+            slug: entrySlug,
           },
           props: {
             collectionItem: item,

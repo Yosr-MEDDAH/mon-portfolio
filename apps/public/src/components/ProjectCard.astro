@@ -28,7 +28,7 @@ const tags = project.tags || [];
 const detailHref = project.slug
   ? (locale === 'en' || locale === DEFAULT_LOCALE
       ? withBase(`/projects/${project.slug}.html`)
-      : withBase(`/${locale}/projects/${project.slug}/index.html`))
+      : withBase(`/${locale}/projects/${project.slug}.html`))
   : null;
 
 const hasRealImage = project.image && project.image !== 'placeholder.png' && project.image.trim() !== '';

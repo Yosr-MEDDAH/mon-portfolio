@@ -15,7 +15,7 @@ interface Props {
 
 const locale: SupportedLocale = Astro.props.locale || DEFAULT_LOCALE;
 
-const skills = getCmsSkills();
+const skills = getCmsSkills(locale);
 const n = skills.length;
 const countText = locale === 'ar'
   ? `${n} فئات مهارات`

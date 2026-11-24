@@ -20,7 +20,7 @@ export async function getStaticPaths() {
 const { lang } = Astro.params;
 const locale = lang as SupportedLocale;
 
-const skills = getCmsSkills();
+const skills = getCmsSkills(locale);
 const n = skills.length;
 const countText = locale === 'ar'
   ? `${n} فئات مهارات`

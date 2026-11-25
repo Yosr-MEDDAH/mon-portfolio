@@ -79,6 +79,11 @@ export const KNOWN_FIELD_LABELS: Record<string, Localized<string>> = {
     fr: 'Lien externe',
     ar: 'الرابط الخارجي',
   },
+  images: {
+    en: 'Gallery Images',
+    fr: 'Images de la galerie',
+    ar: 'صور المعرض',
+  },
 };
 
 /**

@@ -4,9 +4,11 @@ import type {
   FieldDefinition,
   SupportedLocale,
   Localized,
+  GalleryImageItem,
 } from '../shared/types.ts';
 import { getFieldLabel } from '../shared/labels.ts';
 import { useAdminLang } from '../context/LanguageContext.tsx';
+import { GalleryFieldEditor } from './GalleryFieldEditor.tsx';
 
 interface DynamicFieldEditorProps {
   fields: FieldDefinition[];
@@ -255,6 +257,15 @@ export const DynamicFieldEditor: React.FC<DynamicFieldEditorProps> = ({
     )}
   </div>
 )}
+
+            {field.type === 'gallery' && (
+              <GalleryFieldEditor
+                value={Array.isArray(value) ? (value as GalleryImageItem[]) : []}
+                onChange={(items) => handleFieldChange(field.key, items)}
+                activeLangTab={activeLangTab}
+                maxImages={field.options?.max ?? 20}
+              />
+            )}
 
             {field.type === 'tags' && (
               <div className="space-y-2">

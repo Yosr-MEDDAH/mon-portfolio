@@ -20,6 +20,7 @@ else if (currentPath.includes('experiences')) pageName = 'experiences';
 else if (currentPath.includes('projects')) pageName = 'projects';
 else if (currentPath.includes('presentations')) pageName = 'presentations';
 else if (currentPath.includes('artworks')) pageName = 'artworks';
+else if (currentPath.includes('gallery')) pageName = 'gallery';
 
 // Localized navigation links for the current locale
 const homeHref = locale === 'fr'
@@ -45,6 +46,10 @@ const presHref = locale === 'fr'
 const artworksHref = locale === 'fr'
   ? withBase('/artworks.html')
   : withBase(`/${locale}/artworks/index.html`);
+
+const galleryHref = locale === 'fr'
+  ? withBase('/gallery.html')
+  : withBase(`/${locale}/gallery/index.html`);
 
 const contactHref = locale === 'fr'
   ? withBase('/index.html#contact')
@@ -91,6 +96,7 @@ const arRoute = pageName === 'index'
       <li><a href={projectsHref} class={currentPath.includes('projects') ? 'active' : ''}>{t('nav.projects', locale)}</a></li>
       <li><a href={presHref} class={currentPath.includes('presentations') ? 'active' : ''}>{t('nav.presentations', locale)}</a></li>
       <li><a href={artworksHref} class={currentPath.includes('artworks') ? 'active' : ''}>{t('nav.artworks', locale)}</a></li>
+      <li><a href={galleryHref} class={currentPath.includes('gallery') ? 'active' : ''}>{t('nav.gallery', locale)}</a></li>
       <li><a href={contactHref}>{t('nav.contact', locale)}</a></li>
     </ul>
 

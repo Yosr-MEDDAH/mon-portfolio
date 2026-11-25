@@ -36,6 +36,23 @@ export const ImageValueSchema = z.union([
   }),
 ]);
 
+export const LocalizedOptionalTextSchema = z.union([
+  z.string(),
+  createPartialLocalizedSchema(z.string()),
+  z.null(),
+  z.undefined(),
+]);
+
+export const GalleryImageItemSchema = z.object({
+  url: z.string().trim().min(1, 'Image URL cannot be empty'),
+  caption: LocalizedOptionalTextSchema.optional(),
+  alt: LocalizedOptionalTextSchema.optional(),
+});
+
+export const GalleryValueSchema = z
+  .array(GalleryImageItemSchema)
+  .max(20, 'A gallery entry can contain at most 20 images');
+
 export const MediaValueSchema = z.union([
   z.string().trim().min(1, 'Media URL cannot be empty'),
   z.object({
@@ -53,6 +70,7 @@ export const FieldTypeSchema = z.enum([
   'boolean',
   'url',
   'image',
+  'gallery',
   'richtext',
   'tags',
   'media',
@@ -163,6 +181,31 @@ export function normalizeEntryFields(
         continue;
       }
 
+      // 3.5. Gallery field (array of { url, caption?, alt? })
+      if (field.type === 'gallery') {
+        if (Array.isArray(val)) {
+          const cleaned = val
+            .filter((item): item is Record<string, unknown> => Boolean(item) && typeof item === 'object')
+            .map((item) => {
+              const url = typeof item.url === 'string' ? item.url.trim() : '';
+              if (!url) return null;
+              const entry: Record<string, unknown> = { url };
+              if (item.caption !== undefined && item.caption !== null && item.caption !== '') {
+                entry.caption = item.caption;
+              }
+              if (item.alt !== undefined && item.alt !== null && item.alt !== '') {
+                entry.alt = item.alt;
+              }
+              return entry;
+            })
+            .filter((item): item is Record<string, unknown> => item !== null);
+          normalized[field.key] = cleaned;
+        } else if (val === '' || val === null || val === undefined) {
+          normalized[field.key] = [];
+        }
+        continue;
+      }
+
       // 4. String-based optional fields (url, date, image, text, textarea, etc.)
       if (typeof val === 'string') {
         if (val.trim() === '') {
@@ -227,6 +270,15 @@ export function getBaseFieldSchema(type: FieldType, isRequired: boolean): z.ZodT
         : z.union([
             ImageValueSchema,
             z.literal(''),
+            z.null(),
+            z.undefined(),
+          ]).optional();
+
+    case 'gallery':
+      return isRequired
+        ? GalleryValueSchema.min(1, 'At least one image is required')
+        : z.union([
+            GalleryValueSchema,
             z.null(),
             z.undefined(),
           ]).optional();

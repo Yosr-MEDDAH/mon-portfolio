@@ -1,0 +1,53 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import GalleryGrid from '../components/GalleryGrid.astro';
+import { PORTFOLIO_DATA, getCmsGallery } from '../data/portfolio.ts';
+import { withBase } from '../utils/url.ts';
+import { t } from '../i18n/utils.ts';
+import { DEFAULT_LOCALE, type SupportedLocale } from '../i18n/types.ts';
+
+interface Props {
+  locale?: SupportedLocale;
+}
+
+const locale: SupportedLocale = Astro.props.locale || DEFAULT_LOCALE;
+const galleryEntries = getCmsGallery();
+const totalImages = galleryEntries.reduce((sum, entry) => sum + entry.images.length, 0);
+
+const countText = locale === 'ar'
+  ? `${totalImages} صورة`
+  : locale === 'en'
+  ? `${totalImages} ${totalImages === 1 ? 'image' : 'images'}`
+  : `${totalImages} ${totalImages === 1 ? 'image' : 'images'}`;
+
+const pageTitle = `${t('page.gallery', locale)} — ${PORTFOLIO_DATA.name}`;
+const pageDesc = `${t('page.gallery', locale)} — ${PORTFOLIO_DATA.name}`;
+
+const backHref = locale === DEFAULT_LOCALE
+  ? withBase('/index.html')
+  : withBase(`/${locale}/index.html`);
+---
+
+<BaseLayout
+  title={pageTitle}
+  description={pageDesc}
+  locale={locale}
+  currentPath="/gallery.html"
+>
+  <div class="container page-header">
+    <a href={backHref} class="back-link">{t('back', locale)}</a>
+    <p class="section-label">{t('section.gallery', locale)}</p>
+    <h1 class="page-title" id="page-title">{t('page.gallery', locale)}</h1>
+    {totalImages > 0 && <p class="page-count" id="page-count">{countText}</p>}
+  </div>
+
+  <section aria-labelledby="page-title" style="padding-top:0">
+    <div class="container">
+      {galleryEntries.length > 0 ? (
+        <GalleryGrid entries={galleryEntries} locale={locale} />
+      ) : (
+        <p class="gallery-empty-state">{t('gallery.empty', locale)}</p>
+      )}
+    </div>
+  </section>
+</BaseLayout>

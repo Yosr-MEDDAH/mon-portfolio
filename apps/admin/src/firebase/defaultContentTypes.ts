@@ -70,4 +70,16 @@ export const DEFAULT_CONTENT_TYPES: ContentTypeDefinition[] = [
     ],
     defaultVisibility: { degree: true, school: true, period: true, location: true },
   },
+  {
+    id: 'gallery',
+    name: { en: 'Gallery', fr: 'Galerie', ar: 'المعرض' },
+    description: { en: 'Photo and visual galleries', fr: 'Galeries photo et visuelles', ar: 'معارض الصور والوسائط البصرية' },
+    slug: 'gallery',
+    fields: [
+      { key: 'title', name: { en: 'Title', fr: 'Titre', ar: 'العنوان' }, type: 'text', required: false, localized: true, defaultVisible: true },
+      { key: 'description', name: { en: 'Description', fr: 'Description', ar: 'الوصف' }, type: 'textarea', required: false, localized: true, defaultVisible: true },
+      { key: 'images', name: { en: 'Gallery Images', fr: 'Images de la galerie', ar: 'صور المعرض' }, type: 'gallery', required: false, localized: false, defaultVisible: true, options: { min: 0, max: 20 } },
+    ],
+    defaultVisibility: { title: true, description: true, images: true },
+  },
 ];

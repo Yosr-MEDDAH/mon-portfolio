@@ -9,9 +9,11 @@ import {
   fetchContentTypes,
   fetchEntries,
   saveEntry,
+  saveContentType,
   archiveEntry,
   restoreEntry,
 } from '../firebase/firestore.ts';
+import { DEFAULT_CONTENT_TYPES } from '../firebase/defaultContentTypes.ts';
 import { useAuth } from '../context/AuthContext.tsx';
 import { useNotify } from '../context/NotificationContext.tsx';
 import { useAdminLang } from '../context/LanguageContext.tsx';
@@ -38,10 +40,19 @@ export const EntriesPage: React.FC = () => {
   const loadData = async () => {
     setLoading(true);
     try {
-      const [allTypes, allEntries] = await Promise.all([
+      const [fetchedTypes, allEntries] = await Promise.all([
         fetchContentTypes(false),
         fetchEntries(undefined, true),
       ]);
+      let allTypes = fetchedTypes;
+      const existingIds = new Set(allTypes.map((t) => t.id));
+      const missing = DEFAULT_CONTENT_TYPES.filter((dt) => !existingIds.has(dt.id));
+      if (missing.length > 0 && user) {
+        for (const dt of missing) {
+          await saveContentType(dt, user.uid, user.email || '', 'Seeded default content type');
+        }
+        allTypes = await fetchContentTypes(false);
+      }
       setTypes(allTypes);
       setEntries(allEntries);
     } catch (err) {
@@ -70,7 +81,7 @@ export const EntriesPage: React.FC = () => {
     for (const f of ct.fields) {
       if (f.localized) {
         initialFields[f.key] = { en: '', fr: '', ar: '' };
-      } else if (f.type === 'tags') {
+      } else if (f.type === 'tags' || f.type === 'gallery') {
         initialFields[f.key] = [];
       } else if (f.type === 'boolean') {
         initialFields[f.key] = false;

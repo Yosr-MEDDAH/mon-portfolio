@@ -3,6 +3,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import FiligranBackground from './FiligranBackground.astro';
 import TatreezDivider from './TatreezDivider.astro';
 import ProjectCard from './ProjectCard.astro';
+import GalleryGrid from './GalleryGrid.astro';
 import {
   PORTFOLIO_DATA,
   DEVICON_MAP,
@@ -13,6 +14,7 @@ import {
   getCmsPresentations,
   getCmsArtworks,
   getCmsEducation,
+  getCmsGallery,
 } from '../data/portfolio.ts';
 import { withBase } from '../utils/url.ts';
 import { t } from '../i18n/utils.ts';
@@ -41,6 +43,7 @@ const experiences = getCmsExperiences();
 const presentations = getCmsPresentations();
 const artworks = getCmsArtworks();
 const education = getCmsEducation();
+const galleryEntries = getCmsGallery();
 
 const skillsHref = locale === DEFAULT_LOCALE
   ? withBase('/skills.html')
@@ -61,6 +64,10 @@ const presHref = locale === DEFAULT_LOCALE
 const artworksHref = locale === DEFAULT_LOCALE
   ? withBase('/artworks.html')
   : withBase(`/${locale}/artworks/index.html`);
+
+const galleryHref = locale === DEFAULT_LOCALE
+  ? withBase('/gallery.html')
+  : withBase(`/${locale}/gallery/index.html`);
 
 const avatarSrc = withBase(`/${PORTFOLIO_DATA.avatar.replace(/^\//, '')}`);
 const rawCv = typeof PORTFOLIO_DATA.cv_url === 'object'
@@ -365,6 +372,24 @@ const cvSrc = isExternalCv ? rawCv : withBase(`/${rawCv.replace(/^\//, '')}`);
       </div>
     </div>
   </section>
+
+  {galleryEntries.length > 0 && (
+    <>
+      <TatreezDivider />
+
+      <!-- GALLERY HIGHLIGHT -->
+      <section id="gallery" aria-labelledby="gallery-heading">
+        <div class="container">
+          <p class="section-label">{t('section.gallery', locale)}</p>
+          <h2 id="gallery-heading">{t('heading.gallery', locale)}</h2>
+          <GalleryGrid entries={galleryEntries.slice(0, 2)} locale={locale} maxImagesPerEntry={6} />
+          <div class="section-footer">
+            <a href={galleryHref} class="see-all">{t('see.gallery', locale)}</a>
+          </div>
+        </div>
+      </section>
+    </>
+  )}
 
   <TatreezDivider />
 

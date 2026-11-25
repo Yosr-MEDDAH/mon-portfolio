@@ -19,9 +19,16 @@ export type StandardFieldType =
   | 'boolean'
   | 'url'
   | 'image'
+  | 'gallery'
   | 'richtext'
   | 'tags'
   | 'media';
+
+export interface GalleryImageItem {
+  url: string;
+  caption?: Localized<string> | PartialLocalized<string> | string;
+  alt?: Localized<string> | PartialLocalized<string> | string;
+}
 
 // Prepared future field types (extensible architecture)
 export type FutureFieldType =

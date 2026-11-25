@@ -206,7 +206,7 @@ function normalizeFieldLabel(name, key) {
     endDate: 'End Date', featured: 'Featured', date: 'Date', tags: 'Tags',
     externalLink: 'External Link', category: 'Category', items: 'Items',
     role: 'Role', company: 'Company', period: 'Period', location: 'Location',
-    context: 'Context', youtube: 'YouTube URL', image: 'Image', degree: 'Degree',
+    context: 'Context', youtube: 'YouTube URL', image: 'Image', images: 'Gallery Images', degree: 'Degree',
     school: 'School',
   };
   const isPlaceholder = (v) => {

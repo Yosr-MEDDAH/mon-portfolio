@@ -1,6 +1,12 @@
 import { getCollectionBySlug } from '../content-store/index.ts';
 import publishedData from '../content-store/data/published-content.json';
 import type { SupportedLocale } from '../i18n/types.ts';
+import {
+  transformGalleryEntries,
+  type GalleryImageItem,
+  type GalleryEntryItem,
+} from './gallery.ts';
+export type { GalleryImageItem, GalleryEntryItem };
 
 export interface LocalizedString {
   fr?: string;
@@ -451,4 +457,8 @@ export function getCmsEducation() {
       location: String(f.location || ''),
     };
   });
+}
+
+export function getCmsGallery(customEntries?: Array<{ slug?: string; id?: string; fields?: Record<string, unknown> }>): GalleryEntryItem[] {
+  return transformGalleryEntries(customEntries ?? cmsEntries('gallery'));
 }

@@ -41,6 +41,7 @@ export const ContentTypesPage: React.FC = () => {
     'boolean',
     'url',
     'image',
+    'gallery',
     'richtext',
     'tags',
     'media',

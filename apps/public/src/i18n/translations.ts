@@ -32,6 +32,11 @@ export const translations: Record<string, Partial<Record<SupportedLocale, string
     fr: 'Artworks',
     ar: 'الأعمال الفنية',
   },
+  'nav.gallery': {
+    en: 'Gallery',
+    fr: 'Galerie',
+    ar: 'المعرض',
+  },
   'nav.contact': {
     en: 'Contact',
     fr: 'Contact',
@@ -121,6 +126,16 @@ export const translations: Record<string, Partial<Record<SupportedLocale, string
     fr: 'Créations',
     ar: 'الأعمال الفنية',
   },
+  'section.gallery': {
+    en: 'Gallery',
+    fr: 'Galerie',
+    ar: 'المعرض',
+  },
+  'heading.gallery': {
+    en: 'Gallery',
+    fr: 'Galerie',
+    ar: 'معرض الصور',
+  },
   'section.education': {
     en: 'Education',
     fr: 'Formation',
@@ -205,6 +220,11 @@ export const translations: Record<string, Partial<Record<SupportedLocale, string
     fr: 'Voir toutes les créations',
     ar: 'عرض كل الأعمال الفنية',
   },
+  'see.gallery': {
+    en: 'See full gallery',
+    fr: 'Voir toute la galerie',
+    ar: 'عرض المعرض الكامل',
+  },
 
   // Page titles
   'page.skills': {
@@ -231,6 +251,31 @@ export const translations: Record<string, Partial<Record<SupportedLocale, string
     en: 'Artworks & Creations',
     fr: 'Créations & Artworks',
     ar: 'الأعمال الفنية',
+  },
+  'page.gallery': {
+    en: 'Gallery',
+    fr: 'Galerie',
+    ar: 'معرض الصور',
+  },
+  'gallery.empty': {
+    en: 'No gallery items published yet.',
+    fr: 'Aucune galerie publiée pour le moment.',
+    ar: 'لا توجد صور منشورة في المعرض حالياً.',
+  },
+  'gallery.close': {
+    en: 'Close lightbox',
+    fr: 'Fermer la visionneuse',
+    ar: 'إغلاق العارض',
+  },
+  'gallery.prev': {
+    en: 'Previous image',
+    fr: 'Image précédente',
+    ar: 'الصورة السابقة',
+  },
+  'gallery.next': {
+    en: 'Next image',
+    fr: 'Image suivante',
+    ar: 'الصورة التالية',
   },
 
   // UI elements

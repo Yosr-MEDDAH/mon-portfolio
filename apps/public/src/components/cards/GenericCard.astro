@@ -7,6 +7,7 @@ import type {
 import type { CardTemplateConfig } from '../../templates/types.ts';
 import { isFieldVisible } from '../../content-model/visibility.ts';
 import { withBase, resolveLocalizedValue } from '../../utils/url.ts';
+import { stripMarkdown } from '../../utils/markdown.ts';
 import { DEFAULT_LOCALE } from '../../i18n/types.ts';
 import { DEVICON_MAP, getProjGrad, getProjEmoji } from '../../data/portfolio.ts';
 
@@ -28,7 +29,8 @@ const {
 
 const fields = entry.fields || {};
 const title = resolveLocalizedValue(fields.title, locale) || entry.slug;
-const desc = resolveLocalizedValue(fields.description, locale) || '';
+const rawDesc = resolveLocalizedValue(fields.shortDescription ?? fields.description, locale) || '';
+const desc = stripMarkdown(rawDesc);
 const context = fields.context ? resolveLocalizedValue(fields.context, locale) : '';
 const tags: string[] = Array.isArray(fields.tags) ? fields.tags : (fields.technologies ? (Array.isArray(fields.technologies) ? fields.technologies : [fields.technologies]) : []);
 

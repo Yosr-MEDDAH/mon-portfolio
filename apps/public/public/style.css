@@ -557,6 +557,139 @@ h1.page-title{
   margin-bottom:2rem;letter-spacing:.04em;
 }
 
+/* ── RICH TEXT / MARKDOWN ────────────────────────────── */
+.field-richtext{
+  color:var(--text-2);
+  font-size:.97rem;
+  line-height:1.8;
+  overflow-wrap:break-word;
+}
+.field-richtext > *:first-child{margin-top:0}
+.field-richtext > *:last-child{margin-bottom:0}
+.field-richtext p{margin:0 0 1rem}
+.field-richtext strong,
+.field-richtext b{color:var(--text);font-weight:600}
+.field-richtext em,
+.field-richtext i{font-style:italic}
+.field-richtext h1,
+.field-richtext h2,
+.field-richtext h3,
+.field-richtext h4,
+.field-richtext h5,
+.field-richtext h6{
+  font-family:var(--font-serif);
+  font-weight:400;
+  color:var(--text);
+  line-height:1.3;
+  margin:1.75rem 0 .75rem;
+}
+[lang="ar"] .field-richtext h1,
+[lang="ar"] .field-richtext h2,
+[lang="ar"] .field-richtext h3,
+[lang="ar"] .field-richtext h4,
+[lang="ar"] .field-richtext h5,
+[lang="ar"] .field-richtext h6{
+  font-family:var(--font-ar);
+  font-weight:500;
+}
+.field-richtext h1{font-size:clamp(1.5rem,3vw,1.9rem)}
+.field-richtext h2{font-size:clamp(1.25rem,2.4vw,1.55rem)}
+.field-richtext h3{font-size:clamp(1.1rem,2vw,1.3rem)}
+.field-richtext h4,
+.field-richtext h5,
+.field-richtext h6{
+  font-family:var(--font-body);
+  font-weight:600;
+  font-size:1rem;
+}
+.field-richtext ul,
+.field-richtext ol{
+  margin:0 0 1rem;
+  padding-inline-start:1.5rem;
+}
+.field-richtext ul{list-style-type:disc}
+.field-richtext ol{list-style-type:decimal}
+.field-richtext li{margin-bottom:.4rem}
+.field-richtext li > ul,
+.field-richtext li > ol{margin-top:.35rem;margin-bottom:.35rem}
+.field-richtext a{
+  color:var(--mg);
+  text-decoration:underline;
+  text-underline-offset:3px;
+  overflow-wrap:anywhere;
+}
+.field-richtext a:hover{color:var(--mg-light)}
+[data-theme="dark"] .field-richtext a{color:var(--mg-text)}
+[data-theme="dark"] .field-richtext a:hover{color:#a8e070}
+.field-richtext blockquote{
+  margin:1.25rem 0;
+  padding:.65rem 1rem;
+  padding-inline-start:1.1rem;
+  border-inline-start:3px solid var(--mg);
+  background:var(--mg-pale);
+  border-radius:var(--radius);
+  color:var(--text-2);
+}
+[data-theme="dark"] .field-richtext blockquote{
+  border-inline-start-color:var(--mg-text);
+}
+.field-richtext blockquote p:last-child{margin-bottom:0}
+.field-richtext :not(pre) > code{
+  font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;
+  font-size:.86em;
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  padding:.12em .38em;
+  color:var(--text);
+  direction:ltr;
+  unicode-bidi:isolate;
+}
+.field-richtext pre{
+  margin:1.25rem 0;
+  padding:.95rem 1.1rem;
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  overflow-x:auto;
+  max-width:100%;
+  line-height:1.55;
+  direction:ltr;
+  text-align:left;
+}
+.field-richtext pre code{
+  font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;
+  font-size:.85rem;
+  background:none;
+  border:none;
+  padding:0;
+  color:var(--text);
+}
+.field-richtext hr{
+  border:none;
+  border-top:1px solid var(--border);
+  margin:1.5rem 0;
+}
+.field-richtext table{
+  width:100%;
+  border-collapse:collapse;
+  margin:1.25rem 0;
+  font-size:.9rem;
+  display:block;
+  overflow-x:auto;
+}
+.field-richtext th,
+.field-richtext td{
+  border:1px solid var(--border);
+  padding:.5rem .75rem;
+  text-align:start;
+}
+.field-richtext th{
+  background:var(--surface);
+  color:var(--text);
+  font-weight:600;
+}
+
 /* ── FADE-IN ─────────────────────────────────────────── */
 .reveal{opacity:0;transform:translateY(16px);transition:opacity .5s ease,transform .5s ease}
 .reveal.visible{opacity:1;transform:none}

@@ -1,5 +1,6 @@
 ---
 import { resolveLocalizedValue } from '../../utils/url.ts';
+import { renderMarkdown } from '../../utils/markdown.ts';
 import type { SupportedLocale } from '../../content-model/types.ts';
 
 interface Props {
@@ -10,7 +11,8 @@ interface Props {
 
 const { value, locale = 'fr', class: className = '' } = Astro.props;
 
-const htmlContent = resolveLocalizedValue(value, locale);
+const rawContent = resolveLocalizedValue(value, locale);
+const htmlContent = rawContent ? renderMarkdown(rawContent) : '';
 ---
 
 {htmlContent ? (

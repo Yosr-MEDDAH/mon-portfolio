@@ -5,6 +5,7 @@ import { getAllRegisteredCollections } from '../../../content-store/index.ts';
 import type { ContentTypeRegistryEntry } from '../../../templates/types.ts';
 import type { ContentEntry } from '../../../content-model/types.ts';
 import { resolveLocalizedValue } from '../../../utils/url.ts';
+import { stripMarkdown } from '../../../utils/markdown.ts';
 import { t } from '../../../i18n/utils.ts';
 import type { SupportedLocale } from '../../../i18n/types.ts';
 
@@ -62,7 +63,7 @@ const pageTitle = `${entryTitle} | ${collectionName} | ${t('hero.name', locale)}
 
 <BaseLayout
   title={pageTitle}
-  description={resolveLocalizedValue(entry.fields.description, locale)}
+  description={stripMarkdown(resolveLocalizedValue(entry.fields.shortDescription ?? entry.fields.description, locale))}
   locale={locale}
   currentPath={`/${locale}/${collectionItem.contentType.slug}/${entry.slug}.html`}
 >
